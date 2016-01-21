@@ -98,7 +98,9 @@ public class SonarLintTest {
 
     assertThat(props).containsEntry("sonar.host.url", "https://update.sonarlint.org");
     assertThat(props).containsEntry("sonar.analysis.mode", "issues");
-    assertThat(props).containsEntry("sonar.sources", "");
+    assertThat(props).containsEntry("sonar.sources", ".");
+    assertThat(props).containsEntry("sonar.tests", ".");
+    assertThat(props).containsEntry("sonar.tests.inclusions", "**/*Test.*,**/test/**/*");
     assertThat(props).containsEntry("sonar.projectKey", "myproject");
     assertThat(props).containsEntry("sonar.projectName", "myproject");
     

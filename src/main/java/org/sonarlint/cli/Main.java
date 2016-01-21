@@ -29,7 +29,7 @@ import java.util.Properties;
 public class Main {
   static final int SUCCESS = 0;
   static final int ERROR = 1;
-  
+
   private final Options opts;
   private final Logger logger;
   private final SonarLint sonarLint;

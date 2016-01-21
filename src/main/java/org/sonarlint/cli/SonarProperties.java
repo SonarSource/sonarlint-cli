@@ -26,6 +26,8 @@ public class SonarProperties {
   public static final String PROJECT_VERSION = "sonar.projectVersion";
   public static final String PROJECT_NAME = "sonar.projectName";
   public static final String SOURCES = "sonar.sources";
+  public static final String TESTS = "sonar.tests";
+  public static final String TESTS_INCLUSIONS = "sonar.tests.inclusions";
   public static final String PROPERTY_PROJECT_BASEDIR = "sonar.projectBaseDir";
   public static final String JSON_REPORT_ENABLE = "sonar.issuesReport.json.enable";
   public static final String HTML_REPORT_ENABLE = "sonar.issuesReport.html.enable";
@@ -33,4 +35,7 @@ public class SonarProperties {
   
   public static final String DEFAULT_HOST_URL = "https://update.sonarlint.org";
   public static final String DEFAULT_VERSION = "1.0";
+  public static final String DEFAULT_SOURCES = ".";
+  public static final String DEFAULT_TESTS = ".";
+  public static final String DEFAULT_TESTS_INCLUSIONS = "**/*Test.*,**/test/**/*";
 }

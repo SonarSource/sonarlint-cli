@@ -61,9 +61,6 @@ public class SonarLint {
     if (props.containsKey(ANALYSIS_MODE)) {
       throw new IllegalStateException(String.format("Invalid property: '%s'. Can't set analysis mode with SonarLint", ANALYSIS_MODE));
     }
-    if (props.containsKey(ANALYSIS_MODE)) {
-      throw new IllegalStateException(String.format("Invalid property: '%s'. Can't set analysis mode with SonarLint", ANALYSIS_MODE));
-    }
   }
 
   public void setDefaults(Properties props, boolean json) {
@@ -76,7 +73,9 @@ public class SonarLint {
       props.setProperty(RunnerProperties.HOST_URL, DEFAULT_HOST_URL);
     }
 
-    setDefault(props, SOURCES, "");
+    setDefault(props, SOURCES, DEFAULT_SOURCES);
+    setDefault(props, TESTS, DEFAULT_TESTS);
+    setDefault(props, TESTS_INCLUSIONS, DEFAULT_TESTS_INCLUSIONS);
     setDefault(props, PROJECT_KEY, getProjectName(props));
     setDefault(props, PROJECT_NAME, getProjectName(props));
     setDefault(props, PROJECT_VERSION, DEFAULT_VERSION);

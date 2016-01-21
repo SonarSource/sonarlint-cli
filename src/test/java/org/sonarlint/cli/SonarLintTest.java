@@ -100,13 +100,24 @@ public class SonarLintTest {
     assertThat(props).containsEntry("sonar.analysis.mode", "issues");
     assertThat(props).containsEntry("sonar.sources", ".");
     assertThat(props).containsEntry("sonar.tests", ".");
-    assertThat(props).containsEntry("sonar.tests.inclusions", "**/*Test.*,**/test/**/*");
+    assertThat(props).containsEntry("sonar.test.inclusions", "**/*Test.*,**/test/**/*");
     assertThat(props).containsEntry("sonar.projectKey", "myproject");
     assertThat(props).containsEntry("sonar.projectName", "myproject");
+    assertThat(props).containsEntry("sonar.projectVersion", "1.0");
     
     assertThat(props).containsEntry("sonar.issuesReport.console.enable", "true");
     assertThat(props).containsEntry("sonar.issuesReport.html.enable", "true");
     assertThat(props).doesNotContainKey("sonar.issuesReport.json.enable");
+  }
+  
+  @Test
+  public void testDefaultWithPreviousValue() {
+    props.put("sonar.projectBaseDir", "/home/myproject");
+    props.put("sonar.projectVersion", "2.0");
+    
+    sonarLint.setDefaults(props, false);
+    assertThat(props).containsEntry("sonar.projectVersion", "2.0");
+    
   }
   
   @Test

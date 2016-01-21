@@ -96,7 +96,7 @@ public class SonarLint {
   }
 
   private static void setDefault(Properties props, String key, String defaultValue) {
-    if (!props.contains(key)) {
+    if (!props.containsKey(key)) {
       props.setProperty(key, defaultValue);
       Logger.get().info(String.format("Setting default value %s=%s", key, defaultValue));
     }

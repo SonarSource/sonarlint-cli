@@ -27,7 +27,7 @@ public class SonarProperties {
   public static final String PROJECT_NAME = "sonar.projectName";
   public static final String SOURCES = "sonar.sources";
   public static final String TESTS = "sonar.tests";
-  public static final String TESTS_INCLUSIONS = "sonar.tests.inclusions";
+  public static final String TESTS_INCLUSIONS = "sonar.test.inclusions";
   public static final String PROPERTY_PROJECT_BASEDIR = "sonar.projectBaseDir";
   public static final String JSON_REPORT_ENABLE = "sonar.issuesReport.json.enable";
   public static final String HTML_REPORT_ENABLE = "sonar.issuesReport.html.enable";

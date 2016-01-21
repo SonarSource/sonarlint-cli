@@ -8,15 +8,10 @@ function installTravisTools {
   source ~/.local/bin/install
 }
 
-if [ -n "${PR_ANALYSIS:-}" ] && [ "${PR_ANALYSIS}" == true ]
-then
-  if [ "$TRAVIS_PULL_REQUEST" != "false" ]
-  then
+if [ -n "${PR_ANALYSIS:-}" ] && [ "${PR_ANALYSIS}" == true ] && [ "$TRAVIS_PULL_REQUEST" != "false" ] && [ -n "$SONAR_GITHUB_OAUTH" ]; then
     # For security reasons environment variables are not available on the pull requests
     # coming from outside repositories
     # http://docs.travis-ci.com/user/pull-requests/#Security-Restrictions-when-testing-Pull-Requests
-    if [ -n "$SONAR_GITHUB_OAUTH" ]; then
-
       # Switch to java 8 as the Dory HTTPS certificate is not supported by Java 7
       export JAVA_HOME=/usr/lib/jvm/java-8-oracle
       export PATH=$JAVA_HOME/bin:$PATH
@@ -31,8 +26,6 @@ then
         -Dsonar.host.url=$SONAR_HOST_URL \
         -Dsonar.login=$SONAR_LOGIN \
         -Dsonar.password=$SONAR_PASSWD  
-    fi
-  fi
 else
   # Regular CI
   mvn install -B -e -V

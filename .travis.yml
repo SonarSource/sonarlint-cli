@@ -9,7 +9,7 @@ script: ./travis.sh
 
 env:
   matrix:
-    - TARGET=CI
+    - PR_ANALYSIS=true
 
 cache:
   directories:

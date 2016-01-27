@@ -193,8 +193,8 @@
             <configuration>
               <rules>
                 <requireFilesSize>
-                  <minsize>18000000</minsize>
-                  <maxsize>19000000</maxsize>
+                  <minsize>26000000</minsize>
+                  <maxsize>28000000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonarlint-cli-${project.version}.zip</file>
                   </files>

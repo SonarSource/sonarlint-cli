@@ -19,43 +19,48 @@
  */
 package org.sonarlint.cli.report;
 
-import org.sonar.runner.api.Issue;
-import org.sonarlint.cli.util.Function;
-import org.sonarlint.cli.util.MutableInt;
-
-import static org.sonarlint.cli.util.Util.getOrCreate;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.sonarlint.cli.util.Function;
+import org.sonarlint.cli.util.MutableInt;
+import org.sonarsource.sonarlint.core.IssueListener;
+
+import static org.sonarlint.cli.util.Util.getOrCreate;
 
 public final class ResourceReport {
-  private final String resource;
-  private final boolean project = false;
+  private final String filePath;
+  private final boolean project;
   private final IssueVariation total = new IssueVariation();
-  private final List<Issue> issues = new ArrayList<>();
+  private final List<IssueListener.Issue> issues = new ArrayList<>();
 
   private final Map<IssueCategory, CategoryReport> reportByCategory = new HashMap<>();
 
-  private final Map<Integer, List<Issue>> issuesPerLine = new HashMap<>();
-  private final Map<Integer, List<Issue>> newIssuesPerLine = new HashMap<>();
+  private final Map<Integer, List<IssueListener.Issue>> issuesPerLine = new HashMap<>();
+  private final Map<Integer, List<IssueListener.Issue>> newIssuesPerLine = new HashMap<>();
 
   private final Map<String, MutableInt> issuesByRule = new HashMap<>();
   private final Map<Severity, MutableInt> issuesBySeverity = new HashMap<>();
 
-  ResourceReport(String resource) {
-    this.resource = resource;
+  ResourceReport(String filePath) {
+    this.filePath = filePath;
+    this.project = false;
+  }
+
+  ResourceReport() {
+    this.filePath = "/";
+    this.project = true;
   }
 
   public String getResourceNode() {
-    return resource;
+    return filePath;
   }
 
   public String getName() {
-    return resource;
+    return filePath;
   }
 
   public String getType() {
@@ -70,22 +75,22 @@ public final class ResourceReport {
     return total;
   }
 
-  public List<Issue> getIssues() {
+  public List<IssueListener.Issue> getIssues() {
     return issues;
   }
 
-  public Map<Integer, List<Issue>> getIssuesPerLine() {
+  public Map<Integer, List<IssueListener.Issue>> getIssuesPerLine() {
     return issuesPerLine;
   }
 
-  public List<Issue> getIssuesAtLine(int lineId) {
+  public List<IssueListener.Issue> getIssuesAtLine(int lineId) {
     if (issuesPerLine.containsKey(lineId)) {
       return issuesPerLine.get(lineId);
     }
     return Collections.emptyList();
   }
 
-  public void addIssue(Issue issue) {
+  public void addIssue(IssueListener.Issue issue) {
     Severity severity = Severity.create(issue.getSeverity());
     String ruleKey = issue.getRuleKey();
     IssueCategory reportRuleKey = new IssueCategory(ruleKey, severity, issue.getRuleName());
@@ -101,12 +106,6 @@ public final class ResourceReport {
 
     reportByCategory.get(reportRuleKey).getTotal().incrementCountInCurrentAnalysis();
     total.incrementCountInCurrentAnalysis();
-
-    if (issue.isNew()) {
-      getOrCreate(newIssuesPerLine, line, issueListCreator).add(issue);
-      total.incrementNewIssuesCount();
-      reportByCategory.get(reportRuleKey).getTotal().incrementNewIssuesCount();
-    }
   }
 
   public void addResolvedIssue(String ruleKey, Severity severity, String name) {
@@ -135,7 +134,7 @@ public final class ResourceReport {
   }
 
   private boolean hasIssues(Integer lineId) {
-    List<Issue> issuesAtLine = issuesPerLine.get(lineId);
+    List<IssueListener.Issue> issuesAtLine = issuesPerLine.get(lineId);
     return issuesAtLine != null && !issuesAtLine.isEmpty();
   }
 
@@ -153,9 +152,9 @@ public final class ResourceReport {
     }
   };
 
-  private static Function<List<Issue>> issueListCreator = new Function<List<Issue>>() {
+  private static Function<List<IssueListener.Issue>> issueListCreator = new Function<List<IssueListener.Issue>>() {
     @Override
-    public List<Issue> call() {
+    public List<IssueListener.Issue> call() {
       return new LinkedList<>();
     }
   };

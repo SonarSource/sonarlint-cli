@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.sonarsource.parent</groupId>
@@ -45,9 +46,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.sonarsource.sonar-runner</groupId>
-      <artifactId>sonar-runner-api</artifactId>
-      <version>2.5.1</version>
+      <groupId>org.sonarsource.sonarlint</groupId>
+      <artifactId>sonarlint-core</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -88,9 +89,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
-          <excludes>
-            <exclude>org/sonar/runner/commonsio/*</exclude>
-            </excludes>
           <archive>
             <manifest>
               <addClasspath>false</addClasspath>
@@ -112,18 +110,50 @@
             </goals>
             <configuration>
               <createDependencyReducedPom>true</createDependencyReducedPom>
-              <minimizeJar>true</minimizeJar>
-              <filters>
-                <!-- Remove signatures from SQ Runner API -->
-                <filter>
-                  <artifact>org.sonarsource.sonar-runner:sonar-runner-api</artifact>
-                  <excludes>
-                    <exclude>META-INF/*.SF</exclude>
-                    <exclude>META-INF/*.DSA</exclude>
-                    <exclude>META-INF/*.RSA</exclude>
-                  </excludes>
-                </filter>
-              </filters>
+              <!-- Don't set to true or it will remove required runtime dependencies on SQ plugin API -->
+              <minimizeJar>false</minimizeJar>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.sonarsource.java</groupId>
+                  <artifactId>sonar-java-plugin</artifactId>
+                  <version>3.9</version>
+                  <type>jar</type>
+                  <overWrite>false</overWrite>
+                  <outputDirectory>${project.build.directory}/plugins</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.sonarsource.javascript</groupId>
+                  <artifactId>sonar-javascript-plugin</artifactId>
+                  <version>2.9</version>
+                  <type>jar</type>
+                  <overWrite>false</overWrite>
+                  <outputDirectory>${project.build.directory}/plugins</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.sonarsource.php</groupId>
+                  <artifactId>sonar-php-plugin</artifactId>
+                  <version>2.7</version>
+                  <type>jar</type>
+                  <overWrite>false</overWrite>
+                  <outputDirectory>${project.build.directory}/plugins</outputDirectory>
+                </artifactItem>
+              </artifactItems>
             </configuration>
           </execution>
         </executions>
@@ -163,8 +193,8 @@
             <configuration>
               <rules>
                 <requireFilesSize>
-                  <minsize>160000</minsize>
-                  <maxsize>1500000</maxsize>
+                  <minsize>18000000</minsize>
+                  <maxsize>19000000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonarlint-cli-${project.version}.zip</file>
                   </files>

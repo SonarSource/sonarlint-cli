@@ -13,8 +13,8 @@
       <useTransitiveFiltering>true</useTransitiveFiltering>
       <useProjectArtifact>true</useProjectArtifact>
       <excludes>
-        <exclude>org.sonarsource.sonar-runner:sonar-runner-api</exclude>
         <exclude>org.freemarker:freemarker</exclude>
+        <exclude>org.sonarsource.sonarlint:sonarlint-core</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>

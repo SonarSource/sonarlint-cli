@@ -19,8 +19,6 @@
  */
 package org.sonarlint.cli.util;
 
-import org.sonar.runner.api.RunnerVersion;
-
 public class SystemInfo {
   private static System2 system = new System2();
 
@@ -32,7 +30,6 @@ public class SystemInfo {
   }
 
   public static void print(Logger logger) {
-    logger.info("SonarLint: " + getVersion() + " engine: " + RunnerVersion.version());
     logger.info(java());
     logger.info(os());
     String runnerOpts = system.getenv("SONARLINT_OPTS");

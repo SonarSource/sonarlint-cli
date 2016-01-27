@@ -19,11 +19,11 @@
  */
 package org.sonarlint.cli.report;
 
+import java.nio.file.Paths;
+import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
-import org.sonar.runner.api.Issue;
-
-import java.util.Date;
+import org.sonarsource.sonarlint.core.IssueListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,13 +56,11 @@ public class IssuesReportTest {
     assertThat(report.getResourceReportsByResource()).containsOnlyKeys("comp");
   }
 
-  private static Issue createTestIssue(String componentKey, String ruleKey, String severity, int line) {
-    return Issue.builder()
+  private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String severity, int line) {
+    return new IssueListener.Issue()
       .setStartLine(line)
-      .setComponentKey(componentKey)
+      .setFilePath(Paths.get(filePath))
       .setRuleKey(ruleKey)
-      .setSeverity(severity)
-      .setNew(false)
-      .build();
+      .setSeverity(severity);
   }
 }

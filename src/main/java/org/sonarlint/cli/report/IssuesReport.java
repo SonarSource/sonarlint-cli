@@ -19,13 +19,13 @@
  */
 package org.sonarlint.cli.report;
 
-import org.sonar.runner.api.Issue;
-
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.sonarsource.sonarlint.core.IssueListener;
 
 public class IssuesReport {
 
@@ -33,7 +33,7 @@ public class IssuesReport {
   private String title;
   private Date date;
   private final ReportSummary summary = new ReportSummary();
-  private final Map<String, ResourceReport> resourceReportsByResource = new HashMap<>();
+  private final Map<String, ResourceReport> resourceReportsByFilePath = new HashMap<>();
 
   IssuesReport() {
 
@@ -64,36 +64,32 @@ public class IssuesReport {
   }
 
   public Map<String, ResourceReport> getResourceReportsByResource() {
-    return resourceReportsByResource;
+    return resourceReportsByFilePath;
   }
 
   public List<ResourceReport> getResourceReports() {
-    return new ArrayList<>(resourceReportsByResource.values());
+    return new ArrayList<>(resourceReportsByFilePath.values());
   }
 
   public List<String> getResourcesWithReport() {
-    return new ArrayList<>(resourceReportsByResource.keySet());
+    return new ArrayList<>(resourceReportsByFilePath.keySet());
   }
 
-  public void addIssue(Issue issue) {
-    Severity severity = Severity.create(issue.getSeverity());
-    ResourceReport report = getOrCreate(issue.getComponentKey());
+  public void addIssue(IssueListener.Issue issue) {
+    Path filePath = issue.getFilePath();
+    ResourceReport report = getOrCreate(filePath != null ? filePath.toString() : "/");
     getSummary().addIssue(issue);
 
-    if (issue.getResolution() != null) {
-      report.addResolvedIssue(issue.getRuleKey(), severity, issue.getRuleName());
-    } else {
-      report.addIssue(issue);
-    }
+    report.addIssue(issue);
   }
 
-  private ResourceReport getOrCreate(String resource) {
-    ResourceReport report = resourceReportsByResource.get(resource);
+  private ResourceReport getOrCreate(String filePath) {
+    ResourceReport report = resourceReportsByFilePath.get(filePath);
     if (report != null) {
       return report;
     }
-    report = new ResourceReport(resource);
-    resourceReportsByResource.put(resource, new ResourceReport(resource));
+    report = new ResourceReport(filePath);
+    resourceReportsByFilePath.put(filePath, new ResourceReport(filePath));
     return report;
   }
 }

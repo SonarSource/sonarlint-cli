@@ -20,9 +20,6 @@
 package org.sonarlint.cli.report;
 
 import freemarker.template.Template;
-import org.sonar.runner.api.Issue;
-import org.sonarlint.cli.util.Logger;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,6 +34,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.sonarlint.cli.util.Logger;
+import org.sonarsource.sonarlint.core.IssueListener;
 
 public class HtmlReport implements Reporter {
   private final Logger logger;
@@ -52,9 +51,9 @@ public class HtmlReport implements Reporter {
   }
 
   @Override
-  public void execute(String projectName, Date date, List<Issue> issues) {
+  public void execute(String projectName, Date date, List<IssueListener.Issue> issues) {
     IssuesReport report = new IssuesReport();
-    for (Issue i : issues) {
+    for (IssueListener.Issue i : issues) {
       report.addIssue(i);
     }
     report.setTitle(projectName);

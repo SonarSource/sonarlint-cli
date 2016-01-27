@@ -19,17 +19,15 @@
  */
 package org.sonarlint.cli;
 
-import org.sonarlint.cli.report.ReportFactory;
-import org.sonarlint.cli.util.Logger;
-import org.sonarlint.cli.util.SystemInfo;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.util.Properties;
+import org.sonarlint.cli.report.ReportFactory;
+import org.sonarlint.cli.util.Logger;
+import org.sonarlint.cli.util.SystemInfo;
 
 public class Main {
   static final int SUCCESS = 0;
@@ -37,14 +35,14 @@ public class Main {
 
   private final Options opts;
   private final Logger logger;
-  private final SonarLint sonarLint;
   private final ReportFactory reportFactory;
   private BufferedReader inputReader;
+  private final SonarLint sonarlint;
 
-  public Main(Options opts, Logger logger, SonarLint sonarLint, ReportFactory reportFactory) {
+  public Main(Options opts, Logger logger, SonarLint sonarlint, ReportFactory reportFactory) {
     this.opts = opts;
     this.logger = logger;
-    this.sonarLint = sonarLint;
+    this.sonarlint = sonarlint;
     this.reportFactory = reportFactory;
   }
 
@@ -71,25 +69,12 @@ public class Main {
       logger.info("Error stacktraces are turned on.");
     }
 
-    Properties combinedProps = null;
-
-    try {
-      Conf conf = new Conf(opts.properties());
-      // these will be the props based on CLI, system props and configuration files
-      combinedProps = conf.properties();
-      sonarLint.validate(combinedProps);
-      sonarLint.setDefaults(combinedProps);
-    } catch (IOException e) {
-      logger.error("Error processing properties", e);
-      return ERROR;
-    }
-
     Stats stats = new Stats();
     try {
       if (opts.isInteractive()) {
-        runInteractive(stats, combinedProps);
+        runInteractive(stats, sonarlint, opts);
       } else {
-        runOnce(stats, combinedProps);
+        runOnce(stats, sonarlint, opts);
       }
     } catch (Exception e) {
       displayExecutionResult(stats, "FAILURE");
@@ -100,27 +85,27 @@ public class Main {
     return SUCCESS;
   }
 
-  private void runOnce(Stats stats, Properties props) {
+  private void runOnce(Stats stats, SonarLint sonarlint, Options options) throws IOException {
     stats.start();
-    if (!sonarLint.isRunning()) {
-      sonarLint.start(props);
+    if (!sonarlint.isRunning()) {
+      sonarlint.start();
     }
-    sonarLint.runAnalysis(props, reportFactory);
-    sonarLint.stop();
+    sonarlint.runAnalysis(options, reportFactory);
+    sonarlint.stop();
     displayExecutionResult(stats, "SUCCESS");
   }
 
-  private void runInteractive(Stats stats, Properties props) throws IOException {
+  private void runInteractive(Stats stats, SonarLint sonarlint, Options options) throws IOException {
     do {
       stats.start();
-      if (!sonarLint.isRunning()) {
-        sonarLint.start(props);
+      if (!sonarlint.isRunning()) {
+        sonarlint.start();
       }
-      sonarLint.runAnalysis(props, reportFactory);
+      sonarlint.runAnalysis(options, reportFactory);
       displayExecutionResult(stats, "SUCCESS");
     } while (waitForUser());
 
-    sonarLint.stop();
+    sonarlint.stop();
   }
 
   private boolean waitForUser() throws IOException {
@@ -147,7 +132,15 @@ public class Main {
       System.exit(ERROR);
     }
 
-    int ret = new Main(opts, logger, new SonarLint(new RunnerFactory(logger)), new ReportFactory()).run();
+    SonarLint sonarlint = null;
+    try {
+      sonarlint = new SonarLint(opts, logger);
+    } catch (IOException e) {
+      logger.error("Error loading plugins", e);
+      System.exit(ERROR);
+    }
+
+    int ret = new Main(opts, logger, sonarlint, new ReportFactory()).run();
     System.exit(ret);
   }
 

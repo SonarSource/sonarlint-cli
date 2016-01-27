@@ -19,39 +19,31 @@
  */
 package org.sonarlint.cli;
 
-import java.util.Properties;
-import org.sonar.runner.api.EmbeddedRunner;
-import org.sonar.runner.api.LogOutput;
 import org.sonarlint.cli.util.Logger;
+import org.sonarsource.sonarlint.core.LogOutput;
 
-class RunnerFactory {
+class DefaultLogOutput implements LogOutput {
 
   private final Logger logger;
 
-  public RunnerFactory(Logger logger) {
+  public DefaultLogOutput(Logger logger) {
     this.logger = logger;
   }
 
-  EmbeddedRunner create(Properties props) {
-    return EmbeddedRunner.create(new DefaultLogOutput()).addGlobalProperties(props);
-  }
-
-  class DefaultLogOutput implements LogOutput {
-    @Override
-    public void log(String formattedMessage, Level level) {
-      switch (level) {
-        case TRACE:
-        case DEBUG:
-          logger.debug(formattedMessage);
-          break;
-        case ERROR:
-          logger.error(formattedMessage);
-          break;
-        case INFO:
-        case WARN:
-        default:
-          logger.info(formattedMessage);
-      }
+  @Override
+  public void log(String formattedMessage, Level level) {
+    switch (level) {
+      case TRACE:
+      case DEBUG:
+        logger.debug(formattedMessage);
+        break;
+      case ERROR:
+        logger.error(formattedMessage);
+        break;
+      case INFO:
+      case WARN:
+      default:
+        logger.info(formattedMessage);
     }
   }
 }

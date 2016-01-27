@@ -19,16 +19,15 @@
  */
 package org.sonarlint.cli.report;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.sonar.runner.api.Issue;
-
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.sonarsource.sonarlint.core.IssueListener;
 
 import static org.mockito.Mockito.mock;
 
@@ -52,8 +51,8 @@ public class HtmlReportTest {
     html.execute("project", new Date(), createTestIssues());
   }
 
-  private static List<Issue> createTestIssues() {
-    List<Issue> issues = new LinkedList<>();
+  private static List<IssueListener.Issue> createTestIssues() {
+    List<IssueListener.Issue> issues = new LinkedList<>();
 
     return issues;
   }

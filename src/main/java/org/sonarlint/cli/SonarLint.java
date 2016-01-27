@@ -19,52 +19,96 @@
  */
 package org.sonarlint.cli;
 
-import org.sonar.runner.api.EmbeddedRunner;
-import org.sonar.runner.api.Issue;
-import org.sonar.runner.api.IssueListener;
-import org.sonar.runner.api.RunnerProperties;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarlint.cli.report.Reporter;
 import org.sonarlint.cli.util.Logger;
+import org.sonarsource.sonarlint.core.AnalysisConfiguration;
+import org.sonarsource.sonarlint.core.IssueListener;
+import org.sonarsource.sonarlint.core.SonarLintClient;
 
-import java.nio.file.Paths;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-
-import static org.sonarlint.cli.SonarProperties.*;
+import static org.sonarlint.cli.SonarProperties.PROJECT_HOME;
 
 public class SonarLint {
-  private EmbeddedRunner runner;
-  private RunnerFactory runnerFactory;
   private boolean running;
-  private Properties global;
+  private SonarLintClient client;
 
-  public SonarLint(RunnerFactory runnerFactory) {
-    this.runnerFactory = runnerFactory;
+  public SonarLint(Options opts, Logger logger) throws IOException {
+    String sonarlintHome = System.getProperty(SonarProperties.SONARLINT_HOME);
+
+    Path sonarLintHomePath = Paths.get(sonarlintHome);
+    Path pluginDir = sonarLintHomePath.resolve("plugins");
+
+    List<URL> pluginsUrls = new ArrayList<>();
+    try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(pluginDir)) {
+      for (Path path : directoryStream) {
+        pluginsUrls.add(path.toUri().toURL());
+      }
+    }
+
+    this.client = SonarLintClient.builder()
+      .addPlugins(pluginsUrls.toArray(new URL[0]))
+      .setLogOutput(new DefaultLogOutput(logger))
+      .setVerbose(opts.isVerbose())
+      .build();
   }
 
-  public void start(Properties globalProps) {
-    this.global = new Properties();
-    this.global.putAll(globalProps);
-
-    runner = runnerFactory.create(globalProps);
-    runner.start();
+  public void start() {
+    client.start();
     running = true;
   }
 
-  public void runAnalysis(Properties analysisProps, ReportFactory reportFactory) {
+  public void runAnalysis(Options opts, ReportFactory reportFactory) throws IOException {
     Date start = new Date();
-    String projectName = getFallback(analysisProps, global, PROPERTY_PROJECT_NAME);
-    String baseDir = getFallback(analysisProps, global, PROPERTY_PROJECT_BASEDIR);
+
+    String baseDir = System.getProperty(PROJECT_HOME);
+
+    Path baseDirPath = Paths.get(baseDir);
+    final List<AnalysisConfiguration.InputFile> inputFiles = new ArrayList<>();
+    Files.walkFileTree(baseDirPath, new SimpleFileVisitor<Path>() {
+      @Override
+      public FileVisitResult visitFile(final Path file, BasicFileAttributes attrs) throws IOException {
+        inputFiles.add(new AnalysisConfiguration.InputFile() {
+          @Override
+          public Path path() {
+            return file;
+          }
+
+          @Override
+          public boolean isTest() {
+            // TODO
+            return false;
+          }
+        });
+        return super.visitFile(file, attrs);
+      }
+    });
 
     IssueCollector collector = new IssueCollector();
-    runner.runAnalysis(analysisProps, collector);
-    generateReports(collector.get(), reportFactory, projectName, baseDir, start);
+    client.analyze(new AnalysisConfiguration(baseDirPath, baseDirPath.resolve(".sonarlint"), inputFiles, toMap(opts.properties())), collector);
+    generateReports(collector.get(), reportFactory, baseDirPath.toString(), baseDir, start);
   }
 
-  private static void generateReports(List<Issue> issues, ReportFactory reportFactory, String projectName, String baseDir, Date date) {
+  private Map<String, String> toMap(Properties properties) {
+    return new HashMap<String, String>((Map) properties);
+  }
+
+  private static void generateReports(List<IssueListener.Issue> issues, ReportFactory reportFactory, String projectName, String baseDir, Date date) {
     List<Reporter> reporters = reportFactory.createReporters(baseDir);
 
     for (Reporter r : reporters) {
@@ -72,71 +116,13 @@ public class SonarLint {
     }
   }
 
-  private String getFallback(Properties p1, Properties p2, String key) {
-    String v = p1.getProperty(key);
-    if (v != null) {
-      return v;
-    }
-    v = p2.getProperty(key);
-    if (v != null) {
-      return v;
-    }
-    throw new IllegalStateException("No value for key: " + key);
-  }
-
   public void stop() {
-    runner.stop();
+    client.stop();
     running = false;
   }
 
   public boolean isRunning() {
     return running;
-  }
-
-  public void validate(Properties props) {
-    if (props.containsKey(RunnerProperties.HOST_URL)) {
-      throw new IllegalStateException(String.format("Invalid property: '%s'. Can't set host with SonarLint", RunnerProperties.HOST_URL));
-    }
-    if (props.containsKey(PROPERTY_ANALYSIS_MODE)) {
-      throw new IllegalStateException(String.format("Invalid property: '%s'. Can't set analysis mode with SonarLint", PROPERTY_ANALYSIS_MODE));
-    }
-  }
-
-  public void setDefaults(Properties props) {
-    props.setProperty(PROPERTY_ANALYSIS_MODE, "issues");
-
-    if (props.containsKey(TEST_HOST_URL)) {
-      props.setProperty(RunnerProperties.HOST_URL, props.getProperty(TEST_HOST_URL));
-      props.remove(TEST_HOST_URL);
-    } else {
-      props.setProperty(RunnerProperties.HOST_URL, DEFAULT_HOST_URL);
-    }
-
-    setDefault(props, PROPERTY_PROJECT_BASEDIR, Paths.get("").toAbsolutePath().toString());
-    setDefault(props, PROPERTY_SOURCES, DEFAULT_SOURCES);
-    setDefault(props, PROPERTY_TESTS, DEFAULT_TESTS);
-    setDefault(props, PROPERTY_TESTS_INCLUSIONS, DEFAULT_TESTS_INCLUSIONS);
-    setDefault(props, PROPERTY_PROJECT_KEY, getProjectName(props));
-    setDefault(props, PROPERTY_PROJECT_NAME, getProjectName(props));
-    setDefault(props, PROPERTY_PROJECT_VERSION, DEFAULT_VERSION);
-
-    props.setProperty(PROPERTY_CONSOLE_REPORT_ENABLE, Boolean.toString(false));
-    props.setProperty(PROPERTY_HTML_REPORT_ENABLE, Boolean.toString(false));
-  }
-
-  private static String getProjectName(Properties props) {
-    if (props.containsKey(PROPERTY_PROJECT_BASEDIR)) {
-      return Paths.get(props.getProperty(PROPERTY_PROJECT_BASEDIR)).getFileName().toString();
-    } else {
-      return Paths.get("").toAbsolutePath().getFileName().toString();
-    }
-  }
-
-  private static void setDefault(Properties props, String key, String defaultValue) {
-    if (!props.containsKey(key)) {
-      props.setProperty(key, defaultValue);
-      Logger.get().debug(String.format("Setting default value %s=%s", key, defaultValue));
-    }
   }
 
   private static class IssueCollector implements IssueListener {

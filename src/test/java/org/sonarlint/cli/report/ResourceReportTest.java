@@ -19,13 +19,13 @@
  */
 package org.sonarlint.cli.report;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.sonar.runner.api.Issue;
-
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import org.sonarsource.sonarlint.core.IssueListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
@@ -41,8 +41,8 @@ public class ResourceReportTest {
 
   @Test
   public void testIssuesLines() {
-    Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
-    Issue i2 = createTestIssue("file1", "rule1", "MAJOR", 11);
+    IssueListener.Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
+    IssueListener.Issue i2 = createTestIssue("file1", "rule1", "MAJOR", 11);
     resourceReport.addIssue(i1);
     resourceReport.addIssue(i2);
 
@@ -56,10 +56,10 @@ public class ResourceReportTest {
 
   @Test
   public void testCategoryReport() {
-    Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
-    Issue i2 = createTestIssue("file1", "rule1", "MINOR", 11);
-    Issue i3 = createTestIssue("file1", "rule2", "MINOR", 11);
-    Issue i4 = createTestIssue("file1", "rule2", "MINOR", 12);
+    IssueListener.Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
+    IssueListener.Issue i2 = createTestIssue("file1", "rule1", "MINOR", 11);
+    IssueListener.Issue i3 = createTestIssue("file1", "rule2", "MINOR", 11);
+    IssueListener.Issue i4 = createTestIssue("file1", "rule2", "MINOR", 12);
     resourceReport.addIssue(i1);
     resourceReport.addIssue(i2);
     resourceReport.addIssue(i3);
@@ -83,13 +83,11 @@ public class ResourceReportTest {
     assertThat(categoryReports.get(2).getTotal().getCountInCurrentAnalysis()).isEqualTo(2);
   }
 
-  private static Issue createTestIssue(String componentKey, String ruleKey, String severity, int line) {
-    return Issue.builder()
+  private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String severity, int line) {
+    return new IssueListener.Issue()
       .setStartLine(line)
-      .setComponentKey(componentKey)
+      .setFilePath(Paths.get(filePath))
       .setRuleKey(ruleKey)
-      .setSeverity(severity)
-      .setNew(false)
-      .build();
+      .setSeverity(severity);
   }
 }

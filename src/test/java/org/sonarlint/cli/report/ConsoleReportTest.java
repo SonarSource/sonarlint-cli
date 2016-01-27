@@ -19,18 +19,18 @@
  */
 package org.sonarlint.cli.report;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.sonar.runner.api.Issue;
-import org.sonarlint.cli.util.Logger;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import org.sonarlint.cli.util.Logger;
+import org.sonarsource.sonarlint.core.IssueListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,7 +51,7 @@ public class ConsoleReportTest {
 
   @Test
   public void testLog() throws IOException {
-    List<Issue> issues = new LinkedList<>();
+    List<IssueListener.Issue> issues = new LinkedList<>();
     issues.add(createTestIssue("comp1", "rule", "MAJOR", 10));
     issues.add(createTestIssue("comp1", "rule", "MINOR", 10));
     report.execute(PROJECT_NAME, DATE, issues);
@@ -76,13 +76,11 @@ public class ConsoleReportTest {
     Logger.set(stdOut, stdErr);
   }
 
-  private static Issue createTestIssue(String componentKey, String ruleKey, String severity, int line) {
-    return Issue.builder()
+  private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String severity, int line) {
+    return new IssueListener.Issue()
       .setStartLine(line)
-      .setComponentKey(componentKey)
+      .setFilePath(Paths.get(filePath))
       .setRuleKey(ruleKey)
-      .setSeverity(severity)
-      .setNew(false)
-      .build();
+      .setSeverity(severity);
   }
 }

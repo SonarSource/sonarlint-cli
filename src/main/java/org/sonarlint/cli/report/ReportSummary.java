@@ -24,9 +24,9 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.sonar.runner.api.Issue;
 import org.sonarlint.cli.util.Function;
 import org.sonarlint.cli.util.Util;
+import org.sonarsource.sonarlint.core.IssueListener;
 
 public class ReportSummary {
 
@@ -39,7 +39,7 @@ public class ReportSummary {
   ReportSummary() {
   }
 
-  public void addIssue(Issue issue) {
+  public void addIssue(IssueListener.Issue issue) {
     Severity severity = Severity.create(issue.getSeverity());
     IssueCategory category = new IssueCategory(issue.getRuleKey(), severity, issue.getRuleName());
 
@@ -51,20 +51,6 @@ public class ReportSummary {
     byCategory.getTotal().incrementCountInCurrentAnalysis();
     byRuleKey.incrementCountInCurrentAnalysis();
     bySeverity.incrementCountInCurrentAnalysis();
-
-    if (issue.isNew()) {
-      total.incrementNewIssuesCount();
-      byCategory.getTotal().incrementNewIssuesCount();
-      byRuleKey.incrementNewIssuesCount();
-      bySeverity.incrementNewIssuesCount();
-    }
-
-    if (issue.getResolution() != null) {
-      total.incrementResolvedIssuesCount();
-      byCategory.getTotal().incrementResolvedIssuesCount();
-      byRuleKey.incrementResolvedIssuesCount();
-      bySeverity.incrementResolvedIssuesCount();
-    }
   }
 
   public IssueVariation getTotal() {

@@ -19,21 +19,14 @@
  */
 package org.sonarlint.cli.util;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import org.sonar.runner.api.RunnerVersion;
-import org.sonarlint.cli.util.Logger;
-import org.sonarlint.cli.util.System2;
-import org.sonarlint.cli.util.SystemInfo;
 import org.junit.Before;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.Test;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 public class SystemInfoTest {
   System2 mockSystem;
@@ -89,7 +82,6 @@ public class SystemInfoTest {
     verify(mockSystem).getProperty("os.version");
     verify(mockSystem).getenv("SONARLINT_OPTS");
 
-    verify(logger).info("SonarLint: unknown engine: " + RunnerVersion.version());
     verify(logger).info("Java 1.9 oracle (64-bit)");
     verify(logger).info("linux 2.5 x64");
     verify(logger).info("SONARLINT_OPTS=arg");

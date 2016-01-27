@@ -19,11 +19,10 @@
  */
 package org.sonarlint.cli.report;
 
-import org.sonar.runner.api.Issue;
-import org.sonarlint.cli.util.Logger;
-
 import java.util.Date;
 import java.util.List;
+import org.sonarlint.cli.util.Logger;
+import org.sonarsource.sonarlint.core.IssueListener;
 
 public class ConsoleReport implements Reporter {
 
@@ -35,9 +34,9 @@ public class ConsoleReport implements Reporter {
   private static final int LEFT_PAD = 10;
 
   ConsoleReport() {
-    
+
   }
-  
+
   private static class Report {
     int totalIssues = 0;
     int blockerIssues = 0;
@@ -46,7 +45,7 @@ public class ConsoleReport implements Reporter {
     int minorIssues = 0;
     int infoIssues = 0;
 
-    public void process(Issue issue) {
+    public void process(IssueListener.Issue issue) {
       totalIssues++;
       switch (issue.getSeverity()) {
         case "BLOCKER":
@@ -75,9 +74,9 @@ public class ConsoleReport implements Reporter {
   }
 
   @Override
-  public void execute(String projectName, Date date, List<Issue> issues) {
+  public void execute(String projectName, Date date, List<IssueListener.Issue> issues) {
     Report r = new Report();
-    for (Issue issue : issues) {
+    for (IssueListener.Issue issue : issues) {
       r.process(issue);
     }
     printReport(r);

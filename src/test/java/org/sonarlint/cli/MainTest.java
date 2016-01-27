@@ -19,11 +19,6 @@
  */
 package org.sonarlint.cli;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.sonarlint.cli.report.ReportFactory;
-import org.sonarlint.cli.util.Logger;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -33,6 +28,10 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.Before;
+import org.junit.Test;
+import org.sonarlint.cli.report.ReportFactory;
+import org.sonarlint.cli.util.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -79,9 +78,7 @@ public class MainTest {
   public void testMain() {
     assertThat(main.run()).isEqualTo(Main.SUCCESS);
 
-    verify(sonarLint).validate(any(Properties.class));
-    verify(sonarLint).setDefaults(any(Properties.class));
-    verify(sonarLint).start(any(Properties.class));
+    verify(sonarLint).start();
     verify(sonarLint).stop();
   }
 
@@ -102,7 +99,7 @@ public class MainTest {
   @Test
   public void errorStart() {
     Exception e = createException("invalid operation", "analysis failed");
-    doThrow(e).when(sonarLint).start(any(Properties.class));
+    doThrow(e).when(sonarLint).start();
     assertThat(main.run()).isEqualTo(Main.ERROR);
     assertThat(getLogs(out)).contains("EXECUTION FAILURE");
     assertThat(getLogs(err)).contains("invalid operation");
@@ -132,7 +129,7 @@ public class MainTest {
 
     assertThat(mutableInt.get()).isEqualTo(Main.SUCCESS);
     verify(sonarLint, times(1)).stop();
-    verify(sonarLint, times(2)).runAnalysis(any(Properties.class), eq(reportFactory));
+    verify(sonarLint, times(2)).runAnalysis(any(Options.class), eq(reportFactory));
   }
 
   @Test
@@ -155,9 +152,9 @@ public class MainTest {
   }
 
   @Test
-  public void errorAnalysis() {
+  public void errorAnalysis() throws IOException {
     Exception e = createException("invalid operation", "analysis failed");
-    doThrow(e).when(sonarLint).runAnalysis(any(Properties.class), eq(reportFactory));
+    doThrow(e).when(sonarLint).runAnalysis(any(Options.class), eq(reportFactory));
     assertThat(main.run()).isEqualTo(Main.ERROR);
     assertThat(getLogs(out)).contains("EXECUTION FAILURE");
     assertThat(getLogs(err)).contains("invalid operation");
@@ -167,7 +164,7 @@ public class MainTest {
   public void showStack() {
     when(opts.showStack()).thenReturn(true);
     Exception e = createException("invalid operation", "analysis failed");
-    doThrow(e).when(sonarLint).start(any(Properties.class));
+    doThrow(e).when(sonarLint).start();
     assertThat(main.run()).isEqualTo(Main.ERROR);
     assertThat(getLogs(out)).contains("EXECUTION FAILURE");
     assertThat(getLogs(err)).contains("invalid operation");

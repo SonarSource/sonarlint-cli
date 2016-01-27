@@ -8,6 +8,9 @@ function installTravisTools {
   source ~/.local/bin/install
 }
 
+installTravisTools
+build_snapshot "SonarSource/sonarlint-core"
+
 if [ -n "${PR_ANALYSIS:-}" ] && [ "${PR_ANALYSIS}" == true ] && [ "$TRAVIS_PULL_REQUEST" != "false" ] && [ -n "$SONAR_GITHUB_OAUTH" ]; then
     # For security reasons environment variables are not available on the pull requests
     # coming from outside repositories

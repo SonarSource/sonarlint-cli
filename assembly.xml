@@ -38,5 +38,9 @@
       <fileMode>0755</fileMode>
       <filtered>true</filtered>
     </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/plugins</directory>
+      <outputDirectory>plugins</outputDirectory>
+    </fileSet>
   </fileSets>
 </assembly>

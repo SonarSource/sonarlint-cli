@@ -9,11 +9,13 @@ script: ./travis.sh
 
 env:
   matrix:
-    - PR_ANALYSIS=true
+    - TARGET=CI
 
 cache:
   directories:
     - '$HOME/.m2/repository'
+    # for integration tests and analysis
+    - $HOME/.sonar
 
 notifications:
   email: false

@@ -19,6 +19,8 @@
  */
 package org.sonarlint.cli;
 
+import org.sonarlint.cli.util.Logger;
+
 class Stats {
   private final Logger logger = Logger.get();
   private long startTime;

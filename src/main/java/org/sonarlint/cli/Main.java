@@ -19,8 +19,13 @@
  */
 package org.sonarlint.cli;
 
+import org.sonarlint.cli.report.ReportFactory;
+import org.sonarlint.cli.util.Logger;
+import org.sonarlint.cli.util.SystemInfo;
+
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -33,12 +38,14 @@ public class Main {
   private final Options opts;
   private final Logger logger;
   private final SonarLint sonarLint;
+  private final ReportFactory reportFactory;
   private BufferedReader inputReader;
 
-  public Main(Options opts, Logger logger, SonarLint sonarLint) {
+  public Main(Options opts, Logger logger, SonarLint sonarLint, ReportFactory reportFactory) {
     this.opts = opts;
     this.logger = logger;
     this.sonarLint = sonarLint;
+    this.reportFactory = reportFactory;
   }
 
   public int run() {
@@ -51,6 +58,9 @@ public class Main {
       Logger.get().info(SystemInfo.getVersion());
       return SUCCESS;
     }
+
+    reportFactory.setDir(opts.reportDir());
+    reportFactory.setName(opts.reportName());
 
     logger.setDebugEnabled(opts.isVerbose());
     logger.setDisplayStackTrace(opts.showStack());
@@ -68,7 +78,7 @@ public class Main {
       // these will be the props based on CLI, system props and configuration files
       combinedProps = conf.properties();
       sonarLint.validate(combinedProps);
-      sonarLint.setDefaults(combinedProps, opts.jsonReport());
+      sonarLint.setDefaults(combinedProps);
     } catch (IOException e) {
       logger.error("Error processing properties", e);
       return ERROR;
@@ -95,7 +105,7 @@ public class Main {
     if (!sonarLint.isRunning()) {
       sonarLint.start(props);
     }
-    sonarLint.runAnalysis(props);
+    sonarLint.runAnalysis(props, reportFactory);
     sonarLint.stop();
     displayExecutionResult(stats, "SUCCESS");
   }
@@ -106,7 +116,7 @@ public class Main {
       if (!sonarLint.isRunning()) {
         sonarLint.start(props);
       }
-      sonarLint.runAnalysis(props);
+      sonarLint.runAnalysis(props, reportFactory);
       displayExecutionResult(stats, "SUCCESS");
     } while (waitForUser());
 
@@ -117,12 +127,14 @@ public class Main {
     if (inputReader == null) {
       inputReader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
     }
-
     logger.info("");
     logger.info("<Press enter to restart analysis or Ctrl+C to exit the interactive mode>");
     String line = inputReader.readLine();
-
     return line != null;
+  }
+
+  public void setIn(InputStream in) {
+    inputReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
   }
 
   public static void main(String[] args) {
@@ -135,16 +147,17 @@ public class Main {
       System.exit(ERROR);
     }
 
-    int ret = new Main(opts, logger, new SonarLint(new RunnerFactory(logger))).run();
+    int ret = new Main(opts, logger, new SonarLint(new RunnerFactory(logger)), new ReportFactory()).run();
     System.exit(ret);
   }
 
   private void displayExecutionResult(Stats stats, String resultMsg) {
-    logger.info("------------------------------------------------------------------------");
+    String dashes = "------------------------------------------------------------------------";
+    logger.info(dashes);
     logger.info("EXECUTION " + resultMsg);
-    logger.info("------------------------------------------------------------------------");
+    logger.info(dashes);
     stats.stop();
-    logger.info("------------------------------------------------------------------------");
+    logger.info(dashes);
   }
 
   private void showError(String message, Throwable e, boolean showStackTrace, boolean debug) {

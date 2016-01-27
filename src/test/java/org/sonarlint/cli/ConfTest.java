@@ -25,6 +25,7 @@ import java.util.Properties;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.sonarlint.cli.util.Logger;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -73,17 +74,6 @@ public class ConfTest {
   }
 
   @Test
-  public void shouldLoadModuleConfiguration() throws Exception {
-    File projectHome = getTestFile("shouldLoadModuleConfiguration/project");
-    args.setProperty("project.home", projectHome.getCanonicalPath());
-
-    Properties properties = conf.properties();
-
-    assertThat(properties.getProperty("module1.sonar.projectName")).isEqualTo("Module 1");
-    assertThat(properties.getProperty("module2.sonar.projectName")).isEqualTo("Module 2");
-  }
-
-  @Test
   public void shouldSupportDeepModuleConfigurationInRoot() throws Exception {
     File projectHome = getTestFile("shouldSupportDeepModuleConfigurationInRoot/project");
     args.setProperty("project.home", projectHome.getCanonicalPath());
@@ -98,30 +88,6 @@ public class ConfTest {
 
     // SONARUNNER-125
     assertThat(properties.getProperty("11.111.sonar.projectName")).isNull();
-  }
-
-  @Test
-  public void shouldLoadModuleConfigurationOverrideBasedir() throws Exception {
-    File projectHome = getTestFile("shouldLoadModuleConfigurationOverrideBasedir/project");
-    args.setProperty("project.home", projectHome.getCanonicalPath());
-
-    Properties properties = conf.properties();
-
-    assertThat(properties.getProperty("module1.sonar.projectName")).isEqualTo("Module 1");
-    assertThat(properties.getProperty("module2.sonar.projectName")).isEqualTo("Module 2");
-    assertThat(properties.getProperty("module3.sonar.projectName")).isEqualTo("Module 3");
-  }
-
-  @Test
-  public void shouldSupportSettingBaseDirFromCli() throws Exception {
-    File projectHome = getTestFile("shouldLoadModuleConfiguration/project");
-    args.setProperty("project.home", temp.newFolder().getCanonicalPath());
-    args.setProperty("sonar.projectBaseDir", projectHome.getCanonicalPath());
-
-    Properties properties = conf.properties();
-
-    assertThat(properties.getProperty("module1.sonar.projectName")).isEqualTo("Module 1");
-    assertThat(properties.getProperty("module2.sonar.projectName")).isEqualTo("Module 2");
   }
 
   @Test

@@ -20,6 +20,7 @@
 package org.sonarlint.cli;
 
 import org.mockito.Mockito;
+import org.sonarlint.cli.util.Logger;
 
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;

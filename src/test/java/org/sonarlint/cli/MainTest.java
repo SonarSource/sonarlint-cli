@@ -21,17 +21,25 @@ package org.sonarlint.cli;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.sonarlint.cli.report.ReportFactory;
+import org.sonarlint.cli.util.Logger;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -39,6 +47,7 @@ import static org.mockito.Mockito.when;
 public class MainTest {
   private Main main;
   private SonarLint sonarLint;
+  private ReportFactory reportFactory;
   private Options opts;
   private ByteArrayOutputStream out;
   private ByteArrayOutputStream err;
@@ -46,10 +55,11 @@ public class MainTest {
   @Before
   public void setUp() {
     opts = mock(Options.class);
+    reportFactory = mock(ReportFactory.class);
     when(opts.properties()).thenReturn(new Properties());
     createLogger();
     sonarLint = mock(SonarLint.class);
-    main = new Main(opts, Logger.get(), sonarLint);
+    main = new Main(opts, Logger.get(), sonarLint, reportFactory);
   }
 
   private Logger createLogger() {
@@ -70,7 +80,7 @@ public class MainTest {
     assertThat(main.run()).isEqualTo(Main.SUCCESS);
 
     verify(sonarLint).validate(any(Properties.class));
-    verify(sonarLint).setDefaults(any(Properties.class), eq(false));
+    verify(sonarLint).setDefaults(any(Properties.class));
     verify(sonarLint).start(any(Properties.class));
     verify(sonarLint).stop();
   }
@@ -90,11 +100,82 @@ public class MainTest {
   }
 
   @Test
-  public void errorAnalysis() {
-    Exception e = new IllegalArgumentException("dummy");
+  public void errorStart() {
+    Exception e = createException("invalid operation", "analysis failed");
     doThrow(e).when(sonarLint).start(any(Properties.class));
     assertThat(main.run()).isEqualTo(Main.ERROR);
     assertThat(getLogs(out)).contains("EXECUTION FAILURE");
-    assertThat(getLogs(err)).contains("ERROR: dummy");
+    assertThat(getLogs(err)).contains("invalid operation");
+  }
+
+  @Test
+  public void runInteractive() throws IOException, InterruptedException {
+    when(opts.isInteractive()).thenReturn(true);
+    PipedOutputStream out = new PipedOutputStream();
+    OutputStreamWriter writter = new OutputStreamWriter(out);
+    PipedInputStream in = new PipedInputStream(out);
+
+    final AtomicInteger mutableInt = new AtomicInteger(Main.ERROR);
+    main.setIn(in);
+
+    Thread t = new Thread() {
+      @Override
+      public void run() {
+        mutableInt.set(main.run());
+      }
+    };
+    t.start();
+
+    writter.write(System.lineSeparator());
+    writter.close();
+    t.join(20000);
+
+    assertThat(mutableInt.get()).isEqualTo(Main.SUCCESS);
+    verify(sonarLint, times(1)).stop();
+    verify(sonarLint, times(2)).runAnalysis(any(Properties.class), eq(reportFactory));
+  }
+
+  @Test
+  public void verbose() {
+    assertThat(main.run()).isEqualTo(Main.SUCCESS);
+    assertThat(Logger.get().isDebugEnabled()).isFalse();
+
+    when(opts.isVerbose()).thenReturn(true);
+    assertThat(main.run()).isEqualTo(Main.SUCCESS);
+    assertThat(Logger.get().isDebugEnabled()).isTrue();
+  }
+
+  @Test
+  public void errorStop() {
+    Exception e = createException("invalid operation", "analysis failed");
+    doThrow(e).when(sonarLint).stop();
+    assertThat(main.run()).isEqualTo(Main.ERROR);
+    assertThat(getLogs(out)).contains("EXECUTION FAILURE");
+    assertThat(getLogs(err)).contains("invalid operation");
+  }
+
+  @Test
+  public void errorAnalysis() {
+    Exception e = createException("invalid operation", "analysis failed");
+    doThrow(e).when(sonarLint).runAnalysis(any(Properties.class), eq(reportFactory));
+    assertThat(main.run()).isEqualTo(Main.ERROR);
+    assertThat(getLogs(out)).contains("EXECUTION FAILURE");
+    assertThat(getLogs(err)).contains("invalid operation");
+  }
+
+  @Test
+  public void showStack() {
+    when(opts.showStack()).thenReturn(true);
+    Exception e = createException("invalid operation", "analysis failed");
+    doThrow(e).when(sonarLint).start(any(Properties.class));
+    assertThat(main.run()).isEqualTo(Main.ERROR);
+    assertThat(getLogs(out)).contains("EXECUTION FAILURE");
+    assertThat(getLogs(err)).contains("invalid operation");
+    assertThat(getLogs(err)).contains("analysis failed");
+  }
+
+  public Exception createException(String firstMsg, String secondMsg) {
+    Exception wrapped = new NullPointerException(firstMsg);
+    return new IllegalStateException(secondMsg, wrapped);
   }
 }

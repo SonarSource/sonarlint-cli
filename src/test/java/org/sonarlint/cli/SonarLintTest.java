@@ -24,6 +24,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.sonar.runner.api.EmbeddedRunner;
+import org.sonar.runner.api.IssueListener;
+import org.sonarlint.cli.report.ReportFactory;
 
 import java.util.Properties;
 
@@ -36,6 +38,7 @@ import static org.mockito.Mockito.when;
 
 public class SonarLintTest {
   private RunnerFactory factory;
+  private ReportFactory reportFactory;
   private SonarLint sonarLint;
   private EmbeddedRunner runner;
   private Properties props;
@@ -46,6 +49,8 @@ public class SonarLintTest {
   @Before
   public void setUp() {
     props = new Properties();
+    props.setProperty(SonarProperties.PROPERTY_PROJECT_BASEDIR, "");
+    reportFactory = mock(ReportFactory.class);
     runner = mock(EmbeddedRunner.class);
     factory = mock(RunnerFactory.class);
     when(factory.create(any(Properties.class))).thenReturn(runner);
@@ -64,24 +69,25 @@ public class SonarLintTest {
   @Test
   public void testAnalysis() {
     assertThat(sonarLint.isRunning()).isFalse();
-    
+
+    sonarLint.setDefaults(props);
     sonarLint.start(props);
     assertThat(sonarLint.isRunning()).isTrue();
     verify(factory).create(props);
     verify(runner).start();
-    
-    sonarLint.runAnalysis(props);
-    verify(runner).runAnalysis(props);
+
+    sonarLint.runAnalysis(props, reportFactory);
+    verify(runner).runAnalysis(any(Properties.class), any(IssueListener.class));
     assertThat(sonarLint.isRunning()).isTrue();
 
-    sonarLint.stop();    
+    sonarLint.stop();
     verify(runner).stop();
     assertThat(sonarLint.isRunning()).isFalse();
 
     verifyNoMoreInteractions(runner);
     verifyNoMoreInteractions(factory);
   }
-  
+
   @Test
   public void testValidationMode() {
     props.put("sonar.analysis.mode", "issues");
@@ -94,7 +100,7 @@ public class SonarLintTest {
   @Test
   public void testDefaults() {
     props.put("sonar.projectBaseDir", "/home/myproject");
-    sonarLint.setDefaults(props, false);
+    sonarLint.setDefaults(props);
 
     assertThat(props).containsEntry("sonar.host.url", "https://update.sonarlint.org");
     assertThat(props).containsEntry("sonar.analysis.mode", "issues");
@@ -104,27 +110,25 @@ public class SonarLintTest {
     assertThat(props).containsEntry("sonar.projectKey", "myproject");
     assertThat(props).containsEntry("sonar.projectName", "myproject");
     assertThat(props).containsEntry("sonar.projectVersion", "1.0");
-    
-    assertThat(props).containsEntry("sonar.issuesReport.console.enable", "true");
-    assertThat(props).containsEntry("sonar.issuesReport.html.enable", "true");
+
+    assertThat(props).containsEntry("sonar.issuesReport.console.enable", "false");
+    assertThat(props).containsEntry("sonar.issuesReport.html.enable", "false");
     assertThat(props).doesNotContainKey("sonar.issuesReport.json.enable");
   }
-  
+
+  @Test
+  public void testHostUrl() {
+    props.put(SonarProperties.TEST_HOST_URL, "myhost");
+  }
+
   @Test
   public void testDefaultWithPreviousValue() {
     props.put("sonar.projectBaseDir", "/home/myproject");
     props.put("sonar.projectVersion", "2.0");
-    
-    sonarLint.setDefaults(props, false);
+
+    sonarLint.setDefaults(props);
     assertThat(props).containsEntry("sonar.projectVersion", "2.0");
-    
-  }
-  
-  @Test
-  public void testJson() {
-    props.put("sonar.projectBaseDir", "/home/myproject");
-    sonarLint.setDefaults(props, true);
-    assertThat(props).containsEntry("sonar.issuesReport.json.enable", "true");
+
   }
 
   @Test

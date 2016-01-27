@@ -19,17 +19,20 @@
  */
 package org.sonarlint.cli;
 
+import org.sonarlint.cli.util.Logger;
+
 import java.text.ParseException;
 import java.util.Properties;
 
 public class Options {
   private Properties props = new Properties();
-  private boolean jsonReport = false;
   private boolean verbose = false;
   private boolean help = false;
   private boolean version = false;
   private boolean showStack = false;
   private boolean interactive = false;
+  private String reportDir = null;
+  private String reportName = null;
   private String task;
 
   public static Options parse(String[] args) throws ParseException {
@@ -55,8 +58,19 @@ public class Options {
       } else if ("-X".equals(arg) || "--debug".equals(arg)) {
         options.verbose = true;
 
-      } else if ("-j".equals(arg) || "--json".equals(arg)) {
-        options.jsonReport = true; 
+      } else if ("--report-dir".equals(arg)) {
+        i++;
+        if (i >= args.length) {
+          throw new ParseException("Missing argument for option --report-dir", i);
+        }
+        options.reportDir = args[i];
+
+      } else if ("--report-name".equals(arg)) {
+        i++;
+        if (i >= args.length) {
+          throw new ParseException("Missing argument for option --report-name", i);
+        }
+        options.reportName = args[i];
 
       } else if ("-D".equals(arg) || "--define".equals(arg)) {
         i++;
@@ -90,16 +104,20 @@ public class Options {
     return help;
   }
 
+  public String reportName() {
+    return reportName;
+  }
+
+  public String reportDir() {
+    return reportDir;
+  }
+
   public boolean isVersion() {
     return version;
   }
 
   public boolean showStack() {
     return showStack;
-  }
-
-  public boolean jsonReport() {
-    return jsonReport;
   }
 
   public Properties properties() {
@@ -122,7 +140,8 @@ public class Options {
     logger.info(" -v,--version          Display version information");
     logger.info(" -X,--debug            Produce execution debug output");
     logger.info(" -i,--interactive      Run interactively");
-    logger.info(" -j,--json             Generate JSON issues report");
+    logger.info(" --report-dir <dir>    Report output directory");
+    logger.info(" --report-name <name>  Report output name");
   }
 
   private static void appendPropertyTo(String arg, Properties props) {

@@ -19,6 +19,9 @@
  */
 package org.sonarlint.cli;
 
+import org.sonarlint.cli.util.Logger;
+import static org.sonarlint.cli.SonarProperties.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,20 +29,10 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
 class Conf {
-  private static final String SONARLINT_HOME = "sonarlint.home";
-  private static final String RUNNER_SETTINGS = "runner.settings";
-  private static final String PROJECT_HOME = "project.home";
-  private static final String PROJECT_SETTINGS = "project.settings";
-  private static final String PROPERTY_MODULES = "sonar.modules";
-  private static final String PROPERTY_PROJECT_BASEDIR = "sonar.projectBaseDir";
-  private static final String PROPERTY_PROJECT_CONFIG_FILE = "sonar.projectConfigFile";
-  private static final String SONAR_PROJECT_PROPERTIES_FILENAME = "sonar-project.properties";
-
   private final Properties props;
   private final Logger logger;
 
@@ -78,7 +71,6 @@ class Conf {
       Properties rootProps = toProperties(rootSettingsFile);
       projectProps.putAll(rootProps);
       initRootProjectBaseDir(props, rootProps);
-      loadModulesProperties(rootProps, projectProps, "");
       return projectProps;
     }
     logger.info("Project configuration file: NONE");
@@ -94,71 +86,11 @@ class Conf {
     }
   }
 
-  private void loadModulesProperties(Properties parentProps, Properties projectProps, String prefix) {
-    File parentBaseDir = new File(parentProps.getProperty(PROPERTY_PROJECT_BASEDIR));
-    if (parentProps.containsKey(PROPERTY_MODULES)) {
-      for (String module : getListFromProperty(parentProps, PROPERTY_MODULES)) {
-        Properties moduleProps = extractModuleProperties(module, parentProps);
-        moduleProps = loadChildConfigFile(parentBaseDir, moduleProps, module);
-
-        // the child project may have children as well
-        loadModulesProperties(moduleProps, projectProps, prefix + module + ".");
-        // and finally add this child properties to global props
-        merge(projectProps, prefix, module, moduleProps);
-      }
-    }
-
-  }
-
-  private static void merge(Properties projectProps, String prefix, String module, Properties moduleProps) {
-    for (Map.Entry<Object, Object> entry : moduleProps.entrySet()) {
-      projectProps.put(prefix + module + "." + entry.getKey(), entry.getValue());
-    }
-  }
-
-  private Properties loadChildConfigFile(File parentBaseDir, Properties moduleProps, String moduleId) {
-    final File baseDir;
-    if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
-      baseDir = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), parentBaseDir);
-      setProjectBaseDir(baseDir, moduleProps, moduleId);
-      try {
-        if (!parentBaseDir.getCanonicalFile().equals(baseDir.getCanonicalFile())) {
-          tryToFindAndLoadPropsFile(baseDir, moduleProps, moduleId);
-        }
-      } catch (IOException e) {
-        throw new IllegalStateException("Error when resolving baseDir", e);
-      }
-    } else if (moduleProps.containsKey(PROPERTY_PROJECT_CONFIG_FILE)) {
-      baseDir = loadPropsFile(parentBaseDir, moduleProps, moduleId);
-      setProjectBaseDir(baseDir, moduleProps, moduleId);
-      moduleProps.remove(PROPERTY_PROJECT_CONFIG_FILE);
-    } else {
-      baseDir = new File(parentBaseDir, moduleId);
-      setProjectBaseDir(baseDir, moduleProps, moduleId);
-      tryToFindAndLoadPropsFile(baseDir, moduleProps, moduleId);
-    }
-
-    return moduleProps;
-  }
-
   private static void setProjectBaseDir(File baseDir, Properties childProps, String moduleId) {
     if (!baseDir.isDirectory()) {
       throw new IllegalStateException(MessageFormat.format("The base directory of the module ''{0}'' does not exist: {1}", moduleId, baseDir.getAbsolutePath()));
     }
     childProps.put(PROPERTY_PROJECT_BASEDIR, baseDir.getAbsolutePath());
-  }
-
-  protected static Properties extractModuleProperties(String module, Properties properties) {
-    Properties moduleProps = new Properties();
-    String propertyPrefix = module + ".";
-    int prefixLength = propertyPrefix.length();
-    for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-      String key = (String) entry.getKey();
-      if (key.startsWith(propertyPrefix)) {
-        moduleProps.put(key.substring(prefixLength), entry.getValue());
-      }
-    }
-    return moduleProps;
   }
 
   private static File locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
@@ -223,20 +155,6 @@ class Conf {
       return baseDir;
     } else {
       throw new IllegalStateException("The properties file of the module '" + moduleId + "' does not exist: " + propertyFile.getAbsolutePath());
-    }
-  }
-
-  private static void tryToFindAndLoadPropsFile(File baseDir, Properties moduleProps, String moduleId) {
-    File propertyFile = new File(baseDir, SONAR_PROJECT_PROPERTIES_FILENAME);
-    if (propertyFile.isFile()) {
-      Properties propsFromFile = toProperties(propertyFile);
-      for (Entry<Object, Object> entry : propsFromFile.entrySet()) {
-        moduleProps.put(entry.getKey(), entry.getValue());
-      }
-      if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
-        File overwrittenBaseDir = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), propertyFile.getParentFile());
-        setProjectBaseDir(overwrittenBaseDir, moduleProps, moduleId);
-      }
     }
   }
 

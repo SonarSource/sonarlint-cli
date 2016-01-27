@@ -22,6 +22,7 @@ package org.sonarlint.cli;
 import java.util.Properties;
 import org.sonar.runner.api.EmbeddedRunner;
 import org.sonar.runner.api.LogOutput;
+import org.sonarlint.cli.util.Logger;
 
 class RunnerFactory {
 

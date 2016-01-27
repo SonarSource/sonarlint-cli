@@ -40,6 +40,14 @@ public class OptionsTest {
     opt = Options.parse(args("--help"));
     assertThat(opt.isHelp()).isTrue();
   }
+  
+  @Test
+  public void testReport() throws ParseException {
+    Options opt = Options.parse(args("--report-dir", "mydir", "--report-name", "myname"));
+    
+    assertThat(opt.reportDir()).isEqualTo("mydir");
+    assertThat(opt.reportName()).isEqualTo("myname");
+  }
 
   @Test
   public void testStack() throws ParseException {
@@ -66,15 +74,6 @@ public class OptionsTest {
 
     opt = Options.parse(args("--version"));
     assertThat(opt.isVersion()).isTrue();
-  }
-
-  @Test
-  public void testJson() throws ParseException {
-    Options opt = Options.parse(args("-j"));
-    assertThat(opt.jsonReport()).isTrue();
-
-    opt = Options.parse(args("--json"));
-    assertThat(opt.jsonReport()).isTrue();
   }
 
   @Test

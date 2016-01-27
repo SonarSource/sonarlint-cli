@@ -20,19 +20,26 @@
 package org.sonarlint.cli;
 
 public class SonarProperties {
-  public static final String ANALYSIS_MODE = "sonar.analysis.mode";
-  public static final String TEST_HOST_URL = "sonar.test.url";
-  public static final String PROJECT_KEY = "sonar.projectKey";
-  public static final String PROJECT_VERSION = "sonar.projectVersion";
-  public static final String PROJECT_NAME = "sonar.projectName";
-  public static final String SOURCES = "sonar.sources";
-  public static final String TESTS = "sonar.tests";
-  public static final String TESTS_INCLUSIONS = "sonar.test.inclusions";
+  public static final String PROPERTY_ANALYSIS_MODE = "sonar.analysis.mode";
+  public static final String PROPERTY_PROJECT_KEY = "sonar.projectKey";
+  public static final String PROPERTY_PROJECT_VERSION = "sonar.projectVersion";
+  public static final String PROPERTY_PROJECT_NAME = "sonar.projectName";
+  public static final String PROPERTY_SOURCES = "sonar.sources";
+  public static final String PROPERTY_TESTS = "sonar.tests";
+  public static final String PROPERTY_TESTS_INCLUSIONS = "sonar.test.inclusions";
   public static final String PROPERTY_PROJECT_BASEDIR = "sonar.projectBaseDir";
-  public static final String JSON_REPORT_ENABLE = "sonar.issuesReport.json.enable";
-  public static final String HTML_REPORT_ENABLE = "sonar.issuesReport.html.enable";
-  public static final String CONSOLE_REPORT_ENABLE = "sonar.issuesReport.console.enable";
-  
+  public static final String PROPERTY_HTML_REPORT_ENABLE = "sonar.issuesReport.html.enable";
+  public static final String PROPERTY_CONSOLE_REPORT_ENABLE = "sonar.issuesReport.console.enable";
+  public static final String PROPERTY_PROJECT_CONFIG_FILE = "sonar.projectConfigFile";
+
+  public static final String TEST_HOST_URL = "sonar.test.url";
+  public static final String SONARLINT_HOME = "sonarlint.home";
+  public static final String RUNNER_SETTINGS = "runner.settings";
+  public static final String PROJECT_HOME = "project.home";
+  public static final String PROJECT_SETTINGS = "project.settings";
+
+  public static final String SONAR_PROJECT_PROPERTIES_FILENAME = "sonar-project.properties";
+
   public static final String DEFAULT_HOST_URL = "https://update.sonarlint.org";
   public static final String DEFAULT_VERSION = "1.0";
   public static final String DEFAULT_SOURCES = ".";

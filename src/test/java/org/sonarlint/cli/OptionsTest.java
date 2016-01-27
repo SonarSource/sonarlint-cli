@@ -40,18 +40,18 @@ public class OptionsTest {
     opt = Options.parse(args("--help"));
     assertThat(opt.isHelp()).isTrue();
   }
-  
+
   @Test
   public void testReport() throws ParseException {
     Options opt = Options.parse(args("--html-report", "myreport"));
-    
+
     assertThat(opt.htmlReport()).isEqualTo("myreport");
   }
-  
+
   @Test
   public void testGlobs() throws ParseException {
     Options opt = Options.parse(args("--src", "source", "--tests", "tests"));
-    
+
     assertThat(opt.src()).isEqualTo("source");
     assertThat(opt.tests()).isEqualTo("tests");
   }
@@ -63,6 +63,12 @@ public class OptionsTest {
 
     opt = Options.parse(args("--errors"));
     assertThat(opt.showStack()).isTrue();
+  }
+
+  @Test
+  public void testCharset() throws ParseException {
+    Options opt = Options.parse(args("--charset", "UTF-8"));
+    assertThat(opt.charset()).isEqualTo("UTF-8");
   }
 
   @Test

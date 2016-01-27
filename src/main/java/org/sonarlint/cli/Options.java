@@ -34,6 +34,7 @@ public class Options {
   private String htmlReport = null;
   private String src = null;
   private String tests = null;
+  private String charset = null;
   private String task;
 
   public static Options parse(String[] args) throws ParseException {
@@ -65,6 +66,13 @@ public class Options {
           throw new ParseException("Missing argument for option " + arg, i);
         }
         options.htmlReport = args[i];
+
+      } else if ("--charset".equals(arg)) {
+        i++;
+        if (i >= args.length) {
+          throw new ParseException("Missing argument for option " + arg, i);
+        }
+        options.charset = args[i];
 
       } else if ("--src".equals(arg)) {
         i++;
@@ -112,6 +120,10 @@ public class Options {
     return help;
   }
 
+  public String charset() {
+    return charset;
+  }
+
   public String htmlReport() {
     return htmlReport;
   }
@@ -146,15 +158,16 @@ public class Options {
     logger.info("usage: sonarlint [options]");
     logger.info("");
     logger.info("Options:");
-    logger.info(" -D,--define <arg>     Define property");
-    logger.info(" -e,--errors           Produce execution error messages");
-    logger.info(" -h,--help             Display help information");
-    logger.info(" -v,--version          Display version information");
-    logger.info(" -X,--debug            Produce execution debug output");
-    logger.info(" -i,--interactive      Run interactively");
-    logger.info(" --html-report <path>  HTML report output path (relative or absolute)");
-    logger.info(" --src <glob pattern>  GLOB pattern to identify source files");
+    logger.info(" -D,--define <arg>      Define property");
+    logger.info(" -e,--errors            Produce execution error messages");
+    logger.info(" -h,--help              Display help information");
+    logger.info(" -v,--version           Display version information");
+    logger.info(" -X,--debug             Produce execution debug output");
+    logger.info(" -i,--interactive       Run interactively");
+    logger.info(" --html-report <path>   HTML report output path (relative or absolute)");
+    logger.info(" --src <glob pattern>   GLOB pattern to identify source files");
     logger.info(" --tests <glob pattern> GLOB pattern to identify test files");
+    logger.info(" --charset <name>       Character encoding of the source files");
   }
 
   private static void appendPropertyTo(String arg, Properties props) {

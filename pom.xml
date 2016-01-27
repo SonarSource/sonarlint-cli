@@ -164,7 +164,7 @@
               <rules>
                 <requireFilesSize>
                   <minsize>160000</minsize>
-                  <maxsize>2500000</maxsize>
+                  <maxsize>1500000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonarlint-cli-${project.version}.zip</file>
                   </files>

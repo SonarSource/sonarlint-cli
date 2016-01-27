@@ -43,7 +43,7 @@ class Conf {
 
   Properties properties() throws IOException {
     Properties result = new Properties();
-    result.putAll(loadGlobalProperties());
+    initProjectBaseDir(props);
     result.putAll(loadProjectProperties());
     result.putAll(System.getProperties());
     result.putAll(props);
@@ -51,38 +51,21 @@ class Conf {
     return result;
   }
 
-  private Properties loadGlobalProperties() throws IOException {
-    File settingsFile = locatePropertiesFile(props, SONARLINT_HOME, "conf/sonar-runner.properties", RUNNER_SETTINGS);
-    if (settingsFile != null && settingsFile.isFile() && settingsFile.exists()) {
-      logger.info("Runner configuration file: " + settingsFile.getAbsolutePath());
-      return toProperties(settingsFile);
-    }
-    logger.info("Runner configuration file: NONE");
-    return new Properties();
-  }
-
   private Properties loadProjectProperties() throws IOException {
     File rootSettingsFile = locatePropertiesFile(props, props.containsKey(PROPERTY_PROJECT_BASEDIR) ? PROPERTY_PROJECT_BASEDIR : PROJECT_HOME,
-      SONAR_PROJECT_PROPERTIES_FILENAME,
-      PROJECT_SETTINGS);
+      SONAR_PROJECT_PROPERTIES_FILENAME);
     if (rootSettingsFile != null && rootSettingsFile.isFile() && rootSettingsFile.exists()) {
       logger.info("Project configuration file: " + rootSettingsFile.getAbsolutePath());
-      Properties projectProps = new Properties();
-      Properties rootProps = toProperties(rootSettingsFile);
-      projectProps.putAll(rootProps);
-      initRootProjectBaseDir(props, rootProps);
-      return projectProps;
+      return toProperties(rootSettingsFile);
     }
     logger.info("Project configuration file: NONE");
     return new Properties();
   }
 
-  private static void initRootProjectBaseDir(Properties cliProps, Properties rootProps) {
-    if (!cliProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
-      String baseDir = cliProps.getProperty(PROJECT_HOME);
-      rootProps.put(PROPERTY_PROJECT_BASEDIR, baseDir);
-    } else {
-      rootProps.put(PROPERTY_PROJECT_BASEDIR, cliProps.getProperty(PROPERTY_PROJECT_BASEDIR));
+  private static void initProjectBaseDir(Properties props) {
+    if (!props.containsKey(PROPERTY_PROJECT_BASEDIR) && props.containsKey(PROJECT_HOME)) {
+      String baseDir = props.getProperty(PROJECT_HOME);
+      props.put(PROPERTY_PROJECT_BASEDIR, baseDir);
     }
   }
 
@@ -93,27 +76,20 @@ class Conf {
     childProps.put(PROPERTY_PROJECT_BASEDIR, baseDir.getAbsolutePath());
   }
 
-  private static File locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome, String settingsKey) {
+  private static File locatePropertiesFile(Properties props, String homeKey, String relativePathFromHome) {
     File settingsFile = null;
     String runnerHome = props.getProperty(homeKey, "");
     if (!"".equals(runnerHome)) {
       settingsFile = new File(runnerHome, relativePathFromHome);
     }
 
-    if (settingsFile == null || !settingsFile.exists()) {
-      String settingsPath = props.getProperty(settingsKey, "");
-      if (!"".equals(settingsPath)) {
-        settingsFile = new File(settingsPath);
-      }
-    }
     return settingsFile;
   }
 
   private static Properties toProperties(File file) {
-    InputStream in = null;
-    try {
-      Properties properties = new Properties();
-      in = new FileInputStream(file);
+    Properties properties = new Properties();
+
+    try (InputStream in = new FileInputStream(file)) {
       properties.load(in);
       // Trim properties
       for (String propKey : properties.stringPropertyNames()) {
@@ -124,14 +100,6 @@ class Conf {
     } catch (Exception e) {
       throw new IllegalStateException("Fail to load file: " + file.getAbsolutePath(), e);
 
-    } finally {
-      if (in != null) {
-        try {
-          in.close();
-        } catch (IOException e) {
-          // Ignore errors
-        }
-      }
     }
   }
 
@@ -145,7 +113,7 @@ class Conf {
       for (Entry<Object, Object> entry : propsFromFile.entrySet()) {
         moduleProps.put(entry.getKey(), entry.getValue());
       }
-      File baseDir = null;
+      File baseDir;
       if (moduleProps.containsKey(PROPERTY_PROJECT_BASEDIR)) {
         baseDir = getFileFromPath(moduleProps.getProperty(PROPERTY_PROJECT_BASEDIR), propertyFile.getParentFile());
       } else {

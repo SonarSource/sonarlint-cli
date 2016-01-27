@@ -46,7 +46,9 @@ public class SonarLint {
   }
 
   public void start(Properties globalProps) {
-    this.global = globalProps;
+    this.global = new Properties();
+    this.global.putAll(globalProps);
+
     runner = runnerFactory.create(globalProps);
     runner.start();
     running = true;
@@ -110,6 +112,7 @@ public class SonarLint {
       props.setProperty(RunnerProperties.HOST_URL, DEFAULT_HOST_URL);
     }
 
+    setDefault(props, PROPERTY_PROJECT_BASEDIR, Paths.get("").toAbsolutePath().toString());
     setDefault(props, PROPERTY_SOURCES, DEFAULT_SOURCES);
     setDefault(props, PROPERTY_TESTS, DEFAULT_TESTS);
     setDefault(props, PROPERTY_TESTS_INCLUSIONS, DEFAULT_TESTS_INCLUSIONS);

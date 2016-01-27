@@ -39,38 +39,19 @@ public class ConfTest {
   Conf conf = new Conf(args);
 
   @Test
-  public void should_load_global_settings_by_home() throws Exception {
-    File home = getTestFile("shouldLoadRunnerSettingsByHome/");
-    args.setProperty("sonarlint.home", home.getCanonicalPath());
-
-    assertThat(conf.properties().get("sonar.prop")).isEqualTo("value");
-  }
-
-  @Test
   public void should_not_fail_if_no_home() throws Exception {
     assertThat(conf.properties()).isNotEmpty();
   }
 
   @Test
-  public void should_load_conf_by_direct_path() throws Exception {
-    File settings = getTestFile("shouldLoadRunnerSettingsByDirectPath/other-conf.properties");
-    args.setProperty("runner.settings", settings.getCanonicalPath());
-
-    assertThat(conf.properties().get("sonar.prop")).isEqualTo("otherValue");
-  }
-
-  @Test
   public void shouldLoadCompleteConfiguration() throws Exception {
-    File sonarlintHome = getTestFile("shouldLoadCompleteConfiguration/runner");
     File projectHome = getTestFile("shouldLoadCompleteConfiguration/project");
-    args.setProperty("sonarlint.home", sonarlintHome.getCanonicalPath());
     args.setProperty("project.home", projectHome.getCanonicalPath());
 
     Properties properties = conf.properties();
 
     assertThat(properties.getProperty("project.prop")).isEqualTo("foo");
     assertThat(properties.getProperty("overridden.prop")).isEqualTo("project scope");
-    assertThat(properties.getProperty("global.prop")).isEqualTo("jdbc:mysql:localhost/sonar");
   }
 
   @Test

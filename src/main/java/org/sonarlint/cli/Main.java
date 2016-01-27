@@ -93,7 +93,7 @@ public class Main {
       }
     } catch (Exception e) {
       displayExecutionResult(stats, "FAILURE");
-      showError("Error during Sonar runner execution", e, opts.showStack(), opts.isVerbose());
+      showError("Error execution SonarLint", e, opts.showStack(), opts.isVerbose());
       return ERROR;
     }
 

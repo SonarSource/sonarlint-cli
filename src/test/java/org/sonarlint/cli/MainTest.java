@@ -25,6 +25,7 @@ import java.io.OutputStreamWriter;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -59,7 +60,7 @@ public class MainTest {
     when(opts.properties()).thenReturn(new Properties());
     createLogger();
     sonarLint = mock(SonarLint.class);
-    fileFinder = new InputFileFinder(null, null);
+    fileFinder = new InputFileFinder(null, null, Charset.defaultCharset());
     main = new Main(opts, Logger.get(), sonarLint, reportFactory, fileFinder);
   }
 

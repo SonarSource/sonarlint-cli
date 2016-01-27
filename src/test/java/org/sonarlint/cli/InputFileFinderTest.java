@@ -26,6 +26,8 @@ import org.junit.rules.TemporaryFolder;
 import org.sonarsource.sonarlint.core.AnalysisConfiguration.InputFile;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -59,7 +61,7 @@ public class InputFileFinderTest {
 
   @Test
   public void onlyTest() throws IOException {
-    fileFinder = new InputFileFinder(null, "**tests**");
+    fileFinder = new InputFileFinder(null, "**tests**", Charset.defaultCharset());
 
     List<InputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(2);
@@ -68,7 +70,7 @@ public class InputFileFinderTest {
 
   @Test
   public void onlySrc() throws IOException {
-    fileFinder = new InputFileFinder("**src**", null);
+    fileFinder = new InputFileFinder("**src**", null, Charset.defaultCharset());
 
     List<InputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(1);
@@ -77,7 +79,7 @@ public class InputFileFinderTest {
 
   @Test
   public void testDefault() throws IOException {
-    fileFinder = new InputFileFinder(null, null);
+    fileFinder = new InputFileFinder(null, null, Charset.defaultCharset());
 
     List<InputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(2);
@@ -86,7 +88,7 @@ public class InputFileFinderTest {
 
   @Test
   public void testOverlapping() throws IOException {
-    fileFinder = new InputFileFinder("**tests**", "**tests**");
+    fileFinder = new InputFileFinder("**tests**", "**tests**", Charset.defaultCharset());
 
     List<InputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(1);
@@ -95,10 +97,19 @@ public class InputFileFinderTest {
 
   @Test
   public void testDisjoint() throws IOException {
-    fileFinder = new InputFileFinder("**abc**", "**abc**");
+    fileFinder = new InputFileFinder("**abc**", "**abc**", Charset.defaultCharset());
 
     List<InputFile> files = fileFinder.collect(root);
     assertThat(files).isEmpty();
+  }
+  
+  @Test
+  public void testCharset() throws IOException {
+    fileFinder = new InputFileFinder(null, null, StandardCharsets.US_ASCII);
+
+    List<InputFile> files = fileFinder.collect(root);
+    assertThat(files).hasSize(2);
+    assertThat(files).extracting("charset").containsOnly(StandardCharsets.US_ASCII);
   }
 
 }

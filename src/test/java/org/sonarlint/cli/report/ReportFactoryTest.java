@@ -22,6 +22,7 @@ package org.sonarlint.cli.report;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class ReportFactoryTest {
 
   @Before
   public void setUp() {
-    factory = new ReportFactory();
+    factory = new ReportFactory(Charset.defaultCharset());
   }
 
   @Test

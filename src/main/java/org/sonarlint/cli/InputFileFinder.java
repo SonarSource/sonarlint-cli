@@ -25,6 +25,7 @@ import org.sonarsource.sonarlint.core.AnalysisConfiguration.InputFile;
 import javax.annotation.Nullable;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -36,12 +37,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InputFileFinder {
-  private Logger logger;
-  private PathMatcher srcMatcher;
-  private PathMatcher testsMatcher;
+  private final Logger logger;
+  private final PathMatcher srcMatcher;
+  private final PathMatcher testsMatcher;
+  private final Charset charset;
 
-  public InputFileFinder(@Nullable String srcGlobPattern, @Nullable String testsGlobPattern) {
-    logger = Logger.get();
+  public InputFileFinder(@Nullable String srcGlobPattern, @Nullable String testsGlobPattern, Charset charset) {
+    this.charset = charset;
+    this.logger = Logger.get();
 
     try {
       if (srcGlobPattern != null) {
@@ -76,7 +79,7 @@ public class InputFileFinder {
         boolean isSrc = srcMatcher.matches(file);
 
         if (isTest || isSrc) {
-          files.add(new DefaultInputFile(file, isTest));
+          files.add(new DefaultInputFile(file, isTest, charset));
         }
 
         return super.visitFile(file, attrs);
@@ -103,10 +106,12 @@ public class InputFileFinder {
   private static class DefaultInputFile implements InputFile {
     private final Path path;
     private final boolean test;
+    private final Charset charset;
 
-    DefaultInputFile(Path path, boolean test) {
+    DefaultInputFile(Path path, boolean test, Charset charset) {
       this.path = path;
       this.test = test;
+      this.charset = charset;
     }
 
     @Override
@@ -117,6 +122,11 @@ public class InputFileFinder {
     @Override
     public boolean isTest() {
       return test;
+    }
+
+    @Override
+    public Charset charset() {
+      return charset;
     }
   }
 

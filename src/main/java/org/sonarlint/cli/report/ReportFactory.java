@@ -22,7 +22,7 @@ package org.sonarlint.cli.report;
 import javax.annotation.Nullable;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,12 +32,17 @@ import java.util.List;
 public class ReportFactory {
   private static final String DEFAULT_REPORT_NAME = "issues-report.html";
   private String htmlPath = null;
+  private Charset charset;
+
+  public ReportFactory(Charset charset) {
+    this.charset = charset;
+  }
 
   public List<Reporter> createReporters(Path basePath) {
     List<Reporter> list = new LinkedList<>();
 
     list.add(new ConsoleReport());
-    list.add(new HtmlReport(getReportFile(basePath), new SourceProvider(StandardCharsets.UTF_8)));
+    list.add(new HtmlReport(getReportFile(basePath), new SourceProvider(charset)));
 
     return list;
   }

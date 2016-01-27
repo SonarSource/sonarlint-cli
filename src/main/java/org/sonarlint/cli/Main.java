@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 
@@ -134,7 +135,19 @@ public class Main {
       System.exit(ERROR);
     }
 
-    InputFileFinder fileFinder = new InputFileFinder(opts.src(), opts.tests());
+    Charset charset = null;
+    try {
+      if (opts.charset() != null) {
+        charset = Charset.forName(opts.charset());
+      } else {
+        charset = Charset.defaultCharset();
+      }
+    } catch (Exception e) {
+      logger.error("Error creating charset: " + opts.charset(), e);
+    }
+
+    InputFileFinder fileFinder = new InputFileFinder(opts.src(), opts.tests(), charset);
+    ReportFactory reportFactory = new ReportFactory(charset);
     SonarLint sonarlint = null;
     try {
       sonarlint = new SonarLint(opts, logger);
@@ -143,7 +156,7 @@ public class Main {
       System.exit(ERROR);
     }
 
-    int ret = new Main(opts, logger, sonarlint, new ReportFactory(), fileFinder).run();
+    int ret = new Main(opts, logger, sonarlint, reportFactory, fileFinder).run();
     System.exit(ret);
   }
 

@@ -22,8 +22,6 @@ package org.sonarlint.cli.report;
 import org.sonarlint.cli.util.HtmlEntities;
 import org.sonarlint.cli.util.Logger;
 
-import javax.annotation.CheckForNull;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -34,18 +32,19 @@ import java.util.List;
 
 public class SourceProvider {
   private final Logger logger = Logger.get();
-  private final Path basePath;
   private final Charset charset;
 
-  public SourceProvider(Path basePath, Charset charset) {
-    this.basePath = basePath;
+  public SourceProvider(Charset charset) {
     this.charset = charset;
   }
 
-  public List<String> getEscapedSource(String componentKey) {
+  public List<String> getEscapedSource(Path filePath) {
+    if (filePath == null) {
+      return Collections.emptyList();
+    }
+
     try {
-      Path filePath = getResource(componentKey);
-      if (filePath == null) {
+      if (!Files.isRegularFile(filePath)) {
         // invalid, directory, project issue, ...
         return Collections.emptyList();
       }
@@ -57,24 +56,8 @@ public class SourceProvider {
       }
       return escapedLines;
     } catch (IOException e) {
-      logger.error("Unable to read source code of resource: " + componentKey, e);
+      logger.error("Unable to read source code of resource: " + filePath, e);
       return Collections.emptyList();
     }
   }
-
-  @CheckForNull
-  private Path getResource(String componentKey) {
-    String[] split = componentKey.split(":");
-    if (split.length != 2) {
-      return null;
-    }
-
-    Path filePath = basePath.resolve(split[1]);
-    if (!Files.isRegularFile(filePath)) {
-      return null;
-    }
-
-    return filePath;
-  }
-
 }

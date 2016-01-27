@@ -20,6 +20,7 @@
 package org.sonarlint.cli.report;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -77,19 +78,23 @@ public class IssuesReport {
 
   public void addIssue(IssueListener.Issue issue) {
     Path filePath = issue.getFilePath();
-    ResourceReport report = getOrCreate(filePath != null ? filePath.toString() : "/");
+    if(filePath == null) {
+      // issue on project (no specific file)
+      filePath = Paths.get("");
+    }
+    ResourceReport report = getOrCreate(filePath);
     getSummary().addIssue(issue);
 
     report.addIssue(issue);
   }
 
-  private ResourceReport getOrCreate(String filePath) {
+  private ResourceReport getOrCreate(Path filePath) {
     ResourceReport report = resourceReportsByFilePath.get(filePath);
     if (report != null) {
       return report;
     }
     report = new ResourceReport(filePath);
-    resourceReportsByFilePath.put(filePath, new ResourceReport(filePath));
+    resourceReportsByFilePath.put(filePath.toString(), new ResourceReport(filePath));
     return report;
   }
 }

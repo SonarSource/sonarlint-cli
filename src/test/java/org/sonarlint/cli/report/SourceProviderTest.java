@@ -29,6 +29,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,31 +40,32 @@ public class SourceProviderTest {
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
   private SourceProvider sourceProvider;
+  private Path testFile;
 
   @Before
   public void setUp() throws IOException {
-    Path testFile = temp.newFile("test").toPath();
+    testFile = temp.newFile("test").toPath();
     String[] lines = {"line1<html>", "line2", "line3"};
 
     Files.write(testFile, Arrays.asList(lines), CHARSET);
-    sourceProvider = new SourceProvider(temp.getRoot().toPath(), CHARSET);
+    sourceProvider = new SourceProvider(CHARSET);
   }
 
   @Test
-  public void testFindFile() {
-    List<String> lines = sourceProvider.getEscapedSource("module1:test");
+  public void testFindFile() throws IOException {
+    List<String> lines = sourceProvider.getEscapedSource(testFile);
     assertThat(lines).hasSize(3);
   }
 
   @Test
   public void testInvalidFile() {
-    List<String> lines = sourceProvider.getEscapedSource("module1:testINVALID");
+    List<String> lines = sourceProvider.getEscapedSource(Paths.get("INVALID"));
     assertThat(lines).isEmpty();
   }
 
   @Test
-  public void testEscapeHtml() {
-    List<String> lines = sourceProvider.getEscapedSource("module1:test");
+  public void testEscapeHtml() throws IOException {
+    List<String> lines = sourceProvider.getEscapedSource(testFile);
     assertThat(lines.get(0)).isEqualTo("line1&lt;html&gt;");
   }
 }

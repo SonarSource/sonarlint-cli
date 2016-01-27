@@ -19,6 +19,7 @@
  */
 package org.sonarlint.cli.report;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -31,12 +32,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
 public class ResourceReportTest {
-  private final static String RESOURCE_ID = "resource";
+  private final static Path RESOURCE = Paths.get("resource");
   private ResourceReport resourceReport;
 
   @Before
   public void setUp() {
-    resourceReport = new ResourceReport(RESOURCE_ID);
+    resourceReport = new ResourceReport(RESOURCE);
   }
 
   @Test
@@ -51,7 +52,8 @@ public class ResourceReportTest {
     assertThat(resourceReport.getIssuesPerLine()).containsOnly(
       entry(i1.getStartLine(), Collections.singletonList(i1)),
       entry(i2.getStartLine(), Collections.singletonList(i2)));
-    assertThat(resourceReport.getName()).isEqualTo(RESOURCE_ID);
+    assertThat(resourceReport.getName()).isEqualTo("resource");
+    assertThat(resourceReport.getPath()).isEqualTo(RESOURCE);
   }
 
   @Test

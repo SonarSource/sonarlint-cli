@@ -37,7 +37,7 @@ public class ReportFactory {
     List<Reporter> list = new LinkedList<>();
 
     list.add(new ConsoleReport());
-    list.add(new HtmlReport(getReportFile(basePath), new SourceProvider(basePath, StandardCharsets.UTF_8)));
+    list.add(new HtmlReport(getReportFile(basePath), new SourceProvider(StandardCharsets.UTF_8)));
 
     return list;
   }

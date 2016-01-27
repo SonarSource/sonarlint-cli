@@ -12,7 +12,7 @@
       [
         <#assign issues=resourceReport.getIssues()>
         <#list issues as issue>
-          {'k': '${issue.getKey()}', 'r': 'R${issue.getRuleKey()}', 'l': ${(issue.getStartLine()!0)?c}, 'new': ${issue.isNew()?string}, 's': '${issue.getSeverity()?lower_case}'}<#if issue_has_next>,</#if>
+          {'r': 'R${issue.getRuleKey()}', 'l': ${(issue.getStartLine()!0)?c}, 's': '${issue.getSeverity()?lower_case}'}<#if issue_has_next>,</#if>
         </#list>
       ]
       <#if resourceReport_has_next>,</#if>
@@ -93,7 +93,7 @@
       }
       for (var resourceIndex = 0; resourceIndex < nbResources; resourceIndex++) {
         var filteredIssues = $.grep(issuesPerResource[resourceIndex], function(v) {
-              return (!onlyNewIssues || v['new']) && (ruleFilter == '' || v['r'] == ruleFilter || v['s'] == ruleFilter);
+              return (ruleFilter == '' || v['r'] == ruleFilter || v['s'] == ruleFilter);
             }
         );
 
@@ -288,7 +288,7 @@
       <tr>
         <td colspan="${colspan}">
           <table class="sources" border="0" cellpadding="0" cellspacing="0">
-            <#list sources.getEscapedSource(resourceReport.getResourceNode()) as line>
+            <#list sources.getEscapedSource(resourceReport.getPath()) as line>
               <#assign lineIndex=line_index+1>
               <#if resourceReport.isDisplayableLine(lineIndex)>
                 <tr id="${resourceReport_index?c}L${lineIndex?c}" class="row">

@@ -19,6 +19,7 @@
  */
 package org.sonarlint.cli.report;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,42 +30,37 @@ import org.sonarlint.cli.util.Function;
 import org.sonarlint.cli.util.MutableInt;
 import org.sonarsource.sonarlint.core.IssueListener;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+
 import static org.sonarlint.cli.util.Util.getOrCreate;
 
 public final class ResourceReport {
-  private final String filePath;
-  private final boolean project;
+  private final Path filePath;
   private final IssueVariation total = new IssueVariation();
   private final List<IssueListener.Issue> issues = new ArrayList<>();
 
   private final Map<IssueCategory, CategoryReport> reportByCategory = new HashMap<>();
-
   private final Map<Integer, List<IssueListener.Issue>> issuesPerLine = new HashMap<>();
-  private final Map<Integer, List<IssueListener.Issue>> newIssuesPerLine = new HashMap<>();
 
   private final Map<String, MutableInt> issuesByRule = new HashMap<>();
   private final Map<Severity, MutableInt> issuesBySeverity = new HashMap<>();
 
-  ResourceReport(String filePath) {
+  ResourceReport(@Nullable Path filePath) {
     this.filePath = filePath;
-    this.project = false;
   }
 
-  ResourceReport() {
-    this.filePath = "/";
-    this.project = true;
-  }
-
-  public String getResourceNode() {
+  @CheckForNull
+  public Path getPath() {
     return filePath;
   }
 
   public String getName() {
-    return filePath;
+    return filePath.getFileName().toString();
   }
 
   public String getType() {
-    if (project) {
+    if (filePath == null) {
       return "PRJ";
     } else {
       return "FIL";

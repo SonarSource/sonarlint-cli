@@ -34,6 +34,10 @@ public final class CategoryReport {
   public IssueCategory getCategory() {
     return category;
   }
+  
+  public String getName() {
+    return category.getName();
+  }
 
   public Severity getSeverity() {
     return category.getSeverity();

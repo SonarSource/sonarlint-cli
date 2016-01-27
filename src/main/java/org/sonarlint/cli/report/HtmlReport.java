@@ -32,6 +32,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +57,7 @@ public class HtmlReport implements Reporter {
     for (Issue i : issues) {
       report.addIssue(i);
     }
-    report.setTitle("title");
+    report.setTitle(projectName);
     report.setDate(date);
     print(report);
   }
@@ -72,7 +73,7 @@ public class HtmlReport implements Reporter {
     }
   }
 
-  public void writeToFile(IssuesReport report, Path toFile) {
+  private void writeToFile(IssuesReport report, Path toFile) {
     try {
       freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
       freemarker.template.Configuration cfg = new freemarker.template.Configuration();
@@ -98,8 +99,7 @@ public class HtmlReport implements Reporter {
     Path target = toDir.resolve("issuesreport_files");
     Files.createDirectories(target);
 
-    // I don't know how to extract a directory from classpath, that's why an exhaustive list of files
-    // is provided here :
+    // I don't know how to extract a directory from classpath, that's why an exhaustive list of files is provided here :
     copyDependency(target, "sonar.eot");
     copyDependency(target, "sonar.svg");
     copyDependency(target, "sonar.ttf");
@@ -117,7 +117,7 @@ public class HtmlReport implements Reporter {
   private void copyDependency(Path target, String filename) {
     String resource = "issuesreport_files/" + filename;
     try (InputStream in = getClass().getResourceAsStream(resource)) {
-      Files.copy(in, target.resolve(filename));
+      Files.copy(in, target.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
 
     } catch (IOException e) {
       throw new IllegalStateException("Fail to copy file " + filename + " to " + target, e);

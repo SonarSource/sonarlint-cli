@@ -78,13 +78,9 @@ public final class ResourceReport {
     return issuesPerLine;
   }
 
-  public List<Issue> getIssuesAtLine(int lineId, boolean all) {
-    if (all) {
-      if (issuesPerLine.containsKey(lineId)) {
-        return issuesPerLine.get(lineId);
-      }
-    } else if (newIssuesPerLine.containsKey(lineId)) {
-      return newIssuesPerLine.get(lineId);
+  public List<Issue> getIssuesAtLine(int lineId) {
+    if (issuesPerLine.containsKey(lineId)) {
+      return issuesPerLine.get(lineId);
     }
     return Collections.emptyList();
   }
@@ -92,7 +88,7 @@ public final class ResourceReport {
   public void addIssue(Issue issue) {
     Severity severity = Severity.create(issue.getSeverity());
     String ruleKey = issue.getRuleKey();
-    IssueCategory reportRuleKey = new IssueCategory(ruleKey, severity);
+    IssueCategory reportRuleKey = new IssueCategory(ruleKey, severity, issue.getRuleName());
 
     initMaps(reportRuleKey);
     issues.add(issue);
@@ -113,8 +109,8 @@ public final class ResourceReport {
     }
   }
 
-  public void addResolvedIssue(String ruleKey, Severity severity) {
-    IssueCategory reportRuleKey = new IssueCategory(ruleKey, severity);
+  public void addResolvedIssue(String ruleKey, Severity severity, String name) {
+    IssueCategory reportRuleKey = new IssueCategory(ruleKey, severity, name);
     initMaps(reportRuleKey);
     total.incrementResolvedIssuesCount();
     reportByCategory.get(reportRuleKey).getTotal().incrementResolvedIssuesCount();
@@ -126,25 +122,21 @@ public final class ResourceReport {
     }
   }
 
-  public boolean isDisplayableLine(Integer lineNumber, boolean all) {
+  public boolean isDisplayableLine(Integer lineNumber) {
     if (lineNumber == null || lineNumber < 1) {
       return false;
     }
     for (int i = lineNumber - 2; i <= lineNumber + 2; i++) {
-      if (hasIssues(i, all)) {
+      if (hasIssues(i)) {
         return true;
       }
     }
     return false;
   }
 
-  private boolean hasIssues(Integer lineId, boolean all) {
-    if (all) {
-      List<Issue> issuesAtLine = issuesPerLine.get(lineId);
-      return issuesAtLine != null && !issuesAtLine.isEmpty();
-    }
-    List<Issue> newIssuesAtLine = newIssuesPerLine.get(lineId);
-    return newIssuesAtLine != null && !newIssuesAtLine.isEmpty();
+  private boolean hasIssues(Integer lineId) {
+    List<Issue> issuesAtLine = issuesPerLine.get(lineId);
+    return issuesAtLine != null && !issuesAtLine.isEmpty();
   }
 
   public List<CategoryReport> getCategoryReports() {

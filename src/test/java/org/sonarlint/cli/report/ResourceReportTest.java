@@ -47,7 +47,7 @@ public class ResourceReportTest {
     resourceReport.addIssue(i2);
 
     assertThat(resourceReport.getIssues()).containsOnly(i1, i2);
-    assertThat(resourceReport.getIssuesAtLine(10, true)).containsExactly(i1);
+    assertThat(resourceReport.getIssuesAtLine(10)).containsExactly(i1);
     assertThat(resourceReport.getIssuesPerLine()).containsOnly(
       entry(i1.getStartLine(), Collections.singletonList(i1)),
       entry(i2.getStartLine(), Collections.singletonList(i2)));

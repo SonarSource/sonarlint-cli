@@ -12,9 +12,7 @@
       [
         <#assign issues=resourceReport.getIssues()>
         <#list issues as issue>
-          <#if complete || issue.isNew()>
-          {'k': '${issue.key()}', 'r': 'R${issue.getRuleKey()}', 'l': ${(issue.startLine()!0)?c}, 'new': ${issue.isNew()?string}, 's': '${issue.severity()?lower_case}'}<#if issue_has_next>,</#if>
-          </#if>
+          {'k': '${issue.getKey()}', 'r': 'R${issue.getRuleKey()}', 'l': ${(issue.getStartLine()!0)?c}, 'new': ${issue.isNew()?string}, 's': '${issue.getSeverity()?lower_case}'}<#if issue_has_next>,</#if>
         </#list>
       ]
       <#if resourceReport_has_next>,</#if>
@@ -125,7 +123,7 @@
     <#assign rules = report.getSummary().getTotalByRuleKey()>
        <#list rules?keys as ruleKey>
        { "key": "${ruleKey}",
-         "label": "${ruleNameProvider.nameForJS(ruleKey)}",
+         "label": "${ruleKey}",
          "total": ${rules[ruleKey].getCountInCurrentAnalysis()?c},
          "newtotal": ${rules[ruleKey].getNewIssuesCount()?c}
        }<#if ruleKey_has_next>,</#if>
@@ -176,7 +174,7 @@
     <tbody>
     <tr>
       <#assign size = '33'>
-      <td align="center" width="${size}%" class="all">
+      <td align="center" width="${size}%">
         <h3>Issues</h3>
         <#if report.getSummary().getTotal().getCountInCurrentAnalysis() gt 0>
           <span class="big worst">${report.getSummary().getTotal().getCountInCurrentAnalysis()?c}</span>
@@ -194,19 +192,19 @@
       <th colspan="2" align="left">
           Issues per Rule
       </th>
-      <th align="right" width="1%" nowrap class="all">Issues</th>
+      <th align="right" width="1%" nowrap>Issues</th>
     </tr>
     </thead>
     <tbody>
       <#list report.getSummary().getCategoryReports() as categoryReport>
-      <tr class="hoverable ${trCss}">
+      <tr class="hoverable">
         <td width="20">
           <i class="icon-severity-${categoryReport.getSeverity()?lower_case}"></i>
         </td>
         <td align="left">
-          ${categoryReport.getRuleKey()}
+          ${categoryReport.getName()?html}
         </td>
-        <td align="right" class="all">
+        <td align="right">
           <#if categoryReport.getTotal().getNewIssuesCount() gt 0>
             <span class="worst">${categoryReport.getTotal().getCountInCurrentAnalysis()?c}</span>
           <#else>
@@ -229,7 +227,8 @@
 
   <div id="summary-per-file">
   <#list report.getResourceReports() as resourceReport>
-  <table width="100%" class="data ${tableCss}" id="resource-${resourceReport_index?c}">
+  <#assign issueId=0>
+  <table width="100%" class="data" id="resource-${resourceReport_index?c}">
     <thead>
     <tr class="total">
       <th align="left" colspan="2" nowrap>
@@ -250,35 +249,35 @@
     </thead>
     <tbody class="resource-details-${resourceReport_index?c}">
     <#list resourceReport.getCategoryReports() as categoryReport>
-      <tr class="hoverable all">
+      <tr class="hoverable">
         <td width="20">
           <i class="icon-severity-${categoryReport.getSeverity()?lower_case}"></i>
         </td>
         <td align="left">
-          ${categoryReport.getRuleKey()}
+          ${categoryReport.getName()?html}
         </td>
-        <td align="right" class="all">
+        <td align="right">
           ${categoryReport.getTotal().getCountInCurrentAnalysis()?c}
         </td>
       </tr>
     </#list>
     <#assign colspan = '3'>
-    <#assign issues=resourceReport.getIssuesAtLine(0, true)>
+    <#assign issues=resourceReport.getIssuesAtLine(0)>
       <#if issues?has_content>
       <tr class="globalIssues">
         <td colspan="${colspan}">
           <#list issues as issue>
-            <div class="issue" id="${issue.key()}">
+            <div class="issue" id="${issue.getKey()}">
               <div class="vtitle">
-                <i class="icon-severity-${issue.severity()?lower_case}"></i>
+                <i class="icon-severity-${issue.getSeverity()?lower_case}"></i>
                 <#if issue.getMessage()?has_content>
                   <span class="rulename">${issue.getMessage()?html}</span>
                 <#else>
-                  <span class="rulename">${issue.getRuleKey()}</span>
+                  <span class="rulename">${issue.getRuleName()}</span>
                 </#if>
               </div>
               <div class="discussionComment">
-                ${issue.getRuleKey()}
+                ${issue.getRuleName()}
               </div>
             </div>
             <#assign issueId = issueId + 1>
@@ -291,7 +290,7 @@
           <table class="sources" border="0" cellpadding="0" cellspacing="0">
             <#list sources.getEscapedSource(resourceReport.getResourceNode()) as line>
               <#assign lineIndex=line_index+1>
-              <#if resourceReport.isDisplayableLine(lineIndex, complete)>
+              <#if resourceReport.isDisplayableLine(lineIndex)>
                 <tr id="${resourceReport_index?c}L${lineIndex?c}" class="row">
                   <td class="lid ">${lineIndex?c}</td>
                   <td class="line ">
@@ -301,23 +300,23 @@
                 <tr id="${resourceReport_index}S${lineIndex?c}" class="blockSep">
                   <td colspan="2"></td>
                 </tr>
-                <#assign issues=resourceReport.getIssuesAtLine(lineIndex, complete)>
+                <#assign issues=resourceReport.getIssuesAtLine(lineIndex)>
                 <#if issues?has_content>
                   <tr id="${resourceReport_index?c}LV${lineIndex?c}" class="row">
                     <td class="lid"></td>
                     <td class="issues">
                       <#list issues as issue>
-                        <div class="issue" id="${issue.key()}">
+                        <div class="issue" id="${issue.getKey()}">
                           <div class="vtitle">
-                            <i class="icon-severity-${issue.severity()?lower_case}"></i>
+                            <i class="icon-severity-${issue.getSeverity()?lower_case}"></i>
                             <#if issue.getMessage()?has_content>
                             <span class="rulename">${issue.getMessage()?html}</span>
                             <#else>
-                            <span class="rulename">${issue.getRuleKey()}</span>
+                            <span class="rulename">${issue.getRuleName()}</span>
                             </#if>
                           </div>
                           <div class="discussionComment">
-                            ${issue.getRuleKey()}
+                            ${issue.getRuleName()}
                           </div>
                         </div>
                         <#assign issueId = issueId + 1>

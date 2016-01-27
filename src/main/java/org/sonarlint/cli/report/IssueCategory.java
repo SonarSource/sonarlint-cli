@@ -28,14 +28,20 @@ import java.util.Objects;
 public class IssueCategory implements Comparable<IssueCategory> {
   private final String ruleKey;
   private final Severity severity;
+  private final String name;
 
-  IssueCategory(String ruleKey, Severity severity) {
+  IssueCategory(String ruleKey, Severity severity, String name) {
     this.ruleKey = ruleKey;
     this.severity = severity;
+    this.name = name;
   }
 
   public String getRuleKey() {
     return ruleKey;
+  }
+  
+  public String getName() {
+    return name;
   }
 
   public Severity getSeverity() {

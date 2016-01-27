@@ -77,6 +77,11 @@ public class ReportFactory {
     } catch (IOException e) {
       throw new IllegalStateException("Fail to create the directory " + reportDir, e);
     }
+
+    if (!reportName.contains(".")) {
+      reportName = reportName + ".html";
+    }
+
     return reportFileDir.resolve(reportName);
   }
 }

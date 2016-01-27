@@ -41,7 +41,7 @@ public class ReportSummary {
 
   public void addIssue(Issue issue) {
     Severity severity = Severity.create(issue.getSeverity());
-    IssueCategory category = new IssueCategory(issue.getRuleKey(), severity);
+    IssueCategory category = new IssueCategory(issue.getRuleKey(), severity, issue.getRuleName());
 
     IssueVariation byRuleKey = Util.getOrCreate(totalByRuleKey, issue.getRuleKey(), issueVariationFactory);
     CategoryReport byCategory = getOrCreate(reportByCategory, category);

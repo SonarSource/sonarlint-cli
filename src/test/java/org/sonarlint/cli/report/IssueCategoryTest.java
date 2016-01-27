@@ -26,17 +26,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class IssueCategoryTest {
   private final static String RULE_KEY = "key";
+  private final static String RULE_NAME = "key name";
   private final static Severity SEVERITY = Severity.MAJOR;
   private IssueCategory category;
 
   @Before
   public void setUp() {
-    category = new IssueCategory(RULE_KEY, SEVERITY);
+    category = new IssueCategory(RULE_KEY, SEVERITY, RULE_NAME);
   }
 
   @Test
   public void getters() {
     assertThat(category.getRuleKey()).isEqualTo(RULE_KEY);
     assertThat(category.getSeverity()).isEqualTo(SEVERITY);
+    assertThat(category.getName()).isEqualTo(RULE_NAME);
   }
 }

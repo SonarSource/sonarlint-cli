@@ -81,7 +81,7 @@ public class IssuesReport {
     getSummary().addIssue(issue);
 
     if (issue.getResolution() != null) {
-      report.addResolvedIssue(issue.getRuleKey(), severity);
+      report.addResolvedIssue(issue.getRuleKey(), severity, issue.getRuleName());
     } else {
       report.addIssue(issue);
     }

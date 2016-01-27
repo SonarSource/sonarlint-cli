@@ -77,10 +77,11 @@ public class ConsoleReportTest {
   }
 
   private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String severity, int line) {
-    return new IssueListener.Issue()
-      .setStartLine(line)
-      .setFilePath(Paths.get(filePath))
-      .setRuleKey(ruleKey)
-      .setSeverity(severity);
+    IssueListener.Issue issue = new IssueListener.Issue();
+    issue .setStartLine(line);
+    issue.setFilePath(Paths.get(filePath));
+    issue.setRuleKey(ruleKey);
+    issue.setSeverity(severity);
+    return issue;
   }
 }

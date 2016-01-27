@@ -22,12 +22,9 @@ package org.sonarlint.cli;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -47,8 +44,15 @@ import static org.sonarlint.cli.SonarProperties.PROJECT_HOME;
 public class SonarLint {
   private boolean running;
   private SonarLintClient client;
+  private Logger logger;
+  private Options opts;
 
   public SonarLint(Options opts, Logger logger) throws IOException {
+    this.opts = opts;
+    this.logger = logger;
+  }
+
+  private URL[] loadPlugins() throws IOException {
     String sonarlintHome = System.getProperty(SonarProperties.SONARLINT_HOME);
 
     Path sonarLintHomePath = Paths.get(sonarlintHome);
@@ -60,55 +64,44 @@ public class SonarLint {
         pluginsUrls.add(path.toUri().toURL());
       }
     }
-
-    this.client = SonarLintClient.builder()
-      .addPlugins(pluginsUrls.toArray(new URL[0]))
-      .setLogOutput(new DefaultLogOutput(logger))
-      .setVerbose(opts.isVerbose())
-      .build();
+    return pluginsUrls.toArray(new URL[pluginsUrls.size()]);
   }
 
   public void start() {
+    URL[] plugins;
+
+    try {
+      plugins = loadPlugins();
+    } catch (Exception e) {
+      throw new IllegalStateException("Error loading plugins", e);
+    }
+    client = SonarLintClient.builder()
+      .addPlugins(plugins)
+      .setLogOutput(new DefaultLogOutput(logger))
+      .setVerbose(opts.isVerbose())
+      .build();
     client.start();
     running = true;
   }
 
-  public void runAnalysis(Options opts, ReportFactory reportFactory) throws IOException {
+  public void runAnalysis(Options opts, ReportFactory reportFactory, InputFileFinder finder) throws IOException {
     Date start = new Date();
 
     String baseDir = System.getProperty(PROJECT_HOME);
 
     Path baseDirPath = Paths.get(baseDir);
-    final List<AnalysisConfiguration.InputFile> inputFiles = new ArrayList<>();
-    Files.walkFileTree(baseDirPath, new SimpleFileVisitor<Path>() {
-      @Override
-      public FileVisitResult visitFile(final Path file, BasicFileAttributes attrs) throws IOException {
-        inputFiles.add(new AnalysisConfiguration.InputFile() {
-          @Override
-          public Path path() {
-            return file;
-          }
-
-          @Override
-          public boolean isTest() {
-            // TODO
-            return false;
-          }
-        });
-        return super.visitFile(file, attrs);
-      }
-    });
+    List<AnalysisConfiguration.InputFile> inputFiles = finder.collect(baseDirPath);
 
     IssueCollector collector = new IssueCollector();
     client.analyze(new AnalysisConfiguration(baseDirPath, baseDirPath.resolve(".sonarlint"), inputFiles, toMap(opts.properties())), collector);
-    generateReports(collector.get(), reportFactory, baseDirPath.toString(), baseDir, start);
+    generateReports(collector.get(), reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);
   }
 
   private Map<String, String> toMap(Properties properties) {
-    return new HashMap<String, String>((Map) properties);
+    return new HashMap<>((Map) properties);
   }
 
-  private static void generateReports(List<IssueListener.Issue> issues, ReportFactory reportFactory, String projectName, String baseDir, Date date) {
+  private static void generateReports(List<IssueListener.Issue> issues, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
     List<Reporter> reporters = reportFactory.createReporters(baseDir);
 
     for (Reporter r : reporters) {

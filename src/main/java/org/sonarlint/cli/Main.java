@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarlint.cli.util.Logger;
 import org.sonarlint.cli.util.SystemInfo;
@@ -38,12 +39,14 @@ public class Main {
   private final ReportFactory reportFactory;
   private BufferedReader inputReader;
   private final SonarLint sonarlint;
+  private final InputFileFinder fileFinder;
 
-  public Main(Options opts, Logger logger, SonarLint sonarlint, ReportFactory reportFactory) {
+  public Main(Options opts, Logger logger, SonarLint sonarlint, ReportFactory reportFactory, InputFileFinder fileFinder) {
     this.opts = opts;
     this.logger = logger;
     this.sonarlint = sonarlint;
     this.reportFactory = reportFactory;
+    this.fileFinder = fileFinder;
   }
 
   public int run() {
@@ -57,8 +60,7 @@ public class Main {
       return SUCCESS;
     }
 
-    reportFactory.setDir(opts.reportDir());
-    reportFactory.setName(opts.reportName());
+    reportFactory.setHtmlPath(opts.htmlReport());
 
     logger.setDebugEnabled(opts.isVerbose());
     logger.setDisplayStackTrace(opts.showStack());
@@ -90,7 +92,7 @@ public class Main {
     if (!sonarlint.isRunning()) {
       sonarlint.start();
     }
-    sonarlint.runAnalysis(options, reportFactory);
+    sonarlint.runAnalysis(options, reportFactory, fileFinder);
     sonarlint.stop();
     displayExecutionResult(stats, "SUCCESS");
   }
@@ -101,7 +103,7 @@ public class Main {
       if (!sonarlint.isRunning()) {
         sonarlint.start();
       }
-      sonarlint.runAnalysis(options, reportFactory);
+      sonarlint.runAnalysis(options, reportFactory, fileFinder);
       displayExecutionResult(stats, "SUCCESS");
     } while (waitForUser());
 
@@ -132,6 +134,7 @@ public class Main {
       System.exit(ERROR);
     }
 
+    InputFileFinder fileFinder = new InputFileFinder(opts.src(), opts.tests());
     SonarLint sonarlint = null;
     try {
       sonarlint = new SonarLint(opts, logger);
@@ -140,7 +143,7 @@ public class Main {
       System.exit(ERROR);
     }
 
-    int ret = new Main(opts, logger, sonarlint, new ReportFactory()).run();
+    int ret = new Main(opts, logger, sonarlint, new ReportFactory(), fileFinder).run();
     System.exit(ret);
   }
 

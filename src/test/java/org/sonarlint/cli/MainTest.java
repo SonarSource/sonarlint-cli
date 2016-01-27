@@ -47,6 +47,7 @@ public class MainTest {
   private Main main;
   private SonarLint sonarLint;
   private ReportFactory reportFactory;
+  private InputFileFinder fileFinder;
   private Options opts;
   private ByteArrayOutputStream out;
   private ByteArrayOutputStream err;
@@ -58,7 +59,8 @@ public class MainTest {
     when(opts.properties()).thenReturn(new Properties());
     createLogger();
     sonarLint = mock(SonarLint.class);
-    main = new Main(opts, Logger.get(), sonarLint, reportFactory);
+    fileFinder = new InputFileFinder(null, null);
+    main = new Main(opts, Logger.get(), sonarLint, reportFactory, fileFinder);
   }
 
   private Logger createLogger() {
@@ -129,7 +131,7 @@ public class MainTest {
 
     assertThat(mutableInt.get()).isEqualTo(Main.SUCCESS);
     verify(sonarLint, times(1)).stop();
-    verify(sonarLint, times(2)).runAnalysis(any(Options.class), eq(reportFactory));
+    verify(sonarLint, times(2)).runAnalysis(any(Options.class), eq(reportFactory), eq(fileFinder));
   }
 
   @Test
@@ -154,7 +156,7 @@ public class MainTest {
   @Test
   public void errorAnalysis() throws IOException {
     Exception e = createException("invalid operation", "analysis failed");
-    doThrow(e).when(sonarLint).runAnalysis(any(Options.class), eq(reportFactory));
+    doThrow(e).when(sonarLint).runAnalysis(any(Options.class), eq(reportFactory), eq(fileFinder));
     assertThat(main.run()).isEqualTo(Main.ERROR);
     assertThat(getLogs(out)).contains("EXECUTION FAILURE");
     assertThat(getLogs(err)).contains("invalid operation");

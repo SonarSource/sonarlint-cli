@@ -22,6 +22,7 @@ package org.sonarlint.cli.report;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +37,7 @@ public class ReportFactoryTest {
 
   @Test
   public void test() {
-    List<Reporter> reporters = factory.createReporters("test");
+    List<Reporter> reporters = factory.createReporters(Paths.get("test"));
     assertThat(reporters).hasSize(2);
   }
 }

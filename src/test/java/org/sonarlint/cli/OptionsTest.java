@@ -43,10 +43,17 @@ public class OptionsTest {
   
   @Test
   public void testReport() throws ParseException {
-    Options opt = Options.parse(args("--report-dir", "mydir", "--report-name", "myname"));
+    Options opt = Options.parse(args("--html-report", "myreport"));
     
-    assertThat(opt.reportDir()).isEqualTo("mydir");
-    assertThat(opt.reportName()).isEqualTo("myname");
+    assertThat(opt.htmlReport()).isEqualTo("myreport");
+  }
+  
+  @Test
+  public void testGlobs() throws ParseException {
+    Options opt = Options.parse(args("--src", "source", "--tests", "tests"));
+    
+    assertThat(opt.src()).isEqualTo("source");
+    assertThat(opt.tests()).isEqualTo("tests");
   }
 
   @Test
@@ -98,7 +105,7 @@ public class OptionsTest {
   @Test
   public void testArgMissing() throws ParseException {
     exception.expect(ParseException.class);
-    exception.expectMessage("Missing argument for option --define");
+    exception.expectMessage("Missing argument for option -D");
     Options.parse(args("-D"));
   }
 

@@ -31,8 +31,9 @@ public class Options {
   private boolean version = false;
   private boolean showStack = false;
   private boolean interactive = false;
-  private String reportDir = null;
-  private String reportName = null;
+  private String htmlReport = null;
+  private String src = null;
+  private String tests = null;
   private String task;
 
   public static Options parse(String[] args) throws ParseException {
@@ -58,24 +59,31 @@ public class Options {
       } else if ("-X".equals(arg) || "--debug".equals(arg)) {
         options.verbose = true;
 
-      } else if ("--report-dir".equals(arg)) {
+      } else if ("--html-report".equals(arg)) {
         i++;
         if (i >= args.length) {
-          throw new ParseException("Missing argument for option --report-dir", i);
+          throw new ParseException("Missing argument for option " + arg, i);
         }
-        options.reportDir = args[i];
+        options.htmlReport = args[i];
 
-      } else if ("--report-name".equals(arg)) {
+      } else if ("--src".equals(arg)) {
         i++;
         if (i >= args.length) {
-          throw new ParseException("Missing argument for option --report-name", i);
+          throw new ParseException("Missing argument for option " + arg, i);
         }
-        options.reportName = args[i];
+        options.src = args[i];
+
+      } else if ("--tests".equals(arg)) {
+        i++;
+        if (i >= args.length) {
+          throw new ParseException("Missing argument for option " + arg, i);
+        }
+        options.tests = args[i];
 
       } else if ("-D".equals(arg) || "--define".equals(arg)) {
         i++;
         if (i >= args.length) {
-          throw new ParseException("Missing argument for option --define", i);
+          throw new ParseException("Missing argument for option " + arg, i);
         }
         arg = args[i];
         appendPropertyTo(arg, options.props);
@@ -104,12 +112,16 @@ public class Options {
     return help;
   }
 
-  public String reportName() {
-    return reportName;
+  public String htmlReport() {
+    return htmlReport;
   }
 
-  public String reportDir() {
-    return reportDir;
+  public String src() {
+    return src;
+  }
+
+  public String tests() {
+    return tests;
   }
 
   public boolean isVersion() {
@@ -140,8 +152,9 @@ public class Options {
     logger.info(" -v,--version          Display version information");
     logger.info(" -X,--debug            Produce execution debug output");
     logger.info(" -i,--interactive      Run interactively");
-    logger.info(" --report-dir <dir>    Report output directory");
-    logger.info(" --report-name <name>  Report output name");
+    logger.info(" --html-report <path>  HTML report output path (relative or absolute)");
+    logger.info(" --src <glob pattern>  GLOB pattern to identify source files");
+    logger.info(" --tests <glob pattern> GLOB pattern to identify test files");
   }
 
   private static void appendPropertyTo(String arg, Properties props) {

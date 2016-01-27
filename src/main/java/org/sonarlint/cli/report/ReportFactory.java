@@ -19,8 +19,6 @@
  */
 package org.sonarlint.cli.report;
 
-import org.sonarlint.cli.util.Logger;
-
 import javax.annotation.Nullable;
 
 import java.io.IOException;
@@ -32,56 +30,41 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ReportFactory {
-  private static final String DEFAULT_REPORT_NAME = "issues-report";
-  private Logger logger = Logger.get();
+  private static final String DEFAULT_REPORT_NAME = "issues-report.html";
+  private String htmlPath = null;
 
-  private String reportName = null;
-  private String reportDir = null;
-
-  public List<Reporter> createReporters(String workDir) {
+  public List<Reporter> createReporters(Path basePath) {
     List<Reporter> list = new LinkedList<>();
-    Path basePath = Paths.get(workDir);
 
     list.add(new ConsoleReport());
-    list.add(new HtmlReport(getReportFile(workDir), new SourceProvider(basePath, StandardCharsets.UTF_8)));
+    list.add(new HtmlReport(getReportFile(basePath), new SourceProvider(basePath, StandardCharsets.UTF_8)));
 
     return list;
   }
 
-  public void setDir(@Nullable String dir) {
-    reportDir = dir;
+  public void setHtmlPath(@Nullable String path) {
+    htmlPath = path;
   }
 
-  public void setName(@Nullable String name) {
-    reportName = name;
-  }
+  private Path getReportFile(Path basePath) {
+    Path reportPath;
 
-  private Path getReportFile(String workDir) {
-    if (reportDir == null) {
-      reportDir = workDir;
-    }
-    if (reportName == null) {
-      reportName = DEFAULT_REPORT_NAME;
+    if (htmlPath != null) {
+      reportPath = Paths.get(htmlPath);
+
+      if (!reportPath.isAbsolute()) {
+        reportPath = basePath.resolve(reportPath).toAbsolutePath();
+      }
+    } else {
+      reportPath = basePath.resolve(DEFAULT_REPORT_NAME);
     }
 
-    Path reportFileDir = Paths.get(reportDir);
-    if (!reportFileDir.isAbsolute()) {
-      reportFileDir = Paths.get(workDir, reportDir);
-    }
-    if (reportDir.endsWith(".html")) {
-      logger.warn("'" + reportDir + "' should indicate a directory. Using parent folder.");
-      reportFileDir = reportFileDir.getParent();
-    }
     try {
-      Files.createDirectories(reportFileDir);
+      Files.createDirectories(reportPath.getParent());
     } catch (IOException e) {
-      throw new IllegalStateException("Fail to create the directory " + reportDir, e);
+      throw new IllegalStateException("Fail to create the directory " + reportPath.getParent(), e);
     }
 
-    if (!reportName.contains(".")) {
-      reportName = reportName + ".html";
-    }
-
-    return reportFileDir.resolve(reportName);
+    return reportPath;
   }
 }

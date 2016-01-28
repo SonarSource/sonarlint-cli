@@ -20,6 +20,7 @@
 package org.sonarlint.cli.report;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -61,7 +62,7 @@ public final class ResourceReport {
   }
 
   public String getType() {
-    if (filePath == null) {
+    if (filePath == null || filePath == Paths.get("")) {
       return "PRJ";
     } else {
       return "FIL";

@@ -89,13 +89,25 @@ public class ConsoleReport implements Reporter {
     if (result.fileCount() == 0) {
       sb.append("  No files analyzed\n");
     } else if (r.hasNoIssues()) {
-      sb.append("  No issues to display (").append(result.fileCount()).append(" files analyzed)\n");
+      sb.append("  No issues to display ");
+      filesAnalyzed(sb, result.fileCount());
+      sb.append("\n");
     } else {
       printIssues(r, sb, result.fileCount());
     }
     sb.append("\n-------------------------------------------\n\n");
 
     LOGGER.info(sb.toString());
+  }
+
+  private static void filesAnalyzed(StringBuilder sb, int num) {
+    sb.append("(").append(num);
+    if (num > 1) {
+      sb.append(" files analyzed");
+    } else {
+      sb.append(" file analyzed");
+    }
+    sb.append(")");
   }
 
   private void printIssues(Report r, StringBuilder sb, int filesAnalyzed) {
@@ -106,7 +118,8 @@ public class ConsoleReport implements Reporter {
       sb.append("s");
     }
 
-    sb.append(" (").append(filesAnalyzed).append(" files analyzed)\n\n");
+    filesAnalyzed(sb, filesAnalyzed);
+    sb.append("\n\n");
     printIssues(sb, r.blockerIssues, "blocker");
     printIssues(sb, r.criticalIssues, "critical");
     printIssues(sb, r.majorIssues, "major");

@@ -10,6 +10,7 @@ script: ./travis.sh
 env:
   matrix:
     - TARGET=CI
+    - TARGET=IT
 
 cache:
   directories:

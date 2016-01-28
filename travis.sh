@@ -53,6 +53,17 @@ CI)
   fi
   ;;
 
+IT)
+  strongEcho 'Build and run ITs'
+  # Build branch and run ITs, without any analysis
+
+  # Install in local maven repository so that ITs find the artifact
+  mvn install -DskipTests -B -e -V
+  sonarlintVersion=mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -Ev '(^\[|Download\w+:)'
+
+  # Run ITs
+  cd it
+  mvn test -Dsonarlint.version=${sonarlintVersion} -B -e -V
 
 *)
   echo "Unexpected TARGET value: $TARGET"

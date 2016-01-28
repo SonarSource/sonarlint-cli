@@ -34,7 +34,7 @@ public class Options {
   private boolean interactive = false;
   private String htmlReport = null;
   private String src = null;
-  private String tests = null;
+  private String tests = "";
   private String charset = null;
   private String task;
 

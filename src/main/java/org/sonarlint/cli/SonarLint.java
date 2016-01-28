@@ -92,6 +92,13 @@ public class SonarLint {
     Path baseDirPath = Paths.get(baseDir);
     List<AnalysisConfiguration.InputFile> inputFiles = finder.collect(baseDirPath);
 
+    if (inputFiles.isEmpty()) {
+      LOGGER.warn("No files to analyze");
+      return;
+    } else {
+      LOGGER.debug(String.format("Submitting %d files for analysis", inputFiles.size()));
+    }
+
     IssueCollector collector = new IssueCollector();
     AnalysisResults result = client.analyze(new AnalysisConfiguration(baseDirPath, baseDirPath.resolve(".sonarlint"), inputFiles, toMap(opts.properties())), collector);
     generateReports(collector.get(), result, reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);

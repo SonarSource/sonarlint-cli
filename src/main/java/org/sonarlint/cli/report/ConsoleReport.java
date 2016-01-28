@@ -27,8 +27,7 @@ import org.sonarsource.sonarlint.core.IssueListener;
 public class ConsoleReport implements Reporter {
 
   public static final String HEADER = "-------------  Issues Report  -------------";
-
-  private final Logger logger = Logger.get();
+  private static final Logger LOGGER = Logger.get();
 
   public static final String CONSOLE_REPORT_ENABLED_KEY = "sonar.issuesReport.console.enable";
   private static final int LEFT_PAD = 10;
@@ -93,7 +92,7 @@ public class ConsoleReport implements Reporter {
     }
     sb.append("\n-------------------------------------------\n\n");
 
-    logger.info(sb.toString());
+    LOGGER.info(sb.toString());
   }
 
   private void printIssues(Report r, StringBuilder sb) {

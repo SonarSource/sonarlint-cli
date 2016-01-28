@@ -22,7 +22,7 @@ package org.sonarlint.cli;
 import org.sonarlint.cli.util.Logger;
 
 class Stats {
-  private final Logger logger = Logger.get();
+  private static final Logger LOGGER = Logger.get();
   private long startTime;
 
   Stats start() {
@@ -32,12 +32,12 @@ class Stats {
 
   Stats stop() {
     long stopTime = System.currentTimeMillis() - startTime;
-    logger.info("Total time: " + formatTime(stopTime));
+    LOGGER.info("Total time: " + formatTime(stopTime));
 
     System.gc();
     Runtime r = Runtime.getRuntime();
     long mb = 1024L * 1024;
-    logger.info("Final Memory: " + (r.totalMemory() - r.freeMemory()) / mb + "M/" + r.totalMemory() / mb + "M");
+    LOGGER.info("Final Memory: " + (r.totalMemory() - r.freeMemory()) / mb + "M/" + r.totalMemory() / mb + "M");
 
     return this;
   }

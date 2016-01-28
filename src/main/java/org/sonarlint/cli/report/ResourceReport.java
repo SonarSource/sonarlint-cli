@@ -22,6 +22,7 @@ package org.sonarlint.cli.report;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,7 +45,7 @@ public final class ResourceReport {
   private final Map<Integer, List<IssueListener.Issue>> issuesPerLine = new HashMap<>();
 
   private final Map<String, MutableInt> issuesByRule = new HashMap<>();
-  private final Map<Severity, MutableInt> issuesBySeverity = new HashMap<>();
+  private final EnumMap<Severity, MutableInt> issuesBySeverity = new EnumMap<>(Severity.class);
 
   ResourceReport(@Nullable Path filePath) {
     this.filePath = filePath;

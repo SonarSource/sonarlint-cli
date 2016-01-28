@@ -35,16 +35,16 @@ public class Main {
   static final int SUCCESS = 0;
   static final int ERROR = 1;
 
+  private static final Logger LOGGER = Logger.get();
+  
   private final Options opts;
-  private final Logger logger;
   private final ReportFactory reportFactory;
   private BufferedReader inputReader;
   private final SonarLint sonarlint;
   private final InputFileFinder fileFinder;
 
-  public Main(Options opts, Logger logger, SonarLint sonarlint, ReportFactory reportFactory, InputFileFinder fileFinder) {
+  public Main(Options opts, SonarLint sonarlint, ReportFactory reportFactory, InputFileFinder fileFinder) {
     this.opts = opts;
-    this.logger = logger;
     this.sonarlint = sonarlint;
     this.reportFactory = reportFactory;
     this.fileFinder = fileFinder;
@@ -63,13 +63,13 @@ public class Main {
 
     reportFactory.setHtmlPath(opts.htmlReport());
 
-    logger.setDebugEnabled(opts.isVerbose());
-    logger.setDisplayStackTrace(opts.showStack());
+    LOGGER.setDebugEnabled(opts.isVerbose());
+    LOGGER.setDisplayStackTrace(opts.showStack());
 
-    SystemInfo.print(logger);
+    SystemInfo.print(LOGGER);
 
     if (opts.showStack()) {
-      logger.info("Error stacktraces are turned on.");
+      LOGGER.info("Error stacktraces are turned on.");
     }
 
     Stats stats = new Stats();
@@ -115,8 +115,8 @@ public class Main {
     if (inputReader == null) {
       inputReader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
     }
-    logger.info("");
-    logger.info("<Press enter to restart analysis or Ctrl+C to exit the interactive mode>");
+    LOGGER.info("");
+    LOGGER.info("<Press enter to restart analysis or Ctrl+C to exit the interactive mode>");
     String line = inputReader.readLine();
     return line != null;
   }
@@ -126,12 +126,11 @@ public class Main {
   }
 
   public static void main(String[] args) {
-    Logger logger = Logger.get();
     Options opts = null;
     try {
       opts = Options.parse(args);
     } catch (ParseException e) {
-      logger.error("Error parsing arguments", e);
+      LOGGER.error("Error parsing arguments", e);
       System.exit(ERROR);
     }
 
@@ -143,53 +142,53 @@ public class Main {
         charset = Charset.defaultCharset();
       }
     } catch (Exception e) {
-      logger.error("Error creating charset: " + opts.charset(), e);
+      LOGGER.error("Error creating charset: " + opts.charset(), e);
     }
 
     InputFileFinder fileFinder = new InputFileFinder(opts.src(), opts.tests(), charset);
     ReportFactory reportFactory = new ReportFactory(charset);
     SonarLint sonarlint = null;
     try {
-      sonarlint = new SonarLint(opts, logger);
+      sonarlint = new SonarLint(opts);
     } catch (IOException e) {
-      logger.error("Error loading plugins", e);
+      LOGGER.error("Error loading plugins", e);
       System.exit(ERROR);
     }
 
-    int ret = new Main(opts, logger, sonarlint, reportFactory, fileFinder).run();
+    int ret = new Main(opts, sonarlint, reportFactory, fileFinder).run();
     System.exit(ret);
   }
 
   private void displayExecutionResult(Stats stats, String resultMsg) {
     String dashes = "------------------------------------------------------------------------";
-    logger.info(dashes);
-    logger.info("EXECUTION " + resultMsg);
-    logger.info(dashes);
+    LOGGER.info(dashes);
+    LOGGER.info("EXECUTION " + resultMsg);
+    LOGGER.info(dashes);
     stats.stop();
-    logger.info(dashes);
+    LOGGER.info(dashes);
   }
 
   private void showError(String message, Throwable e, boolean showStackTrace, boolean debug) {
     if (showStackTrace) {
-      logger.error(message, e);
+      LOGGER.error(message, e);
       if (!debug) {
-        logger.error("");
+        LOGGER.error("");
         suggestDebugMode();
       }
     } else {
-      logger.error(message);
+      LOGGER.error(message);
       if (e != null) {
-        logger.error(e.getMessage());
+        LOGGER.error(e.getMessage());
         String previousMsg = "";
         for (Throwable cause = e.getCause(); cause != null
           && cause.getMessage() != null
           && !cause.getMessage().equals(previousMsg); cause = cause.getCause()) {
-          logger.error("Caused by: " + cause.getMessage());
+          LOGGER.error("Caused by: " + cause.getMessage());
           previousMsg = cause.getMessage();
         }
       }
-      logger.error("");
-      logger.error("To see the full stack trace of the errors, re-run SonarLint with the -e switch.");
+      LOGGER.error("");
+      LOGGER.error("To see the full stack trace of the errors, re-run SonarLint with the -e switch.");
       if (!debug) {
         suggestDebugMode();
       }
@@ -197,6 +196,6 @@ public class Main {
   }
 
   private void suggestDebugMode() {
-    logger.error("Re-run SonarLint using the -X switch to enable full debug logging.");
+    LOGGER.error("Re-run SonarLint using the -X switch to enable full debug logging.");
   }
 }

@@ -60,52 +60,46 @@ public class Options {
       } else if ("-X".equals(arg) || "--debug".equals(arg)) {
         options.verbose = true;
 
-      } else if ("--html-report".equals(arg)) {
-        i++;
-        if (i >= args.length) {
-          throw new ParseException("Missing argument for option " + arg, i);
-        }
-        options.htmlReport = args[i];
-
-      } else if ("--charset".equals(arg)) {
-        i++;
-        if (i >= args.length) {
-          throw new ParseException("Missing argument for option " + arg, i);
-        }
-        options.charset = args[i];
-
-      } else if ("--src".equals(arg)) {
-        i++;
-        if (i >= args.length) {
-          throw new ParseException("Missing argument for option " + arg, i);
-        }
-        options.src = args[i];
-
-      } else if ("--tests".equals(arg)) {
-        i++;
-        if (i >= args.length) {
-          throw new ParseException("Missing argument for option " + arg, i);
-        }
-        options.tests = args[i];
-
-      } else if ("-D".equals(arg) || "--define".equals(arg)) {
-        i++;
-        if (i >= args.length) {
-          throw new ParseException("Missing argument for option " + arg, i);
-        }
-        arg = args[i];
-        appendPropertyTo(arg, options.props);
-
-      } else if (arg.startsWith("-D")) {
+      } else if (arg.startsWith("-D") && !"-D".equals(arg)) {
         arg = arg.substring(2);
         appendPropertyTo(arg, options.props);
 
       } else {
-        throw new ParseException("Unrecognized option: " + arg, i);
+        i++;
+
+        if ("--html-report".equals(arg)) {
+          checkAdditionalArg(i, args.length, arg);
+          options.htmlReport = args[i];
+
+        } else if ("--charset".equals(arg)) {
+          checkAdditionalArg(i, args.length, arg);
+          options.charset = args[i];
+
+        } else if ("--src".equals(arg)) {
+          checkAdditionalArg(i, args.length, arg);
+          options.src = args[i];
+
+        } else if ("--tests".equals(arg)) {
+          checkAdditionalArg(i, args.length, arg);
+          options.tests = args[i];
+
+        } else if ("-D".equals(arg) || "--define".equals(arg)) {
+          checkAdditionalArg(i, args.length, arg);
+          appendPropertyTo(args[i], options.props);
+
+        } else {
+          throw new ParseException("Unrecognized option: " + arg, i);
+        }
       }
     }
 
     return options;
+  }
+
+  private static void checkAdditionalArg(int i, int argsLength, String arg) throws ParseException {
+    if (i >= argsLength) {
+      throw new ParseException("Missing argument for option " + arg, i);
+    }
   }
 
   public boolean isVerbose() {
@@ -171,7 +165,9 @@ public class Options {
   }
 
   private static void appendPropertyTo(String arg, Properties props) {
-    final String key, value;
+    final String key;
+    final String value;
+
     int j = arg.indexOf('=');
     if (j == -1) {
       key = arg;

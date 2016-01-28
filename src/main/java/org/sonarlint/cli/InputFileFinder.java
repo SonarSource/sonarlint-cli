@@ -37,14 +37,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InputFileFinder {
-  private final Logger logger;
+  private static final Logger LOGGER = Logger.get();
   private final PathMatcher srcMatcher;
   private final PathMatcher testsMatcher;
   private final Charset charset;
 
   public InputFileFinder(@Nullable String srcGlobPattern, @Nullable String testsGlobPattern, Charset charset) {
     this.charset = charset;
-    this.logger = Logger.get();
 
     try {
       if (srcGlobPattern != null) {
@@ -53,7 +52,7 @@ public class InputFileFinder {
         srcMatcher = acceptAll;
       }
     } catch (Exception e) {
-      logger.error("Error creating matcher with pattern: " + srcGlobPattern);
+      LOGGER.error("Error creating matcher with pattern: " + srcGlobPattern);
       throw e;
     }
 
@@ -64,7 +63,7 @@ public class InputFileFinder {
         testsMatcher = refuseAll;
       }
     } catch (Exception e) {
-      logger.error("Error creating matcher with pattern: " + testsGlobPattern);
+      LOGGER.error("Error creating matcher with pattern: " + testsGlobPattern);
       throw e;
     }
   }

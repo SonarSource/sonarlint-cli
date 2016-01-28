@@ -42,17 +42,16 @@ import org.sonarsource.sonarlint.core.SonarLintClient;
 import static org.sonarlint.cli.SonarProperties.PROJECT_HOME;
 
 public class SonarLint {
+  private static final Logger LOGGER = Logger.get();
   private boolean running;
   private SonarLintClient client;
-  private Logger logger;
   private Options opts;
 
-  public SonarLint(Options opts, Logger logger) throws IOException {
+  public SonarLint(Options opts) throws IOException {
     this.opts = opts;
-    this.logger = logger;
   }
 
-  private URL[] loadPlugins() throws IOException {
+  private static URL[] loadPlugins() throws IOException {
     String sonarlintHome = System.getProperty(SonarProperties.SONARLINT_HOME);
 
     Path sonarLintHomePath = Paths.get(sonarlintHome);
@@ -77,7 +76,7 @@ public class SonarLint {
     }
     client = SonarLintClient.builder()
       .addPlugins(plugins)
-      .setLogOutput(new DefaultLogOutput(logger))
+      .setLogOutput(new DefaultLogOutput(LOGGER))
       .setVerbose(opts.isVerbose())
       .build();
     client.start();
@@ -97,7 +96,7 @@ public class SonarLint {
     generateReports(collector.get(), reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);
   }
 
-  private Map<String, String> toMap(Properties properties) {
+  private static Map<String, String> toMap(Properties properties) {
     return new HashMap<>((Map) properties);
   }
 

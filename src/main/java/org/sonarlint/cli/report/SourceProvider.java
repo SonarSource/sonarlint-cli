@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class SourceProvider {
-  private final Logger logger = Logger.get();
+  private static final Logger LOGGER = Logger.get();
   private final Charset charset;
 
   public SourceProvider(Charset charset) {
@@ -56,7 +56,7 @@ public class SourceProvider {
       }
       return escapedLines;
     } catch (IOException e) {
-      logger.error("Unable to read source code of resource: " + filePath, e);
+      LOGGER.error("Unable to read source code of resource: " + filePath, e);
       return Collections.emptyList();
     }
   }

@@ -58,19 +58,18 @@ public class MainTest {
     opts = mock(Options.class);
     reportFactory = mock(ReportFactory.class);
     when(opts.properties()).thenReturn(new Properties());
-    createLogger();
+    setUpLogger();
     sonarLint = mock(SonarLint.class);
     fileFinder = new InputFileFinder(null, null, Charset.defaultCharset());
-    main = new Main(opts, Logger.get(), sonarLint, reportFactory, fileFinder);
+    main = new Main(opts, sonarLint, reportFactory, fileFinder);
   }
 
-  private Logger createLogger() {
+  private void setUpLogger() {
     out = new ByteArrayOutputStream();
     PrintStream outStream = new PrintStream(out);
     err = new ByteArrayOutputStream();
     PrintStream errStream = new PrintStream(err);
     Logger.set(outStream, errStream);
-    return Logger.get();
   }
 
   private String getLogs(ByteArrayOutputStream stream) {

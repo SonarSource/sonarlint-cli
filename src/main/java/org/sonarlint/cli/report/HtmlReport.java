@@ -38,7 +38,7 @@ import org.sonarlint.cli.util.Logger;
 import org.sonarsource.sonarlint.core.IssueListener;
 
 public class HtmlReport implements Reporter {
-  private final Logger logger;
+  private static final Logger LOGGER = Logger.get();
   private final Path reportFile;
   private final Path reportDir;
   private final SourceProvider sourceProvider;
@@ -47,7 +47,6 @@ public class HtmlReport implements Reporter {
     this.sourceProvider = sourceProvider;
     this.reportDir = reportFile.getParent().toAbsolutePath();
     this.reportFile = reportFile.toAbsolutePath();
-    this.logger = Logger.get();
   }
 
   @Override
@@ -62,9 +61,9 @@ public class HtmlReport implements Reporter {
   }
 
   public void print(IssuesReport report) {
-    logger.debug("Generating HTML Report to: " + reportFile);
+    LOGGER.debug("Generating HTML Report to: " + reportFile);
     writeToFile(report, reportFile);
-    logger.info("HTML Issues Report generated: " + reportFile);
+    LOGGER.info("HTML Issues Report generated: " + reportFile);
     try {
       copyDependencies(reportDir);
     } catch (Exception e) {

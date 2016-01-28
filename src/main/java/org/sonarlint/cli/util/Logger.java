@@ -22,26 +22,32 @@ package org.sonarlint.cli.util;
 import java.io.PrintStream;
 
 public class Logger {
-  private static Logger defaultLogger;
+  private static Logger instance;
   private boolean debugEnabled = false;
   private boolean displayStackTrace = false;
   private PrintStream stdOut;
   private PrintStream stdErr;
 
+  private Logger() {
+    this.stdErr = System.err;
+    this.stdOut = System.out;
+  }
+  
   public Logger(PrintStream stdOut, PrintStream stdErr) {
     this.stdErr = stdErr;
     this.stdOut = stdOut;
   }
 
   public static Logger get() {
-    if (defaultLogger == null) {
-      defaultLogger = new Logger(System.out, System.err);
+    if (instance == null) {
+      instance = new Logger();
     }
-    return defaultLogger;
+    return instance;
   }
 
   public static void set(PrintStream stdOut, PrintStream stdErr) {
-    defaultLogger = new Logger(stdOut, stdErr);
+    get().stdOut = stdOut;
+    get().stdErr = stdErr;
   }
 
   public void setDebugEnabled(boolean debugEnabled) {

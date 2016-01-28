@@ -33,6 +33,7 @@ public class IssuesReport {
   public static final int TOO_MANY_ISSUES_THRESHOLD = 1000;
   private String title;
   private Date date;
+  private int filesAnalyzed;
   private final ReportSummary summary = new ReportSummary();
   private final Map<String, ResourceReport> resourceReportsByFilePath = new HashMap<>();
 
@@ -46,6 +47,18 @@ public class IssuesReport {
 
   public ReportSummary getSummary() {
     return summary;
+  }
+
+  public boolean noFiles() {
+    return filesAnalyzed == 0;
+  }
+
+  public int getFilesAnalyzed() {
+    return filesAnalyzed;
+  }
+
+  public void setFilesAnalyzed(int num) {
+    this.filesAnalyzed = num;
   }
 
   public String getTitle() {
@@ -78,7 +91,7 @@ public class IssuesReport {
 
   public void addIssue(IssueListener.Issue issue) {
     Path filePath = issue.getFilePath();
-    if(filePath == null) {
+    if (filePath == null) {
       // issue on project (no specific file)
       filePath = Paths.get("");
     }

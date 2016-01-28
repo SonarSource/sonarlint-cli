@@ -22,6 +22,7 @@ package org.sonarlint.cli.report;
 import java.util.Date;
 import java.util.List;
 import org.sonarlint.cli.util.Logger;
+import org.sonarsource.sonarlint.core.AnalysisResults;
 import org.sonarsource.sonarlint.core.IssueListener;
 
 public class ConsoleReport implements Reporter {
@@ -73,40 +74,44 @@ public class ConsoleReport implements Reporter {
   }
 
   @Override
-  public void execute(String projectName, Date date, List<IssueListener.Issue> issues) {
+  public void execute(String projectName, Date date, List<IssueListener.Issue> issues, AnalysisResults result) {
     Report r = new Report();
     for (IssueListener.Issue issue : issues) {
       r.process(issue);
     }
-    printReport(r);
+    printReport(r, result);
   }
 
-  public void printReport(Report r) {
+  public void printReport(Report r, AnalysisResults result) {
     StringBuilder sb = new StringBuilder();
 
     sb.append("\n\n" + HEADER + "\n\n");
-    if (r.hasNoIssues()) {
-      sb.append("  No issues to display\n");
+    if (result.fileCount() == 0) {
+      sb.append("  No files analyzed\n");
+    } else if (r.hasNoIssues()) {
+      sb.append("  No issues to display (").append(result.fileCount()).append(" files analyzed)\n");
     } else {
-      printIssues(r, sb);
+      printIssues(r, sb, result.fileCount());
     }
     sb.append("\n-------------------------------------------\n\n");
 
     LOGGER.info(sb.toString());
   }
 
-  private void printIssues(Report r, StringBuilder sb) {
+  private void printIssues(Report r, StringBuilder sb, int filesAnalyzed) {
     int issues = r.totalIssues;
-    if (issues > 0) {
-      sb.append(leftPad(Integer.toString(issues), LEFT_PAD)).append(" issue" + (issues > 1 ? "s" : "")).append("\n\n");
-      printIssues(sb, r.blockerIssues, "blocker");
-      printIssues(sb, r.criticalIssues, "critical");
-      printIssues(sb, r.majorIssues, "major");
-      printIssues(sb, r.minorIssues, "minor");
-      printIssues(sb, r.infoIssues, "info");
-    } else {
-      sb.append("  No issue").append("\n");
+    sb.append(leftPad(Integer.toString(issues), LEFT_PAD))
+      .append(" issue");
+    if (issues > 1) {
+      sb.append("s");
     }
+
+    sb.append(" (").append(filesAnalyzed).append(" files analyzed)\n\n");
+    printIssues(sb, r.blockerIssues, "blocker");
+    printIssues(sb, r.criticalIssues, "critical");
+    printIssues(sb, r.majorIssues, "major");
+    printIssues(sb, r.minorIssues, "minor");
+    printIssues(sb, r.infoIssues, "info");
   }
 
   private static void printIssues(StringBuilder sb, int issueCount, String severityLabel) {

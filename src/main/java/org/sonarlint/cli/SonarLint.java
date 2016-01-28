@@ -36,6 +36,7 @@ import org.sonarlint.cli.report.ReportFactory;
 import org.sonarlint.cli.report.Reporter;
 import org.sonarlint.cli.util.Logger;
 import org.sonarsource.sonarlint.core.AnalysisConfiguration;
+import org.sonarsource.sonarlint.core.AnalysisResults;
 import org.sonarsource.sonarlint.core.IssueListener;
 import org.sonarsource.sonarlint.core.SonarLintClient;
 
@@ -92,19 +93,19 @@ public class SonarLint {
     List<AnalysisConfiguration.InputFile> inputFiles = finder.collect(baseDirPath);
 
     IssueCollector collector = new IssueCollector();
-    client.analyze(new AnalysisConfiguration(baseDirPath, baseDirPath.resolve(".sonarlint"), inputFiles, toMap(opts.properties())), collector);
-    generateReports(collector.get(), reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);
+    AnalysisResults result = client.analyze(new AnalysisConfiguration(baseDirPath, baseDirPath.resolve(".sonarlint"), inputFiles, toMap(opts.properties())), collector);
+    generateReports(collector.get(), result, reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);
   }
 
   private static Map<String, String> toMap(Properties properties) {
     return new HashMap<>((Map) properties);
   }
 
-  private static void generateReports(List<IssueListener.Issue> issues, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
+  private static void generateReports(List<IssueListener.Issue> issues, AnalysisResults result, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
     List<Reporter> reporters = reportFactory.createReporters(baseDir);
 
     for (Reporter r : reporters) {
-      r.execute(projectName, date, issues);
+      r.execute(projectName, date, issues, result);
     }
   }
 

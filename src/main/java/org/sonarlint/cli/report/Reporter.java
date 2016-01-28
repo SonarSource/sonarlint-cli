@@ -21,8 +21,10 @@ package org.sonarlint.cli.report;
 
 import java.util.Date;
 import java.util.List;
+
+import org.sonarsource.sonarlint.core.AnalysisResults;
 import org.sonarsource.sonarlint.core.IssueListener;
 
 public interface Reporter {
-  void execute(String projectName, Date date, List<IssueListener.Issue> issues);
+  void execute(String projectName, Date date, List<IssueListener.Issue> issues, AnalysisResults result);
 }

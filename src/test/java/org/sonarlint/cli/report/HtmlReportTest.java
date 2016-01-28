@@ -27,12 +27,15 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.sonarsource.sonarlint.core.AnalysisResults;
 import org.sonarsource.sonarlint.core.IssueListener;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class HtmlReportTest {
   private HtmlReport html;
+  private AnalysisResults result;
 
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
@@ -41,6 +44,8 @@ public class HtmlReportTest {
 
   @Before
   public void setUp() {
+    result = mock(AnalysisResults.class);
+    when(result.fileCount()).thenReturn(1);
     reportFile = temp.getRoot().toPath().resolve("report.html");
     sources = mock(SourceProvider.class);
     html = new HtmlReport(reportFile, sources);
@@ -48,7 +53,7 @@ public class HtmlReportTest {
 
   @Test
   public void testHtml() {
-    html.execute("project", new Date(), createTestIssues());
+    html.execute("project", new Date(), createTestIssues(), result);
   }
 
   private static List<IssueListener.Issue> createTestIssues() {

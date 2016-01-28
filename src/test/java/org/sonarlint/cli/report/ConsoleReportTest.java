@@ -30,14 +30,18 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.sonarlint.cli.util.Logger;
+import org.sonarsource.sonarlint.core.AnalysisResults;
 import org.sonarsource.sonarlint.core.IssueListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ConsoleReportTest {
   private final static String PROJECT_NAME = "project";
   private final static Date DATE = new Date(System.currentTimeMillis());
   private ConsoleReport report;
+  private AnalysisResults result;
   private ByteArrayOutputStream out;
   private ByteArrayOutputStream err;
   private PrintStream stdOut;
@@ -47,6 +51,8 @@ public class ConsoleReportTest {
   public void setUp() {
     setStreams();
     report = new ConsoleReport();
+    result = mock(AnalysisResults.class);
+    when(result.fileCount()).thenReturn(1);
   }
 
   @Test
@@ -54,7 +60,7 @@ public class ConsoleReportTest {
     List<IssueListener.Issue> issues = new LinkedList<>();
     issues.add(createTestIssue("comp1", "rule", "MAJOR", 10));
     issues.add(createTestIssue("comp1", "rule", "MINOR", 10));
-    report.execute(PROJECT_NAME, DATE, issues);
+    report.execute(PROJECT_NAME, DATE, issues, result);
 
     stdOut.flush();
     assertThat(getLog(out)).contains("Issues Report");

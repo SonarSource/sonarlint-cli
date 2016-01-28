@@ -25,6 +25,7 @@ import java.text.ParseException;
 import java.util.Properties;
 
 public class Options {
+  private static final Logger LOGGER = Logger.get();
   private Properties props = new Properties();
   private boolean verbose = false;
   private boolean help = false;
@@ -147,21 +148,20 @@ public class Options {
   }
 
   public static void printUsage() {
-    Logger logger = Logger.get();
-    logger.info("");
-    logger.info("usage: sonarlint [options]");
-    logger.info("");
-    logger.info("Options:");
-    logger.info(" -D,--define <arg>      Define property");
-    logger.info(" -e,--errors            Produce execution error messages");
-    logger.info(" -h,--help              Display help information");
-    logger.info(" -v,--version           Display version information");
-    logger.info(" -X,--debug             Produce execution debug output");
-    logger.info(" -i,--interactive       Run interactively");
-    logger.info(" --html-report <path>   HTML report output path (relative or absolute)");
-    logger.info(" --src <glob pattern>   GLOB pattern to identify source files");
-    logger.info(" --tests <glob pattern> GLOB pattern to identify test files");
-    logger.info(" --charset <name>       Character encoding of the source files");
+    LOGGER.info("");
+    LOGGER.info("usage: sonarlint [options]");
+    LOGGER.info("");
+    LOGGER.info("Options:");
+    LOGGER.info(" -D,--define <arg>      Define property");
+    LOGGER.info(" -e,--errors            Produce execution error messages");
+    LOGGER.info(" -h,--help              Display help information");
+    LOGGER.info(" -v,--version           Display version information");
+    LOGGER.info(" -X,--debug             Produce execution debug output");
+    LOGGER.info(" -i,--interactive       Run interactively");
+    LOGGER.info(" --html-report <path>   HTML report output path (relative or absolute)");
+    LOGGER.info(" --src <glob pattern>   GLOB pattern to identify source files");
+    LOGGER.info(" --tests <glob pattern> GLOB pattern to identify test files");
+    LOGGER.info(" --charset <name>       Character encoding of the source files");
   }
 
   private static void appendPropertyTo(String arg, Properties props) {

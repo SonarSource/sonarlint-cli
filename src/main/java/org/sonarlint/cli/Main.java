@@ -159,7 +159,7 @@ public class Main {
     System.exit(ret);
   }
 
-  private void displayExecutionResult(Stats stats, String resultMsg) {
+  private static void displayExecutionResult(Stats stats, String resultMsg) {
     String dashes = "------------------------------------------------------------------------";
     LOGGER.info(dashes);
     LOGGER.info("EXECUTION " + resultMsg);
@@ -195,7 +195,7 @@ public class Main {
     }
   }
 
-  private void suggestDebugMode() {
+  private static void suggestDebugMode() {
     LOGGER.error("Re-run SonarLint using the -X switch to enable full debug logging.");
   }
 }

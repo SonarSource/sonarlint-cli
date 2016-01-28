@@ -65,7 +65,7 @@ public class ReportSummary {
     return totalByRuleKey;
   }
 
-  private CategoryReport getOrCreate(Map<IssueCategory, CategoryReport> m, IssueCategory key) {
+  private static CategoryReport getOrCreate(Map<IssueCategory, CategoryReport> m, IssueCategory key) {
     CategoryReport report = m.get(key);
     if (report != null) {
       return report;

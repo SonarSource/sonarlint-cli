@@ -20,6 +20,10 @@
 package org.sonarlint.cli;
 
 public class SonarProperties {
+  private SonarProperties() {
+    
+  }
+  
   public static final String PROPERTY_PROJECT_CONFIG_FILE = "sonar.projectConfigFile";
 
   public static final String SONARLINT_HOME = "sonarlint.home";

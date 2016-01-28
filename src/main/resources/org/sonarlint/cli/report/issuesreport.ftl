@@ -10,8 +10,7 @@
     var issuesPerResource = [
     <#list report.getResourceReports() as resourceReport>
       [
-        <#assign issues=resourceReport.getIssues()>
-        <#list issues as issue>
+        <#list resourceReport.getIssues() as issue>
           {'r': 'R${issue.getRuleKey()}', 'l': ${(issue.getStartLine()!0)?c}, 's': '${issue.getSeverity()?lower_case}'}<#if issue_has_next>,</#if>
         </#list>
       ]
@@ -78,19 +77,13 @@
 
 
     function refreshFilters(updateSelect) {
-      var onlyNewIssues = true;
-
       if (updateSelect) {
-        populateSelectFilter(onlyNewIssues);
+        populateSelectFilter();
       }
       var ruleFilter = $('#rule_filter').val();
 
       hideAll();
-      if (onlyNewIssues) {
-        $('.all').addClass('all-masked');
-      } else {
-        $('.all').removeClass('all-masked');
-      }
+      $('.all').removeClass('all-masked');
       for (var resourceIndex = 0; resourceIndex < nbResources; resourceIndex++) {
         var filteredIssues = $.grep(issuesPerResource[resourceIndex], function(v) {
               return (ruleFilter == '' || v['r'] == ruleFilter || v['s'] == ruleFilter);
@@ -113,8 +106,7 @@
        <#list severities?keys as severity>
        { "key": "${severity?lower_case}",
          "label": "${severity?lower_case?cap_first}",
-         "total": ${severities[severity].getCountInCurrentAnalysis()?c},
-         "newtotal": ${severities[severity].getNewIssuesCount()?c}
+         "total": ${severities[severity].getCountInCurrentAnalysis()?c}
        }<#if severity_has_next>,</#if>
        </#list>
     ];
@@ -123,9 +115,8 @@
     <#assign rules = report.getSummary().getTotalByRuleKey()>
        <#list rules?keys as ruleKey>
        { "key": "${ruleKey}",
-         "label": "${ruleKey}",
-         "total": ${rules[ruleKey].getCountInCurrentAnalysis()?c},
-         "newtotal": ${rules[ruleKey].getNewIssuesCount()?c}
+         "label": "${report.getRuleName(ruleKey)?html}",
+         "total": ${rules[ruleKey].getCountInCurrentAnalysis()?c}
        }<#if ruleKey_has_next>,</#if>
        </#list>
     ].sort(function(a, b) {
@@ -133,21 +124,21 @@
         return ((x < y) ? -1 : ((x > y) ? 1 : 0));
     });
 
-    function populateSelectFilter(onlyNewIssues) {
+    function populateSelectFilter() {
        var ruleFilterSelect = $('#rule_filter');
        ruleFilterSelect.empty().append(function() {
          var output = '';
          output += '<option value="" selected>Filter by:</option>';
          output += '<optgroup label="Severity">';
          $.each(severityFilter, function(key, value) {
-           if ((!onlyNewIssues && value.total > 0) || value.newtotal > 0) {
-             output += '<option value="' + value.key + '">' + value.label + ' (' + (onlyNewIssues ? value.newtotal : value.total) + ')</option>';
+           if (value.total > 0) {
+             output += '<option value="' + value.key + '">' + value.label + ' (' + value.total + ')</option>';
            }
          });
          output += '<optgroup label="Rule">';
          $.each(ruleFilter, function(key, value) {
-           if ((!onlyNewIssues && value.total > 0) || value.newtotal > 0) {
-             output += '<option value="R' + value.key + '">' + value.label + ' (' + (onlyNewIssues ? value.newtotal : value.total) + ')</option>';
+           if (value.total > 0) {
+             output += '<option value="R' + value.key + '">' + value.label + ' (' + value.total + ')</option>';
            }
          });
          return output;
@@ -205,7 +196,7 @@
           ${categoryReport.getName()?html}
         </td>
         <td align="right">
-          <#if categoryReport.getTotal().getNewIssuesCount() gt 0>
+          <#if categoryReport.getTotal().getCountInCurrentAnalysis() gt 0>
             <span class="worst">${categoryReport.getTotal().getCountInCurrentAnalysis()?c}</span>
           <#else>
             <span>0</span>
@@ -239,7 +230,7 @@
       </th>
       <th align="right" width="1%" nowrap class="resource-details-${resourceReport_index?c}">
         <#if resourceReport.getTotal().getCountInCurrentAnalysis() gt 0>
-          <span class="worst" id="new-total">${resourceReport.getTotal().getCountInCurrentAnalysis()?c}</span>
+          <span class="worst" id="total">${resourceReport.getTotal().getCountInCurrentAnalysis()?c}</span>
         <#else>
           <span id="current-total">0</span>
         </#if>
@@ -267,7 +258,7 @@
       <tr class="globalIssues">
         <td colspan="${colspan}">
           <#list issues as issue>
-            <div class="issue" id="${issue.getKey()}">
+            <div class="issue">
               <div class="vtitle">
                 <i class="icon-severity-${issue.getSeverity()?lower_case}"></i>
                 <#if issue.getMessage()?has_content>
@@ -306,7 +297,7 @@
                     <td class="lid"></td>
                     <td class="issues">
                       <#list issues as issue>
-                        <div class="issue" id="${issue.getKey()}">
+                        <div class="issue">
                           <div class="vtitle">
                             <i class="icon-severity-${issue.getSeverity()?lower_case}"></i>
                             <#if issue.getMessage()?has_content>

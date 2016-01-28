@@ -35,7 +35,8 @@ public class IssuesReport {
   private Date date;
   private int filesAnalyzed;
   private final ReportSummary summary = new ReportSummary();
-  private final Map<String, ResourceReport> resourceReportsByFilePath = new HashMap<>();
+  private final Map<Path, ResourceReport> resourceReportsByFilePath = new HashMap<>();
+  private final Map<String, String> ruleNameByKey = new HashMap<>();
 
   IssuesReport() {
 
@@ -77,7 +78,7 @@ public class IssuesReport {
     this.date = date;
   }
 
-  public Map<String, ResourceReport> getResourceReportsByResource() {
+  public Map<Path, ResourceReport> getResourceReportsByResource() {
     return resourceReportsByFilePath;
   }
 
@@ -85,11 +86,16 @@ public class IssuesReport {
     return new ArrayList<>(resourceReportsByFilePath.values());
   }
 
-  public List<String> getResourcesWithReport() {
+  public List<Path> getResourcesWithReport() {
     return new ArrayList<>(resourceReportsByFilePath.keySet());
+  }
+  
+  public String getRuleName(String ruleKey) {
+    return ruleNameByKey.get(ruleKey);
   }
 
   public void addIssue(IssueListener.Issue issue) {
+    ruleNameByKey.put(issue.getRuleKey(), issue.getRuleName());
     Path filePath = issue.getFilePath();
     if (filePath == null) {
       // issue on project (no specific file)
@@ -107,7 +113,7 @@ public class IssuesReport {
       return report;
     }
     report = new ResourceReport(filePath);
-    resourceReportsByFilePath.put(filePath.toString(), new ResourceReport(filePath));
+    resourceReportsByFilePath.put(filePath, new ResourceReport(filePath));
     return report;
   }
 }

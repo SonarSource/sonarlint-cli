@@ -53,7 +53,7 @@ public class IssuesReportTest {
     assertThat(report.getSummary()).isNotNull();
     assertThat(report.getSummary().getTotal()).isEqualTo(new IssueVariation(1, 0, 0));
 
-    assertThat(report.getResourceReportsByResource()).containsOnlyKeys("comp");
+    assertThat(report.getResourceReportsByResource()).containsOnlyKeys(Paths.get("comp"));
   }
 
   private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String severity, int line) {

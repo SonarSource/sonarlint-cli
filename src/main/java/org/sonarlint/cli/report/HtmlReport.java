@@ -111,7 +111,7 @@ public class HtmlReport implements Reporter {
     copyDependency(target, "jquery.min.js");
     copyDependency(target, "sep12.png");
     copyDependency(target, "sonar.css");
-    copyDependency(target, "sonarqube-24x100.png");
+    copyDependency(target, "sonarlint.png");
   }
 
   private void copyDependency(Path target, String filename) {

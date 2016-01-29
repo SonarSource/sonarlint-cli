@@ -27,6 +27,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,14 +42,14 @@ public class SonarlintTest {
 
   @Test
   public void testHelp() {
-    int code = sonarlint.run("-h");
+    int code = sonarlint.run(Paths.get(""), "-h");
     assertThat(sonarlint.getOut()).contains("usage: sonarlint");
     assertThat(code).isEqualTo(0);
   }
 
   @Test
   public void testVersion() {
-    int code = sonarlint.run("-v");
+    int code = sonarlint.run(Paths.get(""), "-v");
     String version = System.getProperty("sonarlint.version");
     assertThat(sonarlint.getOut()).contains(version);
     assertThat(code).isEqualTo(0);
@@ -56,7 +57,7 @@ public class SonarlintTest {
 
   @Test
   public void testInvalidArg() {
-    int code = sonarlint.run("-q");
+    int code = sonarlint.run(Paths.get(""), "-q");
     assertThat(sonarlint.getErr()).contains("Error parsing arguments");
     assertThat(code).isEqualTo(1);
   }
@@ -68,10 +69,11 @@ public class SonarlintTest {
     assertThat(Files.isDirectory(plugins)).isTrue();
     assertThat(Files.newDirectoryStream(plugins)).isNotEmpty();
   }
-  
+
   @Test
   public void testNoFilesToAnalyse() throws IOException {
-    int code = sonarlint.runProject("empty");
+    Path empty = Files.createTempDirectory("empty");
+    int code = sonarlint.run(empty);
     assertThat(code).isEqualTo(0);
     assertThat(sonarlint.getOut()).contains("WARN: No files to analyze");
   }

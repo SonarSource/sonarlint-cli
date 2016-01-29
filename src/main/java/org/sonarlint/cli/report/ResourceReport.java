@@ -62,7 +62,7 @@ public final class ResourceReport {
   }
 
   public String getType() {
-    if (filePath == null || filePath == Paths.get("")) {
+    if (filePath == null || filePath.equals(Paths.get(""))) {
       return "PRJ";
     } else {
       return "FIL";

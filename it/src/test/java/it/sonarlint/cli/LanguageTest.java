@@ -37,7 +37,7 @@ public class LanguageTest {
 
   @Test
   public void testSimpleJava() {
-    int code = sonarlint.runProject("java-sample");
+    int code = sonarlint.deployAndRunProject("java-sample");
     assertThat(code).isEqualTo(0);
     
     assertThat(sonarlint.getOut()).contains("6 issues");
@@ -47,7 +47,7 @@ public class LanguageTest {
 
   @Test
   public void testMultiLanguage() {
-    int code = sonarlint.runProject("multi-language", "-X");
+    int code = sonarlint.deployAndRunProject("multi-language", "-X");
     assertThat(code).isEqualTo(0);
     
     assertThat(sonarlint.getOut()).contains("src/main/js/Hello.js' is detected to be 'js'");
@@ -61,7 +61,7 @@ public class LanguageTest {
   
   @Test
   public void testNoIssues() {
-    int code = sonarlint.runProject("java-no-issues");
+    int code = sonarlint.deployAndRunProject("java-no-issues");
     assertThat(code).isEqualTo(0);
     
     assertThat(sonarlint.getOut()).contains("No issues to display");
@@ -70,7 +70,7 @@ public class LanguageTest {
   
   @Test
   public void testNoFiles() {
-    int code = sonarlint.runProject("no-lang-files", "-X");
+    int code = sonarlint.deployAndRunProject("no-lang-files", "-X");
     assertThat(code).isEqualTo(0);
     
     assertThat(sonarlint.getOut()).contains("No files analyzed");

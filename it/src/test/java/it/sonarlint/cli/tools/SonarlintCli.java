@@ -49,7 +49,17 @@ public class SonarlintCli extends ExternalResource {
     this.script = installer.install(installPath, version);
   }
 
-  public int runProject(String location, String... args) {
+  public int run(Path workingDir, String... args) {
+    LOG.info("Running SonarLint CLI in '{}'", workingDir.toAbsolutePath());
+    try {
+      exec = new CommandExecutor(script);
+      return exec.execute(args, workingDir.toAbsolutePath());
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  public int deployAndRunProject(String location, String... args) {
     LOG.info("Running SonarLint CLI on project '{}'", location);
     try {
       Path project = deployProject(location);
@@ -60,20 +70,10 @@ public class SonarlintCli extends ExternalResource {
     }
   }
 
-  public int run(String... args) {
-    LOG.info("Running SonarLint CLI");
-    try {
-      exec = new CommandExecutor(script);
-      return exec.execute(args);
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
-  }
-
   private Path deployProject(String location) throws IOException {
     Path originalLoc = Paths.get("projects").resolve(location);
     String projectName = originalLoc.getFileName().toString();
-    
+
     if (!Files.isDirectory(originalLoc)) {
       throw new IllegalArgumentException("Couldn't find project directory: " + originalLoc.toAbsolutePath().toString());
     }

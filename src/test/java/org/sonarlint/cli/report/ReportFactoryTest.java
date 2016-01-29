@@ -20,9 +20,12 @@
 package org.sonarlint.cli.report;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -30,6 +33,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ReportFactoryTest {
   private ReportFactory factory;
+
+  @Rule
+  public TemporaryFolder temp = new TemporaryFolder();
 
   @Before
   public void setUp() {
@@ -40,5 +46,18 @@ public class ReportFactoryTest {
   public void test() {
     List<Reporter> reporters = factory.createReporters(Paths.get("test"));
     assertThat(reporters).hasSize(2);
+  }
+
+  @Test
+  public void defaultReportFile() {
+    Path report = factory.getReportFile(temp.getRoot().toPath());
+    assertThat(report).isEqualTo(temp.getRoot().toPath().resolve("issues-report.html"));
+  }
+
+  @Test
+  public void customReportFile() {
+    factory.setHtmlPath(Paths.get("myreport", "myfile.html").toString());
+    Path report = factory.getReportFile(temp.getRoot().toPath());
+    assertThat(report).isEqualTo(temp.getRoot().toPath().resolve("myreport").resolve("myfile.html"));
   }
 }

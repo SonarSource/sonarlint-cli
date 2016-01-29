@@ -22,7 +22,7 @@ package org.sonarlint.cli.util;
 import java.io.PrintStream;
 
 public class Logger {
-  private static Logger instance;
+  private static volatile Logger instance;
   private boolean debugEnabled = false;
   private boolean displayStackTrace = false;
   private PrintStream stdOut;

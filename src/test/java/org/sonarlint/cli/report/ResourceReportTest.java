@@ -49,11 +49,20 @@ public class ResourceReportTest {
 
     assertThat(resourceReport.getIssues()).containsOnly(i1, i2);
     assertThat(resourceReport.getIssuesAtLine(10)).containsExactly(i1);
+    assertThat(resourceReport.getIssuesAtLine(20)).isEmpty();
     assertThat(resourceReport.getIssuesPerLine()).containsOnly(
       entry(i1.getStartLine(), Collections.singletonList(i1)),
       entry(i2.getStartLine(), Collections.singletonList(i2)));
     assertThat(resourceReport.getName()).isEqualTo("resource");
     assertThat(resourceReport.getPath()).isEqualTo(RESOURCE);
+  }
+  
+  @Test
+  public void testType() {
+    assertThat(resourceReport.getType()).isEqualTo("FIL");
+    
+    resourceReport = new ResourceReport(Paths.get(""));
+    assertThat(resourceReport.getType()).isEqualTo("PRJ");
   }
 
   @Test
@@ -83,6 +92,30 @@ public class ResourceReportTest {
     assertThat(categoryReports.get(0).getTotal().getCountInCurrentAnalysis()).isEqualTo(1);
     assertThat(categoryReports.get(1).getTotal().getCountInCurrentAnalysis()).isEqualTo(1);
     assertThat(categoryReports.get(2).getTotal().getCountInCurrentAnalysis()).isEqualTo(2);
+    
+    assertThat(resourceReport.getTotal().getCountInCurrentAnalysis()).isEqualTo(4);
+  }
+  
+  @Test
+  public void lineIssues() {
+    IssueListener.Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
+    IssueListener.Issue i2 = createTestIssue("file1", "rule1", "MINOR", 11);
+    resourceReport.addIssue(i1);
+    resourceReport.addIssue(i2);
+    
+    assertThat(resourceReport.isDisplayableLine(0)).isFalse();
+    assertThat(resourceReport.isDisplayableLine(-3)).isFalse();
+    assertThat(resourceReport.isDisplayableLine(null)).isFalse();
+    
+    assertThat(resourceReport.isDisplayableLine(7)).isFalse();
+    assertThat(resourceReport.isDisplayableLine(8)).isTrue();
+    assertThat(resourceReport.isDisplayableLine(9)).isTrue();
+    assertThat(resourceReport.isDisplayableLine(10)).isTrue();
+    assertThat(resourceReport.isDisplayableLine(11)).isTrue();
+    assertThat(resourceReport.isDisplayableLine(12)).isTrue();
+    assertThat(resourceReport.isDisplayableLine(13)).isTrue();
+    assertThat(resourceReport.isDisplayableLine(14)).isFalse();
+    
   }
 
   private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String severity, int line) {

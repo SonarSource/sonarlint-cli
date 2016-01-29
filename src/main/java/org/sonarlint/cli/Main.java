@@ -168,7 +168,7 @@ public class Main {
     LOGGER.info(dashes);
   }
 
-  private void showError(String message, Throwable e, boolean showStackTrace, boolean debug) {
+  private static void showError(String message, Throwable e, boolean showStackTrace, boolean debug) {
     if (showStackTrace) {
       LOGGER.error(message, e);
       if (!debug) {

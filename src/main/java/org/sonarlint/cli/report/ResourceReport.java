@@ -106,13 +106,6 @@ public final class ResourceReport {
     total.incrementCountInCurrentAnalysis();
   }
 
-  public void addResolvedIssue(String ruleKey, Severity severity, String name) {
-    IssueCategory reportRuleKey = new IssueCategory(ruleKey, severity, name);
-    initMaps(reportRuleKey);
-    total.incrementResolvedIssuesCount();
-    reportByCategory.get(reportRuleKey).getTotal().incrementResolvedIssuesCount();
-  }
-
   private void initMaps(IssueCategory reportRuleKey) {
     if (!reportByCategory.containsKey(reportRuleKey)) {
       reportByCategory.put(reportRuleKey, new CategoryReport(reportRuleKey));

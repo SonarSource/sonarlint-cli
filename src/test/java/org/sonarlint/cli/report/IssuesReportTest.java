@@ -45,20 +45,28 @@ public class IssuesReportTest {
 
     assertThat(report.getDate()).isEqualTo(d);
     assertThat(report.getTitle()).isEqualTo(title);
+    assertThat(report.noFiles()).isTrue();
+
+    report.setFilesAnalyzed(1);
+    assertThat(report.getFilesAnalyzed()).isEqualTo(1);
+    assertThat(report.noFiles()).isFalse();
   }
 
   @Test
   public void testAdd() {
-    report.addIssue(createTestIssue("comp", "rule1", "MAJOR", 10));
+    report.addIssue(createTestIssue("comp", "rule1", "name1", "MAJOR", 10));
+    report.addIssue(createTestIssue("comp", "rule2", "name2", "MAJOR", 11));
     assertThat(report.getSummary()).isNotNull();
-    assertThat(report.getSummary().getTotal()).isEqualTo(new IssueVariation(1, 0, 0));
+    assertThat(report.getSummary().getTotal()).isEqualTo(new IssueVariation(2, 0, 0));
 
     assertThat(report.getResourceReportsByResource()).containsOnlyKeys(Paths.get("comp"));
+    assertThat(report.getRuleName("rule1")).isEqualTo("name1");
   }
 
-  private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String severity, int line) {
+  private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String name, String severity, int line) {
     IssueListener.Issue issue = new IssueListener.Issue();
-    issue .setStartLine(line);
+    issue.setStartLine(line);
+    issue.setRuleName(name);
     issue.setFilePath(Paths.get(filePath));
     issue.setRuleKey(ruleKey);
     issue.setSeverity(severity);

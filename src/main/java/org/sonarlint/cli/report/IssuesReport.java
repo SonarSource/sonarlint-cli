@@ -96,7 +96,8 @@ public class IssuesReport {
   
   public String issueId(IssueListener.Issue issue) {
     String line = issue.getStartLine() != null ? issue.getStartLine().toString() : "-";
-    return issue.getRuleKey() + "R" + issue.getFilePath().toString() + "L" + line;
+    String path = issue.getFilePath() != null ? issue.getFilePath().toString() : "";
+    return issue.getRuleKey() + "R" + path + "L" + line;
   }
 
   public void addIssue(IssueListener.Issue issue) {

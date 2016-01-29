@@ -51,7 +51,7 @@ public class ReportFactory {
     htmlPath = path;
   }
 
-  private Path getReportFile(Path basePath) {
+  Path getReportFile(Path basePath) {
     Path reportPath;
 
     if (htmlPath != null) {

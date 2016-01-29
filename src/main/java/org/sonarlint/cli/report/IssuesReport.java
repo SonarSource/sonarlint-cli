@@ -93,6 +93,11 @@ public class IssuesReport {
   public String getRuleName(String ruleKey) {
     return ruleNameByKey.get(ruleKey);
   }
+  
+  public String issueId(IssueListener.Issue issue) {
+    String line = issue.getStartLine() != null ? issue.getStartLine().toString() : "-";
+    return issue.getRuleKey() + "R" + issue.getFilePath().toString() + "L" + line;
+  }
 
   public void addIssue(IssueListener.Issue issue) {
     ruleNameByKey.put(issue.getRuleKey(), issue.getRuleName());

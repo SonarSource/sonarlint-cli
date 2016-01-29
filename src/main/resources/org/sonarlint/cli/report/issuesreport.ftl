@@ -11,7 +11,7 @@
     <#list report.getResourceReports() as resourceReport>
       [
         <#list resourceReport.getIssues() as issue>
-          {'r': 'R${issue.getRuleKey()}', 'l': ${(issue.getStartLine()!0)?c}, 's': '${issue.getSeverity()?lower_case}'}<#if issue_has_next>,</#if>
+          {'k': ${report.issueId(issue)?html}, 'r': 'R${issue.getRuleKey()}', 'l': ${(issue.getStartLine()!0)?c}, 's': '${issue.getSeverity()?lower_case}'}<#if issue_has_next>,</#if>
         </#list>
       ]
       <#if resourceReport_has_next>,</#if>
@@ -258,7 +258,7 @@
       <tr class="globalIssues">
         <td colspan="${colspan}">
           <#list issues as issue>
-            <div class="issue">
+            <div class="issue" id="$report.issueId(issue)?html">
               <div class="vtitle">
                 <i class="icon-severity-${issue.getSeverity()?lower_case}"></i>
                 <#if issue.getMessage()?has_content>
@@ -297,7 +297,7 @@
                     <td class="lid"></td>
                     <td class="issues">
                       <#list issues as issue>
-                        <div class="issue">
+                        <div class="issue" id="${report.issueId(issue)?html}">
                           <div class="vtitle">
                             <i class="icon-severity-${issue.getSeverity()?lower_case}"></i>
                             <#if issue.getMessage()?has_content>

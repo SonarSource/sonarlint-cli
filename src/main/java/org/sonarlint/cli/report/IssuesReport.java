@@ -104,15 +104,12 @@ public class IssuesReport {
     ruleNameByKey.put(issue.getRuleKey(), issue.getRuleName());
     ids.put(issue, id++);
 
-    System.out.println(issue.getRuleKey() + " " + issue.getStartLine() + " " + issue.getFilePath());
-    
     Path filePath = issue.getFilePath();
     if (filePath == null) {
       // issue on project (no specific file)
       filePath = Paths.get("");
     }
     ResourceReport report = getOrCreate(filePath);
-    System.out.println("report has " + report.getIssues().size());
     getSummary().addIssue(issue);
     report.addIssue(issue);
   }

@@ -14,7 +14,7 @@
       <useProjectArtifact>true</useProjectArtifact>
       <excludes>
         <exclude>org.freemarker:freemarker</exclude>
-        <exclude>org.sonarsource.sonarlint:sonarlint-core</exclude>
+        <exclude>org.sonarsource.sonarlint.core:sonarlint-core</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>

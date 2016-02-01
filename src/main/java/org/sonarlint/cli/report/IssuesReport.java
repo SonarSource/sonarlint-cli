@@ -37,6 +37,8 @@ public class IssuesReport {
   private final ReportSummary summary = new ReportSummary();
   private final Map<Path, ResourceReport> resourceReportsByFilePath = new HashMap<>();
   private final Map<String, String> ruleNameByKey = new HashMap<>();
+  private final Map<IssueListener.Issue, Integer> ids = new HashMap<>();
+  private int id = 0;
 
   IssuesReport() {
 
@@ -89,27 +91,29 @@ public class IssuesReport {
   public List<Path> getResourcesWithReport() {
     return new ArrayList<>(resourceReportsByFilePath.keySet());
   }
-  
+
   public String getRuleName(String ruleKey) {
     return ruleNameByKey.get(ruleKey);
   }
-  
+
   public String issueId(IssueListener.Issue issue) {
-    String line = issue.getStartLine() != null ? issue.getStartLine().toString() : "-";
-    String path = issue.getFilePath() != null ? issue.getFilePath().toString() : "";
-    return issue.getRuleKey() + "R" + path + "L" + line;
+    return "issue" + ids.get(issue).toString();
   }
 
   public void addIssue(IssueListener.Issue issue) {
     ruleNameByKey.put(issue.getRuleKey(), issue.getRuleName());
+    ids.put(issue, id++);
+
+    System.out.println(issue.getRuleKey() + " " + issue.getStartLine() + " " + issue.getFilePath());
+    
     Path filePath = issue.getFilePath();
     if (filePath == null) {
       // issue on project (no specific file)
       filePath = Paths.get("");
     }
     ResourceReport report = getOrCreate(filePath);
+    System.out.println("report has " + report.getIssues().size());
     getSummary().addIssue(issue);
-
     report.addIssue(issue);
   }
 
@@ -119,7 +123,7 @@ public class IssuesReport {
       return report;
     }
     report = new ResourceReport(filePath);
-    resourceReportsByFilePath.put(filePath, new ResourceReport(filePath));
+    resourceReportsByFilePath.put(filePath, report);
     return report;
   }
 }

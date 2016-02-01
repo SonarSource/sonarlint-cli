@@ -11,7 +11,7 @@
     <#list report.getResourceReports() as resourceReport>
       [
         <#list resourceReport.getIssues() as issue>
-          {'k': ${report.issueId(issue)?html}, 'r': 'R${issue.getRuleKey()}', 'l': ${(issue.getStartLine()!0)?c}, 's': '${issue.getSeverity()?lower_case}'}<#if issue_has_next>,</#if>
+          {'k': '${report.issueId(issue)?html}', 'r': 'R${issue.getRuleKey()}', 'l': ${(issue.getStartLine()!0)?c}, 's': '${issue.getSeverity()?lower_case}'}<#if issue_has_next>,</#if>
         </#list>
       ]
       <#if resourceReport_has_next>,</#if>

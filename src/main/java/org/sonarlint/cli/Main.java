@@ -130,7 +130,8 @@ public class Main {
     try {
       opts = Options.parse(args);
     } catch (ParseException e) {
-      LOGGER.error("Error parsing arguments", e);
+      LOGGER.error("Error parsing arguments: " + e.getMessage(), e);
+      Options.printUsage();
       System.exit(ERROR);
     }
 

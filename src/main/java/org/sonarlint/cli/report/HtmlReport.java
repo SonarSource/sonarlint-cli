@@ -43,8 +43,10 @@ public class HtmlReport implements Reporter {
   private final Path reportFile;
   private final Path reportDir;
   private final SourceProvider sourceProvider;
+  private Path basePath;
 
-  HtmlReport(Path reportFile, SourceProvider sourceProvider) {
+  HtmlReport(Path basePath, Path reportFile, SourceProvider sourceProvider) {
+    this.basePath = basePath;
     this.sourceProvider = sourceProvider;
     this.reportDir = reportFile.getParent().toAbsolutePath();
     this.reportFile = reportFile.toAbsolutePath();
@@ -52,7 +54,7 @@ public class HtmlReport implements Reporter {
 
   @Override
   public void execute(String projectName, Date date, List<IssueListener.Issue> issues, AnalysisResults result) {
-    IssuesReport report = new IssuesReport();
+    IssuesReport report = new IssuesReport(basePath);
     for (IssueListener.Issue i : issues) {
       report.addIssue(i);
     }

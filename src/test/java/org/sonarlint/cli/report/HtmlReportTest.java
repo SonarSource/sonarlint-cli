@@ -48,7 +48,7 @@ public class HtmlReportTest {
     when(result.fileCount()).thenReturn(1);
     reportFile = temp.getRoot().toPath().resolve("report.html");
     sources = mock(SourceProvider.class);
-    html = new HtmlReport(reportFile, sources);
+    html = new HtmlReport(temp.getRoot().toPath(), reportFile, sources);
   }
 
   @Test

@@ -59,6 +59,7 @@ public class SonarlintTest {
   public void testInvalidArg() {
     int code = sonarlint.run(Paths.get(""), "-q");
     assertThat(sonarlint.getErr()).contains("Error parsing arguments");
+    assertThat(sonarlint.getOut()).contains("usage: sonarlint");
     assertThat(code).isEqualTo(1);
   }
 

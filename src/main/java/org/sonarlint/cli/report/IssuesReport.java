@@ -39,9 +39,10 @@ public class IssuesReport {
   private final Map<String, String> ruleNameByKey = new HashMap<>();
   private final Map<IssueListener.Issue, Integer> ids = new HashMap<>();
   private int id = 0;
+  private Path basePath;
 
-  IssuesReport() {
-
+  IssuesReport(Path basePath) {
+    this.basePath = basePath;
   }
 
   public boolean noIssues() {
@@ -119,7 +120,7 @@ public class IssuesReport {
     if (report != null) {
       return report;
     }
-    report = new ResourceReport(filePath);
+    report = new ResourceReport(basePath, filePath);
     resourceReportsByFilePath.put(filePath, report);
     return report;
   }

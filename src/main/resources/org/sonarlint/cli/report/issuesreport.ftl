@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>Issues report of ${report.getTitle()?html}</title>
+  <title>SonarLint report of ${report.getTitle()?html}</title>
   <link href="issuesreport_files/sonar.css" media="all" rel="stylesheet" type="text/css">
   <link rel="shortcut icon" type="image/x-icon" href="issuesreport_files/favicon.ico">
   <script type="text/javascript" src="issuesreport_files/jquery.min.js"></script>
@@ -149,7 +149,7 @@
 <body>
 <div id="reportHeader">
   <div id="logo"><img src="issuesreport_files/sonarlint.png" alt="SonarLint"/></div>
-  <div class="title">Issues Report</div>
+  <div class="title">SonarLint Report</div>
   <div class="subtitle">${report.getTitle()?html} - ${report.getDate()?datetime}</div>
 </div>
 

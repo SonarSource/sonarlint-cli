@@ -42,7 +42,7 @@ public class ReportFactory {
     List<Reporter> list = new LinkedList<>();
 
     list.add(new ConsoleReport());
-    list.add(new HtmlReport(getReportFile(basePath), new SourceProvider(charset)));
+    list.add(new HtmlReport(basePath, getReportFile(basePath), new SourceProvider(charset)));
 
     return list;
   }

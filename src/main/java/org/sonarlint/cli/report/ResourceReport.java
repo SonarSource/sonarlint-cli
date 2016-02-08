@@ -47,8 +47,10 @@ public final class ResourceReport {
 
   private final Map<String, MutableInt> issuesByRule = new HashMap<>();
   private final EnumMap<Severity, MutableInt> issuesBySeverity = new EnumMap<>(Severity.class);
+  private Path basePath;
 
-  ResourceReport(@Nullable Path filePath) {
+  ResourceReport(Path basePath, @Nullable Path filePath) {
+    this.basePath = basePath;
     this.filePath = filePath;
   }
 
@@ -58,7 +60,7 @@ public final class ResourceReport {
   }
 
   public String getName() {
-    return filePath.getFileName().toString();
+    return basePath.relativize(filePath).toString();
   }
 
   public String getType() {

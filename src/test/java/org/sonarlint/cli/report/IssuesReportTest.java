@@ -32,7 +32,7 @@ public class IssuesReportTest {
 
   @Before
   public void setUp() {
-    report = new IssuesReport();
+    report = new IssuesReport(Paths.get(""));
   }
 
   @Test

@@ -48,7 +48,7 @@
     <dependency>
       <groupId>org.sonarsource.sonarlint.core</groupId>
       <artifactId>sonarlint-core</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -112,6 +112,17 @@
               <createDependencyReducedPom>true</createDependencyReducedPom>
               <!-- Don't set to true or it will remove required runtime dependencies on SQ plugin API -->
               <minimizeJar>false</minimizeJar>
+              <filters>
+                <!-- Remove signatures from SL Core -->
+                <filter>
+                  <artifact>org.sonarsource.sonarlint.core:sonarlint-core</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
             </configuration>
           </execution>
         </executions>

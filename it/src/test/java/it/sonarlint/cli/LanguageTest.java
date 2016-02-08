@@ -24,6 +24,9 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.nio.file.Path;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class LanguageTest {
@@ -38,6 +41,24 @@ public class LanguageTest {
   @Test
   public void testSimpleJava() {
     int code = sonarlint.deployAndRunProject("java-sample");
+    assertThat(code).isEqualTo(0);
+    
+    assertThat(sonarlint.getOut()).contains("6 issues");
+    assertThat(sonarlint.getOut()).contains("6 major");
+    assertThat(sonarlint.getOut()).contains("2 files analyzed");
+  }
+  
+  @Test
+  public void testRunTwice() throws IOException {
+    Path project = sonarlint.deployProject("java-sample");
+    int code = sonarlint.run(project);
+    assertThat(code).isEqualTo(0);
+    
+    assertThat(sonarlint.getOut()).contains("6 issues");
+    assertThat(sonarlint.getOut()).contains("6 major");
+    assertThat(sonarlint.getOut()).contains("2 files analyzed");
+    
+    code = sonarlint.run(project);
     assertThat(code).isEqualTo(0);
     
     assertThat(sonarlint.getOut()).contains("6 issues");

@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.sonarsource.sonarlint.core.AnalysisConfiguration.InputFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -96,13 +97,24 @@ public class InputFileFinderTest {
   }
 
   @Test
+  public void testIgnoreHidden() throws IOException {
+    fileFinder = new InputFileFinder(null, null, Charset.defaultCharset());
+    File hiddenFolder = temp.newFolder(".test");
+    Path hiddenSrc = hiddenFolder.toPath().resolve("Test.java");
+    List<InputFile> files = fileFinder.collect(root);
+
+    assertThat(files).extracting("path").doesNotContain(hiddenSrc);
+    assertThat(files).extracting("path").contains(src1);
+  }
+
+  @Test
   public void testDisjoint() throws IOException {
     fileFinder = new InputFileFinder("**abc**", "**abc**", Charset.defaultCharset());
 
     List<InputFile> files = fileFinder.collect(root);
     assertThat(files).isEmpty();
   }
-  
+
   @Test
   public void testCharset() throws IOException {
     fileFinder = new InputFileFinder(null, null, StandardCharsets.US_ASCII);

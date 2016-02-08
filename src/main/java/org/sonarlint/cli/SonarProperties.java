@@ -25,8 +25,6 @@ public class SonarProperties {
   public static final String SONARLINT_HOME = "sonarlint.home";
   public static final String PROJECT_HOME = "project.home";
 
-  public static final String SONAR_PROJECT_PROPERTIES_FILENAME = "sonarlint.properties";
-
   public static final String DEFAULT_SOURCES = ".";
   public static final String DEFAULT_TESTS = ".";
   public static final String DEFAULT_TESTS_INCLUSIONS = "**/*Test.*,**/test/**/*";

@@ -69,8 +69,8 @@ public class SonarlintCli extends ExternalResource {
       throw new IllegalStateException(e);
     }
   }
-
-  private Path deployProject(String location) throws IOException {
+  
+  public Path deployProject(String location) throws IOException {
     Path originalLoc = Paths.get("projects").resolve(location);
     String projectName = originalLoc.getFileName().toString();
 

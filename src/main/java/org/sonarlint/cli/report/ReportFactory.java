@@ -30,7 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ReportFactory {
-  private static final String DEFAULT_REPORT_NAME = "issues-report.html";
+  private static final String DEFAULT_REPORT_PATH = ".sonarlint/issues-report.html";
   private String htmlPath = null;
   private Charset charset;
 
@@ -61,7 +61,7 @@ public class ReportFactory {
         reportPath = basePath.resolve(reportPath).toAbsolutePath();
       }
     } else {
-      reportPath = basePath.resolve(DEFAULT_REPORT_NAME);
+      reportPath = basePath.resolve(DEFAULT_REPORT_PATH);
     }
 
     try {

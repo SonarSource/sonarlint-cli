@@ -44,7 +44,9 @@ public class LanguageTest {
     assertThat(code).isEqualTo(0);
     
     assertThat(sonarlint.getOut()).contains("6 issues");
-    assertThat(sonarlint.getOut()).contains("6 major");
+    assertThat(sonarlint.getOut()).contains("1 blocker");
+    assertThat(sonarlint.getOut()).contains("4 major");
+    assertThat(sonarlint.getOut()).contains("1 minor");
     assertThat(sonarlint.getOut()).contains("2 files analyzed");
   }
   
@@ -55,14 +57,18 @@ public class LanguageTest {
     assertThat(code).isEqualTo(0);
     
     assertThat(sonarlint.getOut()).contains("6 issues");
-    assertThat(sonarlint.getOut()).contains("6 major");
+    assertThat(sonarlint.getOut()).contains("1 blocker");
+    assertThat(sonarlint.getOut()).contains("4 major");
+    assertThat(sonarlint.getOut()).contains("1 minor");
     assertThat(sonarlint.getOut()).contains("2 files analyzed");
     
     code = sonarlint.run(project);
     assertThat(code).isEqualTo(0);
     
     assertThat(sonarlint.getOut()).contains("6 issues");
-    assertThat(sonarlint.getOut()).contains("6 major");
+    assertThat(sonarlint.getOut()).contains("1 blocker");
+    assertThat(sonarlint.getOut()).contains("4 major");
+    assertThat(sonarlint.getOut()).contains("1 minor");
     assertThat(sonarlint.getOut()).contains("2 files analyzed");
   }
 
@@ -75,7 +81,9 @@ public class LanguageTest {
     assertThat(sonarlint.getOut()).contains("src/main/java/Hello.java' is detected to be 'java'");
 
     assertThat(sonarlint.getOut()).contains("3 issues");
-    assertThat(sonarlint.getOut()).contains("3 major");
+    assertThat(sonarlint.getOut()).contains("2 major");
+    assertThat(sonarlint.getOut()).contains("1 minor");
+    
     // 1 of each lang
     assertThat(sonarlint.getOut()).contains("2 files analyzed");
   }

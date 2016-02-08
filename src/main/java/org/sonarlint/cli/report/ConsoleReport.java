@@ -115,7 +115,7 @@ public class ConsoleReport implements Reporter {
     sb.append(leftPad(Integer.toString(issues), LEFT_PAD))
       .append(" issue");
     if (issues > 1) {
-      sb.append("s");
+      sb.append("s ");
     }
 
     filesAnalyzed(sb, filesAnalyzed);

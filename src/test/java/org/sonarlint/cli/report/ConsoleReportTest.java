@@ -63,7 +63,7 @@ public class ConsoleReportTest {
     report.execute(PROJECT_NAME, DATE, issues, result);
 
     stdOut.flush();
-    assertThat(getLog(out)).contains("Issues Report");
+    assertThat(getLog(out)).contains("SonarLint Report");
     assertThat(getLog(out)).contains("2 issues");
     assertThat(getLog(out)).contains("1 major");
     assertThat(getLog(out)).contains("1 minor");

@@ -65,9 +65,9 @@ public class HtmlReport implements Reporter {
   }
 
   public void print(IssuesReport report) {
-    LOGGER.debug("Generating HTML Report to: " + reportFile);
+    LOGGER.debug("Generating SonarLint Report to: " + reportFile);
     writeToFile(report, reportFile);
-    LOGGER.info("HTML Issues Report generated: " + reportFile);
+    LOGGER.info("SonarLint HTML Report generated: " + reportFile);
     try {
       copyDependencies(reportDir);
     } catch (Exception e) {
@@ -85,7 +85,7 @@ public class HtmlReport implements Reporter {
       root.put("report", report);
       root.put("sources", sourceProvider);
 
-      Template template = cfg.getTemplate("issuesreport.ftl");
+      Template template = cfg.getTemplate("sonarlintreport.ftl");
 
       try (FileOutputStream fos = new FileOutputStream(toFile.toFile());
         Writer writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
@@ -98,7 +98,7 @@ public class HtmlReport implements Reporter {
   }
 
   private void copyDependencies(Path toDir) throws URISyntaxException, IOException {
-    Path target = toDir.resolve("issuesreport_files");
+    Path target = toDir.resolve("sonarlintreport_files");
     Files.createDirectories(target);
 
     // I don't know how to extract a directory from classpath, that's why an exhaustive list of files is provided here :
@@ -117,7 +117,7 @@ public class HtmlReport implements Reporter {
   }
 
   private void copyDependency(Path target, String filename) {
-    String resource = "issuesreport_files/" + filename;
+    String resource = "sonarlintreport_files/" + filename;
     try (InputStream in = getClass().getResourceAsStream(resource)) {
       Files.copy(in, target.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
 

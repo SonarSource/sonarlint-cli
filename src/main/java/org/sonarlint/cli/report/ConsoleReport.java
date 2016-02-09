@@ -27,7 +27,7 @@ import org.sonarsource.sonarlint.core.IssueListener;
 
 public class ConsoleReport implements Reporter {
 
-  public static final String HEADER = "-------------  Issues Report  -------------";
+  public static final String HEADER = "-------------  SonarLint Report  -------------";
   private static final Logger LOGGER = Logger.get();
 
   public static final String CONSOLE_REPORT_ENABLED_KEY = "sonar.issuesReport.console.enable";

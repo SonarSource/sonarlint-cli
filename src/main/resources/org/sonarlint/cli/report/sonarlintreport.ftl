@@ -3,9 +3,9 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <title>SonarLint report of ${report.getTitle()?html}</title>
-  <link href="issuesreport_files/sonar.css" media="all" rel="stylesheet" type="text/css">
-  <link rel="shortcut icon" type="image/x-icon" href="issuesreport_files/favicon.ico">
-  <script type="text/javascript" src="issuesreport_files/jquery.min.js"></script>
+  <link href="sonarlintreport_files/sonar.css" media="all" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" type="image/x-icon" href="sonarlintreport_files/favicon.ico">
+  <script type="text/javascript" src="sonarlintreport_files/jquery.min.js"></script>
   <script type="text/javascript">
     var issuesPerResource = [
     <#list report.getResourceReports() as resourceReport>
@@ -148,7 +148,7 @@
 </head>
 <body>
 <div id="reportHeader">
-  <div id="logo"><img src="issuesreport_files/sonarlint.png" alt="SonarLint"/></div>
+  <div id="logo"><img src="sonarlintreport_files/sonarlint.png" alt="SonarLint"/></div>
   <div class="title">SonarLint Report</div>
   <div class="subtitle">${report.getTitle()?html} - ${report.getDate()?datetime}</div>
 </div>
@@ -224,7 +224,7 @@
     <tr class="total">
       <th align="left" colspan="2" nowrap>
         <div class="file_title">
-          <img src="issuesreport_files/${resourceReport.getType()}.png" title="Resource icon"/>
+          <img src="sonarlintreport_files/${resourceReport.getType()}.png" title="Resource icon"/>
           <a href="#" onclick="$('.resource-details-${resourceReport_index?c}').toggleClass('masked'); return false;" style="color: black">${resourceReport.getName()}</a>
         </div>
       </th>

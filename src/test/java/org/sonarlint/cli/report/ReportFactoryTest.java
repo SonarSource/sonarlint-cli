@@ -51,7 +51,7 @@ public class ReportFactoryTest {
   @Test
   public void defaultReportFile() {
     Path report = factory.getReportFile(temp.getRoot().toPath());
-    assertThat(report).isEqualTo(temp.getRoot().toPath().resolve(".sonarlint").resolve("issues-report.html"));
+    assertThat(report).isEqualTo(temp.getRoot().toPath().resolve(".sonarlint").resolve("sonarlint-report.html"));
   }
 
   @Test

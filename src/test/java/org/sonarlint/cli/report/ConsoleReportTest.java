@@ -60,14 +60,45 @@ public class ConsoleReportTest {
     List<IssueListener.Issue> issues = new LinkedList<>();
     issues.add(createTestIssue("comp1", "rule", "MAJOR", 10));
     issues.add(createTestIssue("comp1", "rule", "MINOR", 10));
+    issues.add(createTestIssue("comp1", "rule", "CRITICAL", 10));
+    issues.add(createTestIssue("comp1", "rule", "INFO", 10));
+    issues.add(createTestIssue("comp1", "rule", "BLOCKER", 10));
+    
+    
     report.execute(PROJECT_NAME, DATE, issues, result);
 
     stdOut.flush();
     assertThat(getLog(out)).contains("SonarLint Report");
-    assertThat(getLog(out)).contains("2 issues");
+    assertThat(getLog(out)).contains("5 issues");
     assertThat(getLog(out)).contains("1 major");
     assertThat(getLog(out)).contains("1 minor");
+    assertThat(getLog(out)).contains("1 info");
+    assertThat(getLog(out)).contains("1 critical");
+    assertThat(getLog(out)).contains("1 blocker");
+
     assertThat(getLog(out)).doesNotContain("new");
+  }
+  
+  @Test
+  public void testReportWithoutIssues() throws IOException {
+    List<IssueListener.Issue> issues = new LinkedList<>();
+    report.execute(PROJECT_NAME, DATE, issues, result);
+    stdOut.flush();
+    assertThat(getLog(out)).contains("SonarLint Report");
+    assertThat(getLog(out)).contains("No issues to display");
+    assertThat(getLog(out)).contains("1 file analyzed");
+  }
+  
+  @Test
+  public void testReportNoFilesAnalyzed() throws IOException {
+    List<IssueListener.Issue> issues = new LinkedList<>();
+    when(result.fileCount()).thenReturn(0);
+    report.execute(PROJECT_NAME, DATE, issues, result);
+    stdOut.flush();
+    assertThat(getLog(out)).contains("SonarLint Report");
+    assertThat(getLog(out)).contains("No files analyzed");
+    
+    assertThat(getLog(out)).doesNotContain("issues");
   }
 
   private String getLog(ByteArrayOutputStream byteStream) throws IOException {

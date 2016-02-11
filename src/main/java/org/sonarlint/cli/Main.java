@@ -27,8 +27,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarlint.cli.util.Logger;
+import org.sonarlint.cli.util.System2;
 import org.sonarlint.cli.util.SystemInfo;
 
 public class Main {
@@ -126,38 +128,46 @@ public class Main {
   }
 
   public static void main(String[] args) {
-    Options opts = null;
+      execute(args, System2.INSTANCE);
+  }
+  
+  @VisibleForTesting
+  static void execute(String[] args, System2 system) {
+    Options parsedOpts = null;
     try {
-      opts = Options.parse(args);
+      parsedOpts = Options.parse(args);
     } catch (ParseException e) {
       LOGGER.error("Error parsing arguments: " + e.getMessage(), e);
       Options.printUsage();
-      System.exit(ERROR);
+      system.exit(ERROR);
+      return;
     }
 
     Charset charset = null;
     try {
-      if (opts.charset() != null) {
-        charset = Charset.forName(opts.charset());
+      if (parsedOpts.charset() != null) {
+        charset = Charset.forName(parsedOpts.charset());
       } else {
         charset = Charset.defaultCharset();
       }
     } catch (Exception e) {
-      LOGGER.error("Error creating charset: " + opts.charset(), e);
+      LOGGER.error("Error creating charset: " + parsedOpts.charset(), e);
     }
 
-    InputFileFinder fileFinder = new InputFileFinder(opts.src(), opts.tests(), charset);
+    InputFileFinder fileFinder = new InputFileFinder(parsedOpts.src(), parsedOpts.tests(), charset);
     ReportFactory reportFactory = new ReportFactory(charset);
     SonarLint sonarlint = null;
     try {
-      sonarlint = new SonarLint(opts);
+      sonarlint = new SonarLint(parsedOpts);
     } catch (IOException e) {
       LOGGER.error("Error loading plugins", e);
-      System.exit(ERROR);
+      system.exit(ERROR);
+      return;
     }
 
-    int ret = new Main(opts, sonarlint, reportFactory, fileFinder).run();
-    System.exit(ret);
+    int ret = new Main(parsedOpts, sonarlint, reportFactory, fileFinder).run();
+    system.exit(ret);
+    return;
   }
 
   private static void displayExecutionResult(Stats stats, String resultMsg) {

@@ -22,16 +22,21 @@ package org.sonarlint.cli;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+import org.sonarlint.cli.util.Logger;
 import org.sonarsource.sonarlint.core.AnalysisConfiguration.InputFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,11 +46,18 @@ public class InputFileFinderTest {
   private Path test1;
   private InputFileFinder fileFinder;
 
+  private ByteArrayOutputStream out;
+  private ByteArrayOutputStream err;
+
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
+
   @Before
   public void setUp() throws IOException {
+    setUpLogger();
     root = temp.getRoot().toPath();
     Path src = root.resolve("src");
     Path tests = root.resolve("tests");
@@ -60,6 +72,18 @@ public class InputFileFinderTest {
     Files.createFile(src1);
   }
 
+  private void setUpLogger() {
+    out = new ByteArrayOutputStream();
+    PrintStream outStream = new PrintStream(out);
+    err = new ByteArrayOutputStream();
+    PrintStream errStream = new PrintStream(err);
+    Logger.set(outStream, errStream);
+  }
+
+  private String getLogs(ByteArrayOutputStream stream) {
+    return new String(stream.toByteArray(), StandardCharsets.UTF_8);
+  }
+
   @Test
   public void onlyTest() throws IOException {
     fileFinder = new InputFileFinder(null, "**tests**", Charset.defaultCharset());
@@ -70,12 +94,27 @@ public class InputFileFinderTest {
   }
 
   @Test
+  public void invalidPattern() throws IOException {
+    exception.expect(PatternSyntaxException.class);
+    try {
+      fileFinder = new InputFileFinder(null, "\\", Charset.defaultCharset());
+    } catch (Exception e) {
+      err.flush();
+      assertThat(getLogs(err)).contains("Error creating matcher with pattern: \\");
+      throw e;
+    }
+  }
+
+  @Test
   public void onlySrc() throws IOException {
     fileFinder = new InputFileFinder("**src**", null, Charset.defaultCharset());
 
     List<InputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(1);
     assertThat(files).extracting("test").containsOnly(false);
+    
+    assertThat(files.get(0).path()).isEqualTo(src1);
+    assertThat(files.get(0).charset()).isEqualTo(Charset.defaultCharset());
   }
 
   @Test
@@ -86,7 +125,7 @@ public class InputFileFinderTest {
     assertThat(files).hasSize(2);
     assertThat(files).extracting("test").containsOnly(false);
   }
-
+  
   @Test
   public void testOverlapping() throws IOException {
     fileFinder = new InputFileFinder("**tests**", "**tests**", Charset.defaultCharset());

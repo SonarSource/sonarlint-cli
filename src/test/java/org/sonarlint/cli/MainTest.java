@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarlint.cli.util.Logger;
+import org.sonarlint.cli.util.System2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -105,6 +106,26 @@ public class MainTest {
     assertThat(main.run()).isEqualTo(Main.ERROR);
     assertThat(getLogs(out)).contains("EXECUTION FAILURE");
     assertThat(getLogs(err)).contains("invalid operation");
+  }
+  
+  @Test
+  public void bootstrap() {
+    System2 sys = mock(System2.class);
+    String[] args = { "-h" };
+    Main.execute(args, sys);
+    
+    verify(sys).exit(Main.SUCCESS);
+    assertThat(getLogs(out)).contains("usage: sonarlint");
+  }
+  
+  @Test
+  public void errorParsing() {
+    System2 sys = mock(System2.class);
+    String[] args = { "-invalid" };
+    Main.execute(args, sys);
+    
+    verify(sys).exit(Main.ERROR);
+    assertThat(getLogs(err)).contains("ERROR: Error parsing arguments: Unrecognized option: -invalid");
   }
 
   @Test

@@ -51,6 +51,17 @@ public class IssuesReportTest {
     assertThat(report.getFilesAnalyzed()).isEqualTo(1);
     assertThat(report.noFiles()).isFalse();
   }
+  
+  @Test
+  public void issueId() {
+    IssueListener.Issue i1 = createTestIssue("comp", "rule1", "name1", "MAJOR", 10);
+    IssueListener.Issue i2 = createTestIssue("comp", "rule2", "name2", "MAJOR", 11);
+    report.addIssue(i1);
+    report.addIssue(i2);
+    
+    assertThat(report.issueId(i1)).isEqualTo("issue0");
+    assertThat(report.issueId(i2)).isEqualTo("issue1");
+  }
 
   @Test
   public void testAdd() {

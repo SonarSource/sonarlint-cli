@@ -95,6 +95,10 @@ public class System2 {
   public String getenv(String key) {
     return System.getenv(key);
   }
+  
+  public void exit(int code) {
+    System.exit(code);
+  }
 
   /**
    * Shortcut for {@link System#getenv()}

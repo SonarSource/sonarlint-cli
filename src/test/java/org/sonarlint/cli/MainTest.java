@@ -98,6 +98,15 @@ public class MainTest {
     assertThat(main.run()).isEqualTo(Main.SUCCESS);
     verifyZeroInteractions(sonarLint);
   }
+  
+  @Test
+  // plugins are not available in test classpath
+  public void noPlugins() {
+    System2 sys = mock(System2.class);
+    Main.execute(new String[0], sys);
+    verify(sys).exit(Main.ERROR);
+    assertThat(getLogs(err)).contains("Error loading plugins");
+  }
 
   @Test
   public void errorStart() {
@@ -106,16 +115,6 @@ public class MainTest {
     assertThat(main.run()).isEqualTo(Main.ERROR);
     assertThat(getLogs(out)).contains("EXECUTION FAILURE");
     assertThat(getLogs(err)).contains("invalid operation");
-  }
-  
-  @Test
-  public void bootstrap() {
-    System2 sys = mock(System2.class);
-    String[] args = { "-h" };
-    Main.execute(args, sys);
-    
-    verify(sys).exit(Main.SUCCESS);
-    assertThat(getLogs(out)).contains("usage: sonarlint");
   }
   
   @Test

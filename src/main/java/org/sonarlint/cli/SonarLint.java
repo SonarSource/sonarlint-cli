@@ -46,15 +46,35 @@ public class SonarLint {
   private static final Logger LOGGER = Logger.get();
   private boolean running;
   private SonarLintClient client;
-  private Options opts;
 
-  public SonarLint(Options opts) throws IOException {
-    this.opts = opts;
+  public SonarLint(SonarLintClient client) throws IOException {
+    this.client = client;
+  }
+  
+  public static SonarLint create(Options opts) throws IOException {
+    URL[] plugins;
+
+    try {
+      plugins = loadPlugins();
+    } catch (Exception e) {
+      throw new IllegalStateException("Error loading plugins", e);
+    }
+    SonarLintClient c = SonarLintClient.builder()
+      .addPlugins(plugins)
+      .setLogOutput(new DefaultLogOutput(LOGGER))
+      .setVerbose(opts.isVerbose())
+      .build();
+    
+    return new SonarLint(c);
   }
 
   private static URL[] loadPlugins() throws IOException {
     String sonarlintHome = System.getProperty(SonarProperties.SONARLINT_HOME);
 
+    if(sonarlintHome == null) {
+      throw new IllegalStateException("Can't find SonarLint home. System property not set: " + SonarProperties.SONARLINT_HOME);
+    }
+    
     Path sonarLintHomePath = Paths.get(sonarlintHome);
     Path pluginDir = sonarLintHomePath.resolve("plugins");
 
@@ -68,25 +88,12 @@ public class SonarLint {
   }
 
   public void start() {
-    URL[] plugins;
-
-    try {
-      plugins = loadPlugins();
-    } catch (Exception e) {
-      throw new IllegalStateException("Error loading plugins", e);
-    }
-    client = SonarLintClient.builder()
-      .addPlugins(plugins)
-      .setLogOutput(new DefaultLogOutput(LOGGER))
-      .setVerbose(opts.isVerbose())
-      .build();
     client.start();
     running = true;
   }
 
   public void runAnalysis(Options opts, ReportFactory reportFactory, InputFileFinder finder) throws IOException {
     Date start = new Date();
-
     String baseDir = System.getProperty(PROJECT_HOME);
 
     Path baseDirPath = Paths.get(baseDir);
@@ -108,7 +115,7 @@ public class SonarLint {
     return new HashMap<>((Map) properties);
   }
 
-  private static void generateReports(List<IssueListener.Issue> issues, AnalysisResults result, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
+  static void generateReports(List<IssueListener.Issue> issues, AnalysisResults result, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
     List<Reporter> reporters = reportFactory.createReporters(baseDir);
 
     for (Reporter r : reporters) {
@@ -125,7 +132,7 @@ public class SonarLint {
     return running;
   }
 
-  private static class IssueCollector implements IssueListener {
+  static class IssueCollector implements IssueListener {
     private List<Issue> issues = new LinkedList<>();
 
     @Override

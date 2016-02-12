@@ -158,8 +158,8 @@ public class Main {
     ReportFactory reportFactory = new ReportFactory(charset);
     SonarLint sonarlint = null;
     try {
-      sonarlint = new SonarLint(parsedOpts);
-    } catch (IOException e) {
+      sonarlint = SonarLint.create(parsedOpts);
+    } catch (Exception e) {
       LOGGER.error("Error loading plugins", e);
       system.exit(ERROR);
       return;

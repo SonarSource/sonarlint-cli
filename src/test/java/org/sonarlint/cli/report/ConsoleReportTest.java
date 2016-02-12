@@ -67,8 +67,7 @@ public class ConsoleReportTest {
     issues.add(createTestIssue("comp1", "rule", "CRITICAL", 10));
     issues.add(createTestIssue("comp1", "rule", "INFO", 10));
     issues.add(createTestIssue("comp1", "rule", "BLOCKER", 10));
-    
-    
+
     report.execute(PROJECT_NAME, DATE, issues, result);
 
     stdOut.flush();
@@ -82,17 +81,17 @@ public class ConsoleReportTest {
 
     assertThat(getLog(out)).doesNotContain("new");
   }
-  
+
   @Test
   public void testInvalidSeverity() throws IOException {
     List<IssueListener.Issue> issues = new LinkedList<>();
     issues.add(createTestIssue("comp1", "rule", "INVALID", 10));
-    
+
     exception.expect(IllegalStateException.class);
     exception.expectMessage("Unknown severity");
     report.execute(PROJECT_NAME, DATE, issues, result);
   }
-  
+
   @Test
   public void testReportWithoutIssues() throws IOException {
     List<IssueListener.Issue> issues = new LinkedList<>();
@@ -102,7 +101,18 @@ public class ConsoleReportTest {
     assertThat(getLog(out)).contains("No issues to display");
     assertThat(getLog(out)).contains("1 file analyzed");
   }
-  
+
+  @Test
+  public void testReportMultipleFiles() throws IOException {
+    when(result.fileCount()).thenReturn(2);
+    List<IssueListener.Issue> issues = new LinkedList<>();
+    report.execute(PROJECT_NAME, DATE, issues, result);
+    stdOut.flush();
+    assertThat(getLog(out)).contains("SonarLint Report");
+    assertThat(getLog(out)).contains("No issues to display");
+    assertThat(getLog(out)).contains("2 files analyzed");
+  }
+
   @Test
   public void testReportNoFilesAnalyzed() throws IOException {
     List<IssueListener.Issue> issues = new LinkedList<>();
@@ -111,7 +121,7 @@ public class ConsoleReportTest {
     stdOut.flush();
     assertThat(getLog(out)).contains("SonarLint Report");
     assertThat(getLog(out)).contains("No files analyzed");
-    
+
     assertThat(getLog(out)).doesNotContain("issues");
   }
 
@@ -129,7 +139,7 @@ public class ConsoleReportTest {
 
   private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String severity, int line) {
     IssueListener.Issue issue = new IssueListener.Issue();
-    issue .setStartLine(line);
+    issue.setStartLine(line);
     issue.setFilePath(Paths.get(filePath));
     issue.setRuleKey(ruleKey);
     issue.setSeverity(severity);

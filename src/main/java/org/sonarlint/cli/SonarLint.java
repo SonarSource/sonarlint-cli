@@ -32,6 +32,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import com.google.common.annotations.VisibleForTesting;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarlint.cli.report.Reporter;
 import org.sonarlint.cli.util.Logger;
@@ -50,7 +52,7 @@ public class SonarLint {
   public SonarLint(SonarLintClient client) throws IOException {
     this.client = client;
   }
-  
+
   public static SonarLint create(Options opts) throws IOException {
     URL[] plugins;
 
@@ -64,17 +66,18 @@ public class SonarLint {
       .setLogOutput(new DefaultLogOutput(LOGGER))
       .setVerbose(opts.isVerbose())
       .build();
-    
+
     return new SonarLint(c);
   }
 
-  private static URL[] loadPlugins() throws IOException {
+  @VisibleForTesting
+  static URL[] loadPlugins() throws IOException {
     String sonarlintHome = System.getProperty(SonarProperties.SONARLINT_HOME);
 
-    if(sonarlintHome == null) {
+    if (sonarlintHome == null) {
       throw new IllegalStateException("Can't find SonarLint home. System property not set: " + SonarProperties.SONARLINT_HOME);
     }
-    
+
     Path sonarLintHomePath = Paths.get(sonarlintHome);
     Path pluginDir = sonarLintHomePath.resolve("plugins");
 
@@ -115,7 +118,7 @@ public class SonarLint {
     return new HashMap<>((Map) properties);
   }
 
-  static void generateReports(List<IssueListener.Issue> issues, AnalysisResults result, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
+  private static void generateReports(List<IssueListener.Issue> issues, AnalysisResults result, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
     List<Reporter> reporters = reportFactory.createReporters(baseDir);
 
     for (Reporter r : reporters) {

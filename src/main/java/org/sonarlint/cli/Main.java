@@ -38,7 +38,7 @@ public class Main {
   static final int ERROR = 1;
 
   private static final Logger LOGGER = Logger.get();
-  
+
   private final Options opts;
   private final ReportFactory reportFactory;
   private BufferedReader inputReader;
@@ -128,9 +128,9 @@ public class Main {
   }
 
   public static void main(String[] args) {
-      execute(args, System2.INSTANCE);
+    execute(args, System2.INSTANCE);
   }
-  
+
   @VisibleForTesting
   static void execute(String[] args, System2 system) {
     Options parsedOpts = null;

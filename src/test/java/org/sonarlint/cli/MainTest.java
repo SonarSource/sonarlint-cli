@@ -98,7 +98,7 @@ public class MainTest {
     assertThat(main.run()).isEqualTo(Main.SUCCESS);
     verifyZeroInteractions(sonarLint);
   }
-  
+
   @Test
   // plugins are not available in test classpath
   public void noPlugins() {
@@ -118,11 +118,21 @@ public class MainTest {
   }
   
   @Test
-  public void errorParsing() {
+  public void invalidCharset() {
     System2 sys = mock(System2.class);
-    String[] args = { "-invalid" };
+    String[] args = {"--charset", "invalid"};
     Main.execute(args, sys);
     
+    verify(sys).exit(Main.ERROR);
+    assertThat(getLogs(err)).contains("ERROR: Error creating charset: invalid");
+  }
+
+  @Test
+  public void errorParsing() {
+    System2 sys = mock(System2.class);
+    String[] args = {"-invalid"};
+    Main.execute(args, sys);
+
     verify(sys).exit(Main.ERROR);
     assertThat(getLogs(err)).contains("ERROR: Error parsing arguments: Unrecognized option: -invalid");
   }

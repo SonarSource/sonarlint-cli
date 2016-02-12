@@ -19,6 +19,7 @@
  */
 package org.sonarlint.cli.util;
 
+import org.assertj.core.data.Percentage;
 import org.junit.Test;
 
 import java.util.Map.Entry;
@@ -39,5 +40,7 @@ public class System2Test {
     
     assertThat(System2.INSTANCE.envVariable(envVar.getKey())).isEqualTo(envVar.getValue());
     assertThat(System2.INSTANCE.getenv(envVar.getKey())).isEqualTo(envVar.getValue());
+    
+    assertThat(System2.INSTANCE.now()).isCloseTo(System.currentTimeMillis(), Percentage.withPercentage(0.01));
   }
 }

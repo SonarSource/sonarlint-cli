@@ -28,7 +28,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.sonarlint.cli.util.Logger;
 import org.sonarsource.sonarlint.core.AnalysisResults;
 import org.sonarsource.sonarlint.core.IssueListener;
@@ -40,6 +42,8 @@ import static org.mockito.Mockito.when;
 public class ConsoleReportTest {
   private final static String PROJECT_NAME = "project";
   private final static Date DATE = new Date(System.currentTimeMillis());
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
   private ConsoleReport report;
   private AnalysisResults result;
   private ByteArrayOutputStream out;
@@ -77,6 +81,16 @@ public class ConsoleReportTest {
     assertThat(getLog(out)).contains("1 blocker");
 
     assertThat(getLog(out)).doesNotContain("new");
+  }
+  
+  @Test
+  public void testInvalidSeverity() throws IOException {
+    List<IssueListener.Issue> issues = new LinkedList<>();
+    issues.add(createTestIssue("comp1", "rule", "INVALID", 10));
+    
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("Unknown severity");
+    report.execute(PROJECT_NAME, DATE, issues, result);
   }
   
   @Test

@@ -23,9 +23,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarsource.sonarlint.core.SonarLintClient;
 
@@ -36,31 +33,26 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
-import org.sonarsource.sonarlint.core.AnalysisConfiguration;
 import org.sonarsource.sonarlint.core.AnalysisConfiguration.InputFile;
 import org.sonarsource.sonarlint.core.AnalysisResults;
-import org.sonarsource.sonarlint.core.IssueListener;
 import org.sonarsource.sonarlint.core.IssueListener.Issue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(SonarLintClient.class)
 public class SonarLintTest {
   private SonarLint sonarLint;
   private SonarLintClient client;
   
   @Rule
-  private TemporaryFolder temp = new TemporaryFolder();
+  public TemporaryFolder temp = new TemporaryFolder();
   
   @Before
   public void setUp() throws IOException {
-    client = mock(SonarLintClient.class);
+    client = SonarLintClient.builder().build();
     sonarLint = new SonarLint(client);
   }
   
@@ -68,13 +60,9 @@ public class SonarLintTest {
   public void startStop() {
     assertThat(sonarLint.isRunning()).isFalse();
     sonarLint.start();
-    verify(client).start();
     assertThat(sonarLint.isRunning()).isTrue();
     sonarLint.stop();
     assertThat(sonarLint.isRunning()).isFalse();
-    verify(client).stop();
-    
-    verifyNoMoreInteractions(client);
   }
   
   @Test
@@ -91,11 +79,10 @@ public class SonarLintTest {
     String path = temp.newFolder().getAbsolutePath();
     
     System.setProperty(SonarProperties.PROJECT_HOME, path);
-    when(client.analyze(any(AnalysisConfiguration.class), any(IssueListener.class))).thenReturn(results);
     
+    sonarLint.start();
     sonarLint.runAnalysis(new Options(), new ReportFactory(StandardCharsets.UTF_8), fileFinder);
     
-    verify(client).analyze(any(AnalysisConfiguration.class), any(IssueListener.class));
     verify(fileFinder).collect(Paths.get(path));
     
     Path htmlReport = Paths.get(path).resolve(".sonarlint").resolve("sonarlint-report.html");

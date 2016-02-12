@@ -64,7 +64,7 @@ public class ConsoleReport implements Reporter {
           infoIssues++;
           break;
         default:
-          throw new IllegalStateException("Unknow severity: " + issue.getSeverity());
+          throw new IllegalStateException("Unknown severity: " + issue.getSeverity());
       }
     }
 

@@ -21,6 +21,7 @@ case "$TARGET" in
 CI)
   if [ "${TRAVIS_BRANCH}" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     strongEcho 'Build and analyze commit in master'
+    git fetch --unshallow || true
     # this commit is master must be built and analyzed (with upload of report)
     export MAVEN_OPTS="-Xmx1G -Xms128m"
     mvn org.jacoco:jacoco-maven-plugin:prepare-agent verify sonar:sonar \

@@ -10,7 +10,6 @@ script: ./travis.sh
 env:
   matrix:
     - TARGET=CI
-    - TARGET=IT
 
 cache:
   directories:
@@ -20,3 +19,5 @@ cache:
 
 notifications:
   email: false
+  webhooks:
+    - secure: "LOtncSv54lCHHhLDRJ7tmVqBGWKeEvJNWXRu5oqVDVocJXy65IiaYU5OlfWmc/wn4iQC6dT3DEV4nF3wBdaIFioIp1CLO3ECo2w6LilQ1wra9Kgj47RazbcSkMrxJkz7wnn504JXok0pvX2/r9UCzJEi9D98jKQDCZ3tNw97YisiWevrhd9ExKG5tmlZea7r+AWdTpZ0EOTDOy95P+ZwPjEsArOXtkypK2DI1Bg5FDzU3xUo6CBRtICE3x5VdCmP2IdyK7Ll7ijX0YbkCrU8/BP00URmCWPNP2VmSBFpT/wXVmhjEYnHEKh21tJfMMv32U4z4ORvDlwlzZVpG4R0md3lR5Wnp5bLTqVkhkLAwgrPjNb9KIiVAV1wDMEy8xKpLHj8GXEcU/qZKi2rDxAj3Zv6ZV177QBZDRsWg5tkO8xxqSWVe9AoXhb6nHmYlFsu+dzJ/UgWZoc2s/3zrw3Kj8YwOSN0qmjDKdEE35TbGgQF/P56Vb5LooyEdK2g4RngiIyqF4OTX1AdSx5cgKbj5vDwGYLoLC0VclGpCPJDc6Vt/oDyAx+RyQOlvvgb8vaGXiIh1azE8ArDFqOb0x8vdIVCsCLnI4w+dcHOdqjVA2bOM0/eWadbRacRgP1DTGSCKfn4eUyyJPzmKicSDe4hkCm2xhhvbu5f/5AX0d0QVZs="

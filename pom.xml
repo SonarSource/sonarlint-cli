@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.sonarsource.parent</groupId>
     <artifactId>parent</artifactId>
-    <version>26</version>
+    <version>31</version>
   </parent>
 
   <groupId>org.sonarsource.sonarlint</groupId>
@@ -42,6 +42,7 @@
 
   <properties>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
+    <gitRepositoryName>sonarlint-cli</gitRepositoryName>
   </properties>
 
   <dependencies>

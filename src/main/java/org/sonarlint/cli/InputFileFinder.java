@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -42,62 +43,6 @@ public class InputFileFinder {
   private final PathMatcher testsMatcher;
   private final Charset charset;
 
-  public InputFileFinder(@Nullable String srcGlobPattern, @Nullable String testsGlobPattern, Charset charset) {
-    this.charset = charset;
-
-    try {
-      if (srcGlobPattern != null) {
-        srcMatcher = FileSystems.getDefault().getPathMatcher("glob:" + srcGlobPattern);
-      } else {
-        srcMatcher = acceptAll;
-      }
-    } catch (Exception e) {
-      LOGGER.error("Error creating matcher with pattern: " + srcGlobPattern);
-      throw e;
-    }
-
-    try {
-      if (testsGlobPattern != null) {
-        testsMatcher = FileSystems.getDefault().getPathMatcher("glob:" + testsGlobPattern);
-      } else {
-        testsMatcher = refuseAll;
-      }
-    } catch (Exception e) {
-      LOGGER.error("Error creating matcher with pattern: " + testsGlobPattern);
-      throw e;
-    }
-  }
-
-  public List<InputFile> collect(Path dir) throws IOException {
-    final List<InputFile> files = new ArrayList<>();
-
-    Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
-      @Override
-      public FileVisitResult visitFile(final Path file, BasicFileAttributes attrs) throws IOException {
-        boolean isTest = testsMatcher.matches(file);
-        boolean isSrc = srcMatcher.matches(file);
-
-        if (isTest || isSrc) {
-          files.add(new DefaultInputFile(file, isTest, charset));
-        }
-
-        return super.visitFile(file, attrs);
-      }
-      
-      @Override
-      public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-        if(Files.isHidden(dir)) {
-          LOGGER.debug("Ignoring hidden directory: " + dir.toString());
-          return FileVisitResult.SKIP_SUBTREE;
-        }
-        
-        return super.preVisitDirectory(dir, attrs);
-      }
-    });
-
-    return files;
-  }
-
   private static PathMatcher acceptAll = new PathMatcher() {
     @Override
     public boolean matches(Path path) {
@@ -111,6 +56,68 @@ public class InputFileFinder {
       return false;
     }
   };
+
+  public InputFileFinder(@Nullable String srcGlobPattern, @Nullable String testsGlobPattern, Charset charset) {
+    this.charset = charset;
+    FileSystem fs = FileSystems.getDefault();
+    try {
+      if (srcGlobPattern != null) {
+        srcMatcher = fs.getPathMatcher("glob:" + srcGlobPattern);
+      } else {
+        srcMatcher = acceptAll;
+      }
+    } catch (Exception e) {
+      LOGGER.error("Error creating matcher with pattern: " + srcGlobPattern);
+      throw e;
+    }
+
+    try {
+      if (testsGlobPattern != null) {
+        testsMatcher = fs.getPathMatcher("glob:" + testsGlobPattern);
+      } else {
+        testsMatcher = refuseAll;
+      }
+    } catch (Exception e) {
+      LOGGER.error("Error creating matcher with pattern: " + testsGlobPattern);
+      throw e;
+    }
+  }
+
+  public List<InputFile> collect(Path dir) throws IOException {
+    final List<InputFile> files = new ArrayList<>();
+    Files.walkFileTree(dir, new FileCollector(files));
+    return files;
+  }
+
+  private class FileCollector extends SimpleFileVisitor<Path> {
+    private List<InputFile> files;
+
+    private FileCollector(List<InputFile> files) {
+      this.files = files;
+    }
+
+    @Override
+    public FileVisitResult visitFile(final Path file, BasicFileAttributes attrs) throws IOException {
+      boolean isTest = testsMatcher.matches(file);
+      boolean isSrc = srcMatcher.matches(file);
+
+      if (isTest || isSrc) {
+        files.add(new DefaultInputFile(file, isTest, charset));
+      }
+
+      return super.visitFile(file, attrs);
+    }
+
+    @Override
+    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+      if (Files.isHidden(dir)) {
+        LOGGER.debug("Ignoring hidden directory: " + dir.toString());
+        return FileVisitResult.SKIP_SUBTREE;
+      }
+
+      return super.preVisitDirectory(dir, attrs);
+    }
+  }
 
   private static class DefaultInputFile implements InputFile {
     private final Path path;

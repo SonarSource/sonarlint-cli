@@ -110,7 +110,7 @@ public class ConsoleReport implements Reporter {
     sb.append(")");
   }
 
-  private void printIssues(Report r, StringBuilder sb, int filesAnalyzed) {
+  private static void printIssues(Report r, StringBuilder sb, int filesAnalyzed) {
     int issues = r.totalIssues;
     sb.append(leftPad(Integer.toString(issues), LEFT_PAD))
       .append(" issue");

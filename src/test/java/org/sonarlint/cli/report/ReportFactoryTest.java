@@ -56,8 +56,7 @@ public class ReportFactoryTest {
 
   @Test
   public void customReportFile() {
-    factory.setHtmlPath(Paths.get("myreport", "myfile.html").toString());
-    Path report = factory.getReportFile(temp.getRoot().toPath());
+    Path report = factory.getReportFile(temp.getRoot().toPath(), Paths.get("myreport", "myfile.html").toString());
     assertThat(report).isEqualTo(temp.getRoot().toPath().resolve("myreport").resolve("myfile.html"));
   }
 }

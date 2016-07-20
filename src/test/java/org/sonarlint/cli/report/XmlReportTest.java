@@ -19,10 +19,6 @@
  */
 package org.sonarlint.cli.report;
 
-import java.nio.file.Path;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,11 +26,16 @@ import org.junit.rules.TemporaryFolder;
 import org.sonarsource.sonarlint.core.AnalysisResults;
 import org.sonarsource.sonarlint.core.IssueListener;
 
+import java.nio.file.Path;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class HtmlReportTest extends BaseReportTest {
-  private HtmlReport html;
+public class XmlReportTest extends BaseReportTest {
+  private XmlReport xml;
   private AnalysisResults result;
 
   @Rule
@@ -46,14 +47,14 @@ public class HtmlReportTest extends BaseReportTest {
   public void setUp() {
     result = mock(AnalysisResults.class);
     when(result.fileCount()).thenReturn(1);
-    reportFile = temp.getRoot().toPath().resolve("report.html");
+    reportFile = temp.getRoot().toPath().resolve("report.xml");
     sources = mock(SourceProvider.class);
-    html = new HtmlReport(temp.getRoot().toPath(), reportFile, sources);
+    xml = new XmlReport(temp.getRoot().toPath(), reportFile, sources);
   }
 
   @Test
-  public void testHtml() {
-    html.execute("project", new Date(), createTestIssues(temp.getRoot().toPath()), result);
+  public void testXml() {
+    xml.execute("project", new Date(), createTestIssues(temp.getRoot().toPath()), result);
   }
 
   private static List<IssueListener.Issue> createTestIssues(Path basePath) {

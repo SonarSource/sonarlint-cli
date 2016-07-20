@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ConsoleReportTest {
+public class ConsoleReportTest extends BaseReportTest {
   private final static String PROJECT_NAME = "project";
   private final static Date DATE = new Date(System.currentTimeMillis());
   @Rule
@@ -135,14 +135,5 @@ public class ConsoleReportTest {
     stdOut = new PrintStream(out);
     stdErr = new PrintStream(err);
     Logger.set(stdOut, stdErr);
-  }
-
-  private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String severity, int line) {
-    IssueListener.Issue issue = new IssueListener.Issue();
-    issue.setStartLine(line);
-    issue.setFilePath(Paths.get(filePath));
-    issue.setRuleKey(ruleKey);
-    issue.setSeverity(severity);
-    return issue;
   }
 }

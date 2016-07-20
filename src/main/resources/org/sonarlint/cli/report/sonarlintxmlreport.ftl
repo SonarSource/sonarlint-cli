@@ -4,8 +4,8 @@
   <#list report.getResourceReports() as resourceReport>
     <file name="${resourceReport.getName()}">
       <issues total="${resourceReport.getTotal().getCountInCurrentAnalysis()?c}">
-        <#list resourceReport.getCategoryReports() as categoryReport>
-        <issue severity="${categoryReport.getSeverity()?lower_case}" count="${categoryReport.getTotal().getCountInCurrentAnalysis()?c}">${categoryReport.getName()?xml}</issue>
+        <#list resourceReport.getIssues() as issue>
+        <issue severity="${issue.getSeverity()?lower_case}" key="${issue.getRuleKey()?xml}" name="${issue.getRuleName()?xml}" line="${(issue.getStartLine()!0)?c}" offset="${(issue.getStartLineOffset()!0)?c}"/>
         </#list>
       </issues>
     </file>

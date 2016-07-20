@@ -33,7 +33,7 @@ import org.sonarsource.sonarlint.core.IssueListener;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class HtmlReportTest {
+public class HtmlReportTest extends BaseReportTest {
   private HtmlReport html;
   private AnalysisResults result;
 
@@ -53,11 +53,13 @@ public class HtmlReportTest {
 
   @Test
   public void testHtml() {
-    html.execute("project", new Date(), createTestIssues(), result);
+    html.execute("project", new Date(), createTestIssues(temp.getRoot().toPath()), result);
   }
 
-  private static List<IssueListener.Issue> createTestIssues() {
+  private static List<IssueListener.Issue> createTestIssues(Path basePath) {
     List<IssueListener.Issue> issues = new LinkedList<>();
+    issues.add(createTestIssue(basePath.resolve("comp1").toString(), "rule", "ruleName", "MAJOR", 10));
+    issues.add(createTestIssue(basePath.resolve("comp1").toString(), "rule", "ruleName", "MINOR", 10));
 
     return issues;
   }

@@ -23,40 +23,45 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.sonarsource.sonarlint.core.AnalysisResults;
+import org.sonarsource.sonarlint.core.IssueListener;
 
-import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public class ReportFactoryTest {
-  private ReportFactory factory;
+public class XmlReportTest extends BaseReportTest {
+  private XmlReport xml;
+  private AnalysisResults result;
 
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
+  private Path reportFile;
+  private SourceProvider sources;
 
   @Before
   public void setUp() {
-    factory = new ReportFactory(Charset.defaultCharset());
+    result = mock(AnalysisResults.class);
+    when(result.fileCount()).thenReturn(1);
+    reportFile = temp.getRoot().toPath().resolve("report.xml");
+    sources = mock(SourceProvider.class);
+    xml = new XmlReport(temp.getRoot().toPath(), reportFile, sources);
   }
 
   @Test
-  public void test() {
-    List<Reporter> reporters = factory.createReporters(Paths.get("test"));
-    assertThat(reporters).hasSize(2);
+  public void testXml() {
+    xml.execute("project", new Date(), createTestIssues(temp.getRoot().toPath()), result);
   }
 
-  @Test
-  public void defaultReportFile() {
-    Path report = factory.getReportFile(temp.getRoot().toPath());
-    assertThat(report).isEqualTo(temp.getRoot().toPath().resolve(".sonarlint").resolve("sonarlint-report.html"));
-  }
+  private static List<IssueListener.Issue> createTestIssues(Path basePath) {
+    List<IssueListener.Issue> issues = new LinkedList<>();
+    issues.add(createTestIssue(basePath.resolve("comp1").toString(), "rule", "ruleName", "MAJOR", 10));
+    issues.add(createTestIssue(basePath.resolve("comp1").toString(), "rule", "ruleName", "MINOR", 10));
 
-  @Test
-  public void customReportFile() {
-    Path report = factory.getReportFile(temp.getRoot().toPath(), Paths.get("myreport", "myfile.html").toString());
-    assertThat(report).isEqualTo(temp.getRoot().toPath().resolve("myreport").resolve("myfile.html"));
+    return issues;
   }
 }

@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.sonarlint.cli.util.Function;
 import org.sonarlint.cli.util.Util;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
@@ -43,9 +42,9 @@ public class ReportSummary {
     Severity severity = Severity.create(issue.getSeverity());
     IssueCategory category = new IssueCategory(issue.getRuleKey(), severity, issue.getRuleName());
 
-    IssueVariation byRuleKey = Util.getOrCreate(totalByRuleKey, issue.getRuleKey(), issueVariationFactory);
+    IssueVariation byRuleKey = Util.getOrCreate(totalByRuleKey, issue.getRuleKey(), IssueVariation::new);
     CategoryReport byCategory = getOrCreate(reportByCategory, category);
-    IssueVariation bySeverity = Util.getOrCreate(totalBySeverity, issue.getSeverity(), issueVariationFactory);
+    IssueVariation bySeverity = Util.getOrCreate(totalBySeverity, issue.getSeverity(), IssueVariation::new);
 
     total.incrementCountInCurrentAnalysis();
     byCategory.getTotal().incrementCountInCurrentAnalysis();
@@ -81,12 +80,4 @@ public class ReportSummary {
     Collections.sort(result, new CategoryReportComparator());
     return result;
   }
-
-  // waiting for Java 8..
-  private static Function<IssueVariation> issueVariationFactory = new Function<IssueVariation>() {
-    @Override
-    public IssueVariation call() {
-      return new IssueVariation();
-    }
-  };
 }

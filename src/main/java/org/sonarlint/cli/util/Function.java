@@ -19,6 +19,7 @@
  */
 package org.sonarlint.cli.util;
 
+@FunctionalInterface
 public interface Function<T> {
   T call();
 }

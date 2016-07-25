@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.sonarlint.cli.util.Function;
 import org.sonarlint.cli.util.MutableInt;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
@@ -100,9 +99,9 @@ public final class ResourceReport {
     Integer line = issue.getStartLine();
     line = line != null ? line : 0;
 
-    getOrCreate(issuesPerLine, line, issueListCreator).add(issue);
-    getOrCreate(issuesByRule, ruleKey, intCreator).inc();
-    getOrCreate(issuesBySeverity, severity, intCreator).inc();
+    getOrCreate(issuesPerLine, line, LinkedList::new).add(issue);
+    getOrCreate(issuesByRule, ruleKey, MutableInt::new).inc();
+    getOrCreate(issuesBySeverity, severity, MutableInt::new).inc();
 
     reportByCategory.get(reportRuleKey).getTotal().incrementCountInCurrentAnalysis();
     total.incrementCountInCurrentAnalysis();
@@ -136,20 +135,4 @@ public final class ResourceReport {
     Collections.sort(result, new CategoryReportComparator());
     return result;
   }
-
-  // waiting for Java 8..
-  private static Function<MutableInt> intCreator = new Function<MutableInt>() {
-    @Override
-    public MutableInt call() {
-      return new MutableInt();
-    }
-  };
-
-  private static Function<List<Issue>> issueListCreator = new Function<List<Issue>>() {
-    @Override
-    public List<Issue> call() {
-      return new LinkedList<>();
-    }
-  };
-
 }

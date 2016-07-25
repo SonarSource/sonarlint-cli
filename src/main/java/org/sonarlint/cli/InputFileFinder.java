@@ -43,19 +43,8 @@ public class InputFileFinder {
   private final PathMatcher testsMatcher;
   private final Charset charset;
 
-  private static PathMatcher acceptAll = new PathMatcher() {
-    @Override
-    public boolean matches(Path path) {
-      return true;
-    }
-  };
-
-  private static PathMatcher refuseAll = new PathMatcher() {
-    @Override
-    public boolean matches(Path path) {
-      return false;
-    }
-  };
+  private static PathMatcher acceptAll = p -> true;
+  private static PathMatcher refuseAll = p -> false;
 
   public InputFileFinder(@Nullable String srcGlobPattern, @Nullable String testsGlobPattern, Charset charset) {
     this.charset = charset;

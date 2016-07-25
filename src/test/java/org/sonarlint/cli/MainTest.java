@@ -80,8 +80,6 @@ public class MainTest {
   @Test
   public void testMain() {
     assertThat(main.run()).isEqualTo(Main.SUCCESS);
-
-    verify(sonarLint).start();
     verify(sonarLint).stop();
   }
 
@@ -109,20 +107,20 @@ public class MainTest {
   }
 
   @Test
-  public void errorStart() {
+  public void errorStart() throws IOException {
     Exception e = createException("invalid operation", "analysis failed");
-    doThrow(e).when(sonarLint).start();
+    doThrow(e).when(sonarLint).runAnalysis(any(Options.class), any(ReportFactory.class), any(InputFileFinder.class));
     assertThat(main.run()).isEqualTo(Main.ERROR);
     assertThat(getLogs(out)).contains("EXECUTION FAILURE");
     assertThat(getLogs(err)).contains("invalid operation");
   }
-  
+
   @Test
   public void invalidCharset() {
     System2 sys = mock(System2.class);
     String[] args = {"--charset", "invalid"};
     Main.execute(args, sys);
-    
+
     verify(sys).exit(Main.ERROR);
     assertThat(getLogs(err)).contains("ERROR: Error creating charset: invalid");
   }
@@ -193,10 +191,10 @@ public class MainTest {
   }
 
   @Test
-  public void showStack() {
+  public void showStack() throws IOException {
     when(opts.showStack()).thenReturn(true);
     Exception e = createException("invalid operation", "analysis failed");
-    doThrow(e).when(sonarLint).start();
+    doThrow(e).when(sonarLint).runAnalysis(any(Options.class), any(ReportFactory.class), any(InputFileFinder.class));
     assertThat(main.run()).isEqualTo(Main.ERROR);
     assertThat(getLogs(out)).contains("EXECUTION FAILURE");
     assertThat(getLogs(err)).contains("invalid operation");

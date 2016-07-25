@@ -37,20 +37,25 @@ import com.google.common.annotations.VisibleForTesting;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarlint.cli.report.Reporter;
 import org.sonarlint.cli.util.Logger;
-import org.sonarsource.sonarlint.core.AnalysisConfiguration;
-import org.sonarsource.sonarlint.core.AnalysisResults;
-import org.sonarsource.sonarlint.core.IssueListener;
-import org.sonarsource.sonarlint.core.SonarLintClient;
+import org.sonarsource.sonarlint.core.StandaloneSonarLintEngineImpl;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.IssueListener;
+import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneAnalysisConfiguration;
+import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneGlobalConfiguration;
+import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneSonarLintEngine;
 
 import static org.sonarlint.cli.SonarProperties.PROJECT_HOME;
 
 public class SonarLint {
   private static final Logger LOGGER = Logger.get();
   private boolean running;
-  private SonarLintClient client;
+  private final StandaloneSonarLintEngine engine;
 
-  public SonarLint(SonarLintClient client) throws IOException {
-    this.client = client;
+  public SonarLint(StandaloneSonarLintEngine engine) throws IOException {
+    this.engine = engine;
+    this.running = true;
   }
 
   public static SonarLint create(Options opts) throws IOException {
@@ -61,13 +66,15 @@ public class SonarLint {
     } catch (Exception e) {
       throw new IllegalStateException("Error loading plugins", e);
     }
-    SonarLintClient c = SonarLintClient.builder()
+
+    StandaloneGlobalConfiguration config = StandaloneGlobalConfiguration.builder()
       .addPlugins(plugins)
       .setLogOutput(new DefaultLogOutput(LOGGER))
-      .setVerbose(opts.isVerbose())
+      // verbose?
       .build();
 
-    return new SonarLint(c);
+    StandaloneSonarLintEngine engine = new StandaloneSonarLintEngineImpl(config);
+    return new SonarLint(engine);
   }
 
   @VisibleForTesting
@@ -90,17 +97,12 @@ public class SonarLint {
     return pluginsUrls.toArray(new URL[pluginsUrls.size()]);
   }
 
-  public void start() {
-    client.start();
-    running = true;
-  }
-
   public void runAnalysis(Options opts, ReportFactory reportFactory, InputFileFinder finder) throws IOException {
     Date start = new Date();
     String baseDir = System.getProperty(PROJECT_HOME);
 
     Path baseDirPath = Paths.get(baseDir);
-    List<AnalysisConfiguration.InputFile> inputFiles = finder.collect(baseDirPath);
+    List<ClientInputFile> inputFiles = finder.collect(baseDirPath);
 
     if (inputFiles.isEmpty()) {
       LOGGER.warn("No files to analyze");
@@ -110,7 +112,7 @@ public class SonarLint {
     }
 
     IssueCollector collector = new IssueCollector();
-    AnalysisResults result = client.analyze(new AnalysisConfiguration(baseDirPath, baseDirPath.resolve(".sonarlint"), inputFiles, toMap(opts.properties())), collector);
+    AnalysisResults result = engine.analyze(new StandaloneAnalysisConfiguration(baseDirPath, baseDirPath.resolve(".sonarlint"), inputFiles, toMap(opts.properties())), collector);
     generateReports(collector.get(), result, reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);
   }
 
@@ -118,7 +120,7 @@ public class SonarLint {
     return new HashMap<>((Map) properties);
   }
 
-  private static void generateReports(List<IssueListener.Issue> issues, AnalysisResults result, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
+  private static void generateReports(List<Issue> issues, AnalysisResults result, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
     List<Reporter> reporters = reportFactory.createReporters(baseDir);
 
     for (Reporter r : reporters) {
@@ -127,7 +129,7 @@ public class SonarLint {
   }
 
   public void stop() {
-    client.stop();
+    engine.stop();
     running = false;
   }
 

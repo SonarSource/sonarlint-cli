@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import org.sonarlint.cli.util.Function;
 import org.sonarlint.cli.util.MutableInt;
-import org.sonarsource.sonarlint.core.IssueListener;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -40,10 +40,10 @@ import static org.sonarlint.cli.util.Util.getOrCreate;
 public final class ResourceReport {
   private final Path filePath;
   private final IssueVariation total = new IssueVariation();
-  private final List<IssueListener.Issue> issues = new ArrayList<>();
+  private final List<Issue> issues = new ArrayList<>();
 
   private final Map<IssueCategory, CategoryReport> reportByCategory = new HashMap<>();
-  private final Map<Integer, List<IssueListener.Issue>> issuesPerLine = new HashMap<>();
+  private final Map<Integer, List<Issue>> issuesPerLine = new HashMap<>();
 
   private final Map<String, MutableInt> issuesByRule = new HashMap<>();
   private final EnumMap<Severity, MutableInt> issuesBySeverity = new EnumMap<>(Severity.class);
@@ -60,7 +60,7 @@ public final class ResourceReport {
   }
 
   public String getName() {
-    return basePath.relativize(filePath).toString();
+    return basePath.toAbsolutePath().relativize(filePath.toAbsolutePath()).toString();
   }
 
   public String getType() {
@@ -75,22 +75,22 @@ public final class ResourceReport {
     return total;
   }
 
-  public List<IssueListener.Issue> getIssues() {
+  public List<Issue> getIssues() {
     return issues;
   }
 
-  public Map<Integer, List<IssueListener.Issue>> getIssuesPerLine() {
+  public Map<Integer, List<Issue>> getIssuesPerLine() {
     return issuesPerLine;
   }
 
-  public List<IssueListener.Issue> getIssuesAtLine(int lineId) {
+  public List<Issue> getIssuesAtLine(int lineId) {
     if (issuesPerLine.containsKey(lineId)) {
       return issuesPerLine.get(lineId);
     }
     return Collections.emptyList();
   }
 
-  public void addIssue(IssueListener.Issue issue) {
+  public void addIssue(Issue issue) {
     Severity severity = Severity.create(issue.getSeverity());
     String ruleKey = issue.getRuleKey();
     IssueCategory reportRuleKey = new IssueCategory(ruleKey, severity, issue.getRuleName());
@@ -127,7 +127,7 @@ public final class ResourceReport {
   }
 
   private boolean hasIssues(Integer lineId) {
-    List<IssueListener.Issue> issuesAtLine = issuesPerLine.get(lineId);
+    List<Issue> issuesAtLine = issuesPerLine.get(lineId);
     return issuesAtLine != null && !issuesAtLine.isEmpty();
   }
 
@@ -145,9 +145,9 @@ public final class ResourceReport {
     }
   };
 
-  private static Function<List<IssueListener.Issue>> issueListCreator = new Function<List<IssueListener.Issue>>() {
+  private static Function<List<Issue>> issueListCreator = new Function<List<Issue>>() {
     @Override
-    public List<IssueListener.Issue> call() {
+    public List<Issue> call() {
       return new LinkedList<>();
     }
   };

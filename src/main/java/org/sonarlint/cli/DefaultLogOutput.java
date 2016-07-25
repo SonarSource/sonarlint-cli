@@ -20,7 +20,7 @@
 package org.sonarlint.cli;
 
 import org.sonarlint.cli.util.Logger;
-import org.sonarsource.sonarlint.core.LogOutput;
+import org.sonarsource.sonarlint.core.client.api.common.LogOutput;
 
 class DefaultLogOutput implements LogOutput {
 

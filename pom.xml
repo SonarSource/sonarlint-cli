@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.sonarsource.parent</groupId>
     <artifactId>parent</artifactId>
-    <version>31</version>
+    <version>36</version>
   </parent>
 
   <groupId>org.sonarsource.sonarlint</groupId>
@@ -49,7 +49,12 @@
     <dependency>
       <groupId>org.sonarsource.sonarlint.core</groupId>
       <artifactId>sonarlint-core</artifactId>
-      <version>1.0.1</version>
+      <version>2.4-build579</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sonarsource.sonarlint.core</groupId>
+      <artifactId>sonarlint-client-api</artifactId>
+      <version>2.4-build579</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -205,8 +210,8 @@
             <configuration>
               <rules>
                 <requireFilesSize>
-                  <minsize>25000000</minsize>
-                  <maxsize>27000000</maxsize>
+                  <minsize>27000000</minsize>
+                  <maxsize>30000000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonarlint-cli-${project.version}.zip</file>
                   </files>

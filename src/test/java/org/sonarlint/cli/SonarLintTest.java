@@ -25,7 +25,11 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.sonarlint.cli.report.ReportFactory;
-import org.sonarsource.sonarlint.core.SonarLintClient;
+import org.sonarsource.sonarlint.core.StandaloneSonarLintEngineImpl;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneGlobalConfiguration;
+import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneSonarLintEngine;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,9 +41,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
-import org.sonarsource.sonarlint.core.AnalysisConfiguration.InputFile;
-import org.sonarsource.sonarlint.core.IssueListener.Issue;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -48,7 +49,7 @@ import static org.mockito.Mockito.when;
 
 public class SonarLintTest {
   private SonarLint sonarLint;
-  private SonarLintClient client;
+  private StandaloneSonarLintEngine client;
 
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
@@ -58,14 +59,12 @@ public class SonarLintTest {
 
   @Before
   public void setUp() throws IOException {
-    client = SonarLintClient.builder().build();
+    client = new StandaloneSonarLintEngineImpl(StandaloneGlobalConfiguration.builder().build());
     sonarLint = new SonarLint(client);
   }
 
   @Test
   public void startStop() {
-    assertThat(sonarLint.isRunning()).isFalse();
-    sonarLint.start();
     assertThat(sonarLint.isRunning()).isTrue();
     sonarLint.stop();
     assertThat(sonarLint.isRunning()).isFalse();
@@ -74,11 +73,10 @@ public class SonarLintTest {
   @Test
   public void run() throws IOException {
     InputFileFinder fileFinder = mock(InputFileFinder.class);
-    when(fileFinder.collect(any(Path.class))).thenReturn(Collections.singletonList(createInputFile("Test.java", false)));
+    Path inputFile = temp.newFile().toPath();
+    when(fileFinder.collect(any(Path.class))).thenReturn(Collections.singletonList(createInputFile(inputFile, false)));
     String path = temp.newFolder().getAbsolutePath();
     System.setProperty(SonarProperties.PROJECT_HOME, path);
-
-    sonarLint.start();
     sonarLint.runAnalysis(new Options(), new ReportFactory(StandardCharsets.UTF_8), fileFinder);
 
     verify(fileFinder).collect(Paths.get(path));
@@ -90,11 +88,10 @@ public class SonarLintTest {
   @Test
   public void runWithoutFiles() throws IOException {
     InputFileFinder fileFinder = mock(InputFileFinder.class);
-    when(fileFinder.collect(any(Path.class))).thenReturn(Collections.EMPTY_LIST);
+    when(fileFinder.collect(any(Path.class))).thenReturn(Collections.<ClientInputFile>emptyList());
     String path = temp.newFolder().getAbsolutePath();
     System.setProperty(SonarProperties.PROJECT_HOME, path);
 
-    sonarLint.start();
     sonarLint.runAnalysis(new Options(), new ReportFactory(StandardCharsets.UTF_8), fileFinder);
 
     Path htmlReport = Paths.get(path).resolve(".sonarlint").resolve("sonarlint-report.html");
@@ -103,14 +100,12 @@ public class SonarLintTest {
 
   @Test
   public void create() throws IOException {
-    File dir = temp.newFolder("plugins");
-    File plugin = new File(dir, "test.jar");
-    plugin.createNewFile();
+    temp.newFolder("plugins");
     System.setProperty(SonarProperties.SONARLINT_HOME, temp.getRoot().getAbsolutePath());
 
     SonarLint sl = SonarLint.create(new Options());
     assertThat(sl).isNotNull();
-    assertThat(sl.isRunning()).isFalse();
+    assertThat(sl.isRunning()).isTrue();
   }
 
   @Test
@@ -145,12 +140,12 @@ public class SonarLintTest {
     assertThat(collector.get()).containsExactly(i1, i2);
   }
 
-  private static InputFile createInputFile(final String name, final boolean test) {
-    return new InputFile() {
+  private static ClientInputFile createInputFile(final Path filePath, final boolean test) {
+    return new ClientInputFile() {
 
       @Override
-      public Path path() {
-        return Paths.get(name);
+      public Path getPath() {
+        return filePath;
       }
 
       @Override
@@ -159,15 +154,20 @@ public class SonarLintTest {
       }
 
       @Override
-      public Charset charset() {
+      public Charset getCharset() {
         return StandardCharsets.UTF_8;
+      }
+
+      @Override
+      public <G> G getClientObject() {
+        return null;
       }
     };
   }
 
   private static Issue createIssue(String ruleKey) {
-    Issue i = new Issue();
-    i.setRuleKey(ruleKey);
+    Issue i = mock(Issue.class);
+    when(i.getRuleKey()).thenReturn(ruleKey);
     return i;
   }
 }

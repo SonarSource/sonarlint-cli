@@ -26,7 +26,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.sonarsource.sonarlint.core.IssueListener;
+
+import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
 public class IssuesReport {
 
@@ -37,7 +39,7 @@ public class IssuesReport {
   private final ReportSummary summary = new ReportSummary();
   private final Map<Path, ResourceReport> resourceReportsByFilePath = new HashMap<>();
   private final Map<String, String> ruleNameByKey = new HashMap<>();
-  private final Map<IssueListener.Issue, Integer> ids = new HashMap<>();
+  private final Map<Issue, Integer> ids = new HashMap<>();
   private int id = 0;
   private Path basePath;
 
@@ -97,18 +99,21 @@ public class IssuesReport {
     return ruleNameByKey.get(ruleKey);
   }
 
-  public String issueId(IssueListener.Issue issue) {
+  public String issueId(Issue issue) {
     return "issue" + ids.get(issue).toString();
   }
 
-  public void addIssue(IssueListener.Issue issue) {
+  public void addIssue(Issue issue) {
     ruleNameByKey.put(issue.getRuleKey(), issue.getRuleName());
     ids.put(issue, id++);
 
-    Path filePath = issue.getFilePath();
-    if (filePath == null) {
+    Path filePath;
+    ClientInputFile inputFile = issue.getInputFile();
+    if (inputFile == null) {
       // issue on project (no specific file)
       filePath = Paths.get("");
+    } else {
+      filePath = inputFile.getPath();
     }
     ResourceReport report = getOrCreate(filePath);
     getSummary().addIssue(issue);

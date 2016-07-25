@@ -23,9 +23,12 @@ import java.nio.file.Paths;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
-import org.sonarsource.sonarlint.core.IssueListener;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class IssuesReportTest {
   private IssuesReport report;
@@ -51,14 +54,14 @@ public class IssuesReportTest {
     assertThat(report.getFilesAnalyzed()).isEqualTo(1);
     assertThat(report.noFiles()).isFalse();
   }
-  
+
   @Test
   public void issueId() {
-    IssueListener.Issue i1 = createTestIssue("comp", "rule1", "name1", "MAJOR", 10);
-    IssueListener.Issue i2 = createTestIssue("comp", "rule2", "name2", "MAJOR", 11);
+    Issue i1 = createTestIssue("comp", "rule1", "name1", "MAJOR", 10);
+    Issue i2 = createTestIssue("comp", "rule2", "name2", "MAJOR", 11);
     report.addIssue(i1);
     report.addIssue(i2);
-    
+
     assertThat(report.issueId(i1)).isEqualTo("issue0");
     assertThat(report.issueId(i2)).isEqualTo("issue1");
   }
@@ -74,13 +77,16 @@ public class IssuesReportTest {
     assertThat(report.getRuleName("rule1")).isEqualTo("name1");
   }
 
-  private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String name, String severity, int line) {
-    IssueListener.Issue issue = new IssueListener.Issue();
-    issue.setStartLine(line);
-    issue.setRuleName(name);
-    issue.setFilePath(Paths.get(filePath));
-    issue.setRuleKey(ruleKey);
-    issue.setSeverity(severity);
+  private static Issue createTestIssue(String filePath, String ruleKey, String name, String severity, int line) {
+    ClientInputFile inputFile = mock(ClientInputFile.class);
+    when(inputFile.getPath()).thenReturn(Paths.get(filePath));
+
+    Issue issue = mock(Issue.class);
+    when(issue.getStartLine()).thenReturn(line);
+    when(issue.getRuleName()).thenReturn(name);
+    when(issue.getInputFile()).thenReturn(inputFile);
+    when(issue.getRuleKey()).thenReturn(ruleKey);
+    when(issue.getSeverity()).thenReturn(severity);
     return issue;
   }
 }

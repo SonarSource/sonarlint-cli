@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.sonarlint.cli.util.Logger;
-import org.sonarsource.sonarlint.core.AnalysisConfiguration.InputFile;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -88,7 +88,7 @@ public class InputFileFinderTest {
   public void onlyTest() throws IOException {
     fileFinder = new InputFileFinder(null, "**tests**", Charset.defaultCharset());
 
-    List<InputFile> files = fileFinder.collect(root);
+    List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(2);
     assertThat(files).extracting("test").contains(true, false);
   }
@@ -109,28 +109,28 @@ public class InputFileFinderTest {
   public void onlySrc() throws IOException {
     fileFinder = new InputFileFinder("**src**", null, Charset.defaultCharset());
 
-    List<InputFile> files = fileFinder.collect(root);
+    List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(1);
     assertThat(files).extracting("test").containsOnly(false);
-    
-    assertThat(files.get(0).path()).isEqualTo(src1);
-    assertThat(files.get(0).charset()).isEqualTo(Charset.defaultCharset());
+
+    assertThat(files.get(0).getPath()).isEqualTo(src1);
+    assertThat(files.get(0).getCharset()).isEqualTo(Charset.defaultCharset());
   }
 
   @Test
   public void testDefault() throws IOException {
     fileFinder = new InputFileFinder(null, null, Charset.defaultCharset());
 
-    List<InputFile> files = fileFinder.collect(root);
+    List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(2);
     assertThat(files).extracting("test").containsOnly(false);
   }
-  
+
   @Test
   public void testOverlapping() throws IOException {
     fileFinder = new InputFileFinder("**tests**", "**tests**", Charset.defaultCharset());
 
-    List<InputFile> files = fileFinder.collect(root);
+    List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(1);
     assertThat(files).extracting("test").containsOnly(true);
   }
@@ -140,7 +140,7 @@ public class InputFileFinderTest {
     fileFinder = new InputFileFinder(null, null, Charset.defaultCharset());
     File hiddenFolder = temp.newFolder(".test");
     Path hiddenSrc = hiddenFolder.toPath().resolve("Test.java");
-    List<InputFile> files = fileFinder.collect(root);
+    List<ClientInputFile> files = fileFinder.collect(root);
 
     assertThat(files).extracting("path").doesNotContain(hiddenSrc);
     assertThat(files).extracting("path").contains(src1);
@@ -150,7 +150,7 @@ public class InputFileFinderTest {
   public void testDisjoint() throws IOException {
     fileFinder = new InputFileFinder("**abc**", "**abc**", Charset.defaultCharset());
 
-    List<InputFile> files = fileFinder.collect(root);
+    List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).isEmpty();
   }
 
@@ -158,7 +158,7 @@ public class InputFileFinderTest {
   public void testCharset() throws IOException {
     fileFinder = new InputFileFinder(null, null, StandardCharsets.US_ASCII);
 
-    List<InputFile> files = fileFinder.collect(root);
+    List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(2);
     assertThat(files).extracting("charset").containsOnly(StandardCharsets.US_ASCII);
   }

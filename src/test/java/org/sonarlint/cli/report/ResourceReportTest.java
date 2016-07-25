@@ -19,6 +19,7 @@
  */
 package org.sonarlint.cli.report;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -26,8 +27,9 @@ import java.util.LinkedList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import org.sonarsource.sonarlint.core.IssueListener;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
+import static org.sonarlint.cli.TestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
@@ -42,8 +44,8 @@ public class ResourceReportTest {
 
   @Test
   public void testIssuesLines() {
-    IssueListener.Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
-    IssueListener.Issue i2 = createTestIssue("file1", "rule1", "MAJOR", 11);
+    Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
+    Issue i2 = createTestIssue("file1", "rule1", "MAJOR", 11);
     resourceReport.addIssue(i1);
     resourceReport.addIssue(i2);
 
@@ -68,15 +70,15 @@ public class ResourceReportTest {
   @Test
   public void testName() {
     resourceReport = new ResourceReport(Paths.get("/tmp/test"), Paths.get("/tmp/test/src/file1"));
-    assertThat(resourceReport.getName()).isEqualTo("src/file1");
+    assertThat(resourceReport.getName()).isEqualTo("src" + File.separator + "file1");
   }
 
   @Test
   public void testCategoryReport() {
-    IssueListener.Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
-    IssueListener.Issue i2 = createTestIssue("file1", "rule1", "MINOR", 11);
-    IssueListener.Issue i3 = createTestIssue("file1", "rule2", "MINOR", 11);
-    IssueListener.Issue i4 = createTestIssue("file1", "rule2", "MINOR", 12);
+    Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
+    Issue i2 = createTestIssue("file1", "rule1", "MINOR", 11);
+    Issue i3 = createTestIssue("file1", "rule2", "MINOR", 11);
+    Issue i4 = createTestIssue("file1", "rule2", "MINOR", 12);
     resourceReport.addIssue(i1);
     resourceReport.addIssue(i2);
     resourceReport.addIssue(i3);
@@ -104,8 +106,8 @@ public class ResourceReportTest {
 
   @Test
   public void lineIssues() {
-    IssueListener.Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
-    IssueListener.Issue i2 = createTestIssue("file1", "rule1", "MINOR", 11);
+    Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
+    Issue i2 = createTestIssue("file1", "rule1", "MINOR", 11);
     resourceReport.addIssue(i1);
     resourceReport.addIssue(i2);
 
@@ -122,14 +124,5 @@ public class ResourceReportTest {
     assertThat(resourceReport.isDisplayableLine(13)).isTrue();
     assertThat(resourceReport.isDisplayableLine(14)).isFalse();
 
-  }
-
-  private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String severity, int line) {
-    IssueListener.Issue issue = new IssueListener.Issue();
-    issue.setStartLine(line);
-    issue.setFilePath(Paths.get(filePath));
-    issue.setRuleKey(ruleKey);
-    issue.setSeverity(severity);
-    return issue;
   }
 }

@@ -20,7 +20,7 @@
 package org.sonarlint.cli;
 
 import org.sonarlint.cli.util.Logger;
-import org.sonarsource.sonarlint.core.AnalysisConfiguration.InputFile;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 
 import javax.annotation.Nullable;
 
@@ -83,16 +83,16 @@ public class InputFileFinder {
     }
   }
 
-  public List<InputFile> collect(Path dir) throws IOException {
-    final List<InputFile> files = new ArrayList<>();
+  public List<ClientInputFile> collect(Path dir) throws IOException {
+    final List<ClientInputFile> files = new ArrayList<>();
     Files.walkFileTree(dir, new FileCollector(files));
     return files;
   }
 
   private class FileCollector extends SimpleFileVisitor<Path> {
-    private List<InputFile> files;
+    private List<ClientInputFile> files;
 
-    private FileCollector(List<InputFile> files) {
+    private FileCollector(List<ClientInputFile> files) {
       this.files = files;
     }
 
@@ -102,7 +102,7 @@ public class InputFileFinder {
       boolean isSrc = srcMatcher.matches(file);
 
       if (isTest || isSrc) {
-        files.add(new DefaultInputFile(file, isTest, charset));
+        files.add(new DefaultClientInputFile(file, isTest, charset));
       }
 
       return super.visitFile(file, attrs);
@@ -119,20 +119,15 @@ public class InputFileFinder {
     }
   }
 
-  private static class DefaultInputFile implements InputFile {
+  private static class DefaultClientInputFile implements ClientInputFile {
     private final Path path;
     private final boolean test;
     private final Charset charset;
 
-    DefaultInputFile(Path path, boolean test, Charset charset) {
+    DefaultClientInputFile(Path path, boolean test, Charset charset) {
       this.path = path;
       this.test = test;
       this.charset = charset;
-    }
-
-    @Override
-    public Path path() {
-      return path;
     }
 
     @Override
@@ -141,9 +136,18 @@ public class InputFileFinder {
     }
 
     @Override
-    public Charset charset() {
+    public Path getPath() {
+      return path;
+    }
+
+    @Override
+    public Charset getCharset() {
       return charset;
     }
-  }
 
+    @Override
+    public <G> G getClientObject() {
+      return null;
+    }
+  }
 }

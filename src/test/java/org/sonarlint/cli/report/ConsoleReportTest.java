@@ -23,7 +23,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,9 +31,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.sonarlint.cli.util.Logger;
-import org.sonarsource.sonarlint.core.AnalysisResults;
-import org.sonarsource.sonarlint.core.IssueListener;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
+import static org.sonarlint.cli.TestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -61,7 +61,7 @@ public class ConsoleReportTest {
 
   @Test
   public void testLog() throws IOException {
-    List<IssueListener.Issue> issues = new LinkedList<>();
+    List<Issue> issues = new LinkedList<>();
     issues.add(createTestIssue("comp1", "rule", "MAJOR", 10));
     issues.add(createTestIssue("comp1", "rule", "MINOR", 10));
     issues.add(createTestIssue("comp1", "rule", "CRITICAL", 10));
@@ -84,7 +84,7 @@ public class ConsoleReportTest {
 
   @Test
   public void testInvalidSeverity() throws IOException {
-    List<IssueListener.Issue> issues = new LinkedList<>();
+    List<Issue> issues = new LinkedList<>();
     issues.add(createTestIssue("comp1", "rule", "INVALID", 10));
 
     exception.expect(IllegalStateException.class);
@@ -94,7 +94,7 @@ public class ConsoleReportTest {
 
   @Test
   public void testReportWithoutIssues() throws IOException {
-    List<IssueListener.Issue> issues = new LinkedList<>();
+    List<Issue> issues = new LinkedList<>();
     report.execute(PROJECT_NAME, DATE, issues, result);
     stdOut.flush();
     assertThat(getLog(out)).contains("SonarLint Report");
@@ -105,7 +105,7 @@ public class ConsoleReportTest {
   @Test
   public void testReportMultipleFiles() throws IOException {
     when(result.fileCount()).thenReturn(2);
-    List<IssueListener.Issue> issues = new LinkedList<>();
+    List<Issue> issues = new LinkedList<>();
     report.execute(PROJECT_NAME, DATE, issues, result);
     stdOut.flush();
     assertThat(getLog(out)).contains("SonarLint Report");
@@ -115,7 +115,7 @@ public class ConsoleReportTest {
 
   @Test
   public void testReportNoFilesAnalyzed() throws IOException {
-    List<IssueListener.Issue> issues = new LinkedList<>();
+    List<Issue> issues = new LinkedList<>();
     when(result.fileCount()).thenReturn(0);
     report.execute(PROJECT_NAME, DATE, issues, result);
     stdOut.flush();
@@ -135,14 +135,5 @@ public class ConsoleReportTest {
     stdOut = new PrintStream(out);
     stdErr = new PrintStream(err);
     Logger.set(stdOut, stdErr);
-  }
-
-  private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String severity, int line) {
-    IssueListener.Issue issue = new IssueListener.Issue();
-    issue.setStartLine(line);
-    issue.setFilePath(Paths.get(filePath));
-    issue.setRuleKey(ruleKey);
-    issue.setSeverity(severity);
-    return issue;
   }
 }

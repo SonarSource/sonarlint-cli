@@ -35,8 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.sonarlint.cli.util.Logger;
-import org.sonarsource.sonarlint.core.AnalysisResults;
-import org.sonarsource.sonarlint.core.IssueListener;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
 public class HtmlReport implements Reporter {
   private static final Logger LOGGER = Logger.get();
@@ -53,9 +53,9 @@ public class HtmlReport implements Reporter {
   }
 
   @Override
-  public void execute(String projectName, Date date, List<IssueListener.Issue> issues, AnalysisResults result) {
+  public void execute(String projectName, Date date, List<Issue> issues, AnalysisResults result) {
     IssuesReport report = new IssuesReport(basePath);
-    for (IssueListener.Issue i : issues) {
+    for (Issue i : issues) {
       report.addIssue(i);
     }
     report.setTitle(projectName);

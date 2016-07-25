@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import org.sonarlint.cli.util.Function;
 import org.sonarlint.cli.util.Util;
-import org.sonarsource.sonarlint.core.IssueListener;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
 public class ReportSummary {
 
@@ -39,7 +39,7 @@ public class ReportSummary {
   ReportSummary() {
   }
 
-  public void addIssue(IssueListener.Issue issue) {
+  public void addIssue(Issue issue) {
     Severity severity = Severity.create(issue.getSeverity());
     IssueCategory category = new IssueCategory(issue.getRuleKey(), severity, issue.getRuleName());
 

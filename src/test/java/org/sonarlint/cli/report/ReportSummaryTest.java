@@ -19,13 +19,13 @@
  */
 package org.sonarlint.cli.report;
 
-import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import org.sonarsource.sonarlint.core.IssueListener;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
+import static org.sonarlint.cli.TestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
@@ -39,7 +39,7 @@ public class ReportSummaryTest {
 
   @Test
   public void test() {
-    for (IssueListener.Issue i : createTestIssues()) {
+    for (Issue i : createTestIssues()) {
       summary.addIssue(i);
     }
 
@@ -66,8 +66,8 @@ public class ReportSummaryTest {
     assertThat(iv.getResolvedIssuesCount()).isEqualTo(resolved);
   }
 
-  private static List<IssueListener.Issue> createTestIssues() {
-    List<IssueListener.Issue> issueList = new LinkedList<>();
+  private static List<Issue> createTestIssues() {
+    List<Issue> issueList = new LinkedList<>();
 
     issueList.add(createTestIssue("comp1", "rule1", "MAJOR", 10));
     issueList.add(createTestIssue("comp1", "rule2", "MINOR", 11));
@@ -77,12 +77,4 @@ public class ReportSummaryTest {
     return issueList;
   }
 
-  private static IssueListener.Issue createTestIssue(String filePath, String ruleKey, String severity, int line) {
-    IssueListener.Issue issue = new IssueListener.Issue();
-    issue .setStartLine(line);
-    issue.setFilePath(Paths.get(filePath));
-    issue.setRuleKey(ruleKey);
-    issue.setSeverity(severity);
-    return issue;
-  }
 }

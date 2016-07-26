@@ -266,6 +266,9 @@
                 <#else>
                   <span class="rulename">${issue.getRuleName()}</span>
                 </#if>
+                &nbsp;
+                <img src="sonarlintreport_files/sep12.png">&nbsp;
+                <span class="rule_key">${issue.getRuleKey()}</span>
               </div>
               <div class="discussionComment">
                 ${issue.getRuleName()}
@@ -305,6 +308,9 @@
                             <#else>
                             <span class="rulename">${issue.getRuleName()}</span>
                             </#if>
+                            &nbsp;
+                            <img src="sonarlintreport_files/sep12.png">&nbsp;
+                            <span class="rule_key">${issue.getRuleKey()}</span>
                           </div>
                           <div class="discussionComment">
                             ${issue.getRuleName()}

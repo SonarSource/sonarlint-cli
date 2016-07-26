@@ -17,15 +17,27 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarlint.cli.report;
+package org.sonarlint.cli.config;
 
-import java.util.Date;
-import java.util.List;
+public class SonarQubeServer {
+  private String url;
+  private String token;
+  private String login;
+  private String password;
 
-import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
-import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+  public String url() {
+    return url;
+  }
 
-@FunctionalInterface
-public interface Reporter {
-  void execute(String projectName, Date date, List<Issue> issues, AnalysisResults result);
+  public String token() {
+    return token;
+  }
+
+  public String login() {
+    return login;
+  }
+
+  public String password() {
+    return password;
+  }
 }

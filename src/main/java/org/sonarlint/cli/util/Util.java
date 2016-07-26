@@ -19,7 +19,9 @@
  */
 package org.sonarlint.cli.util;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 public class Util {
   private Util() {
@@ -34,5 +36,9 @@ public class Util {
     value = f.call();
     map.put(key, value);
     return value;
+  }
+  
+  public static Map<String, String> toMap(Properties properties) {
+    return new HashMap<>((Map) properties);
   }
 }

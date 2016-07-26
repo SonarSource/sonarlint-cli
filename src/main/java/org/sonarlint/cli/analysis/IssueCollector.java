@@ -17,33 +17,23 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarlint.cli;
+package org.sonarlint.cli.analysis;
 
-import org.sonarlint.cli.util.Logger;
-import org.sonarsource.sonarlint.core.client.api.common.LogOutput;
+import java.util.LinkedList;
+import java.util.List;
 
-class DefaultLogOutput implements LogOutput {
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.IssueListener;
 
-  private final Logger logger;
-
-  public DefaultLogOutput(Logger logger) {
-    this.logger = logger;
-  }
+public class IssueCollector implements IssueListener {
+  private List<Issue> issues = new LinkedList<>();
 
   @Override
-  public void log(String formattedMessage, Level level) {
-    switch (level) {
-      case TRACE:
-      case DEBUG:
-        logger.debug(formattedMessage);
-        break;
-      case ERROR:
-        logger.error(formattedMessage);
-        break;
-      case INFO:
-      case WARN:
-      default:
-        logger.info(formattedMessage);
-    }
+  public void handle(Issue issue) {
+    issues.add(issue);
+  }
+
+  public List<Issue> get() {
+    return issues;
   }
 }

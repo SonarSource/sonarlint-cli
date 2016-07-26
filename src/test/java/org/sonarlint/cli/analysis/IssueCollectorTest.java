@@ -17,15 +17,23 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarlint.cli.report;
+package org.sonarlint.cli.analysis;
 
-import java.util.Date;
-import java.util.List;
+import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.*;
 
-import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
+import org.junit.Test;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
-@FunctionalInterface
-public interface Reporter {
-  void execute(String projectName, Date date, List<Issue> issues, AnalysisResults result);
+public class IssueCollectorTest {
+  @Test
+  public void testCollector() {
+    IssueCollector collector = new IssueCollector();
+    Issue i1 = mock(Issue.class);
+    Issue i2 = mock(Issue.class);
+    collector.handle(i1);
+    collector.handle(i2);
+
+    assertThat(collector.get()).containsExactly(i1, i2);
+  }
 }

@@ -26,12 +26,18 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.Map;
 
 import com.google.common.annotations.VisibleForTesting;
+
+import org.sonarlint.cli.analysis.SonarLint;
+import org.sonarlint.cli.analysis.SonarLintFactory;
+import org.sonarlint.cli.config.ConfigurationReader;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarlint.cli.util.Logger;
 import org.sonarlint.cli.util.System2;
 import org.sonarlint.cli.util.SystemInfo;
+import org.sonarlint.cli.util.Util;
 
 public class Main {
   static final int SUCCESS = 0;
@@ -42,17 +48,17 @@ public class Main {
   private final Options opts;
   private final ReportFactory reportFactory;
   private BufferedReader inputReader;
-  private final SonarLint sonarlint;
   private final InputFileFinder fileFinder;
+  private final SonarLintFactory sonarLintFactory;
 
-  public Main(Options opts, SonarLint sonarlint, ReportFactory reportFactory, InputFileFinder fileFinder) {
+  public Main(Options opts, SonarLintFactory sonarLintFactory, ReportFactory reportFactory, InputFileFinder fileFinder) {
     this.opts = opts;
-    this.sonarlint = sonarlint;
+    this.sonarLintFactory = sonarLintFactory;
     this.reportFactory = reportFactory;
     this.fileFinder = fileFinder;
   }
 
-  public int run() {
+  int run() {
     if (opts.isHelp()) {
       Options.printUsage();
       return SUCCESS;
@@ -76,10 +82,15 @@ public class Main {
 
     Stats stats = new Stats();
     try {
+      SonarLint sonarLint = sonarLintFactory.createSonarLint(opts.isUpdate(), opts.isVerbose());
+      sonarLint.start(opts.isUpdate());
+
+      Map<String, String> props = Util.toMap(opts.properties());
+
       if (opts.isInteractive()) {
-        runInteractive(stats, sonarlint, opts);
+        runInteractive(stats, sonarLint, props);
       } else {
-        runOnce(stats, sonarlint, opts);
+        runOnce(stats, sonarLint, props);
       }
     } catch (Exception e) {
       displayExecutionResult(stats, "FAILURE");
@@ -90,21 +101,21 @@ public class Main {
     return SUCCESS;
   }
 
-  private void runOnce(Stats stats, SonarLint sonarlint, Options options) throws IOException {
+  private void runOnce(Stats stats, SonarLint sonarLint, Map<String, String> props) throws IOException {
     stats.start();
-    sonarlint.runAnalysis(options, reportFactory, fileFinder);
-    sonarlint.stop();
+    sonarLint.runAnalysis(props, reportFactory, fileFinder);
+    sonarLint.stop();
     displayExecutionResult(stats, "SUCCESS");
   }
 
-  private void runInteractive(Stats stats, SonarLint sonarlint, Options options) throws IOException {
+  private void runInteractive(Stats stats, SonarLint sonarLint, Map<String, String> props) throws IOException {
     do {
       stats.start();
-      sonarlint.runAnalysis(options, reportFactory, fileFinder);
+      sonarLint.runAnalysis(props, reportFactory, fileFinder);
       displayExecutionResult(stats, "SUCCESS");
     } while (waitForUser());
 
-    sonarlint.stop();
+    sonarLint.stop();
   }
 
   private boolean waitForUser() throws IOException {
@@ -146,20 +157,16 @@ public class Main {
       }
     } catch (Exception e) {
       LOGGER.error("Error creating charset: " + parsedOpts.charset(), e);
-    }
-
-    InputFileFinder fileFinder = new InputFileFinder(parsedOpts.src(), parsedOpts.tests(), charset);
-    ReportFactory reportFactory = new ReportFactory(charset);
-    SonarLint sonarlint = null;
-    try {
-      sonarlint = SonarLint.create(parsedOpts);
-    } catch (Exception e) {
-      LOGGER.error("Error loading plugins", e);
       system.exit(ERROR);
       return;
     }
 
-    int ret = new Main(parsedOpts, sonarlint, reportFactory, fileFinder).run();
+    InputFileFinder fileFinder = new InputFileFinder(parsedOpts.src(), parsedOpts.tests(), charset);
+    ReportFactory reportFactory = new ReportFactory(charset);
+    ConfigurationReader reader = new ConfigurationReader();
+    SonarLintFactory sonarLintFactory = new SonarLintFactory(reader);
+
+    int ret = new Main(parsedOpts, sonarLintFactory, reportFactory, fileFinder).run();
     system.exit(ret);
     return;
   }

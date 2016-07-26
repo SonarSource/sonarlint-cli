@@ -30,13 +30,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.sonarlint.cli.analysis.SonarLint;
+import org.sonarlint.cli.analysis.SonarLintFactory;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarlint.cli.util.Logger;
 import org.sonarlint.cli.util.System2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -47,6 +53,7 @@ import static org.mockito.Mockito.when;
 
 public class MainTest {
   private Main main;
+  private SonarLintFactory sonarLintFactory;
   private SonarLint sonarLint;
   private ReportFactory reportFactory;
   private InputFileFinder fileFinder;
@@ -54,15 +61,21 @@ public class MainTest {
   private ByteArrayOutputStream out;
   private ByteArrayOutputStream err;
 
+  @Rule
+  public TemporaryFolder temp = new TemporaryFolder();
+
   @Before
-  public void setUp() {
+  public void setUp() throws IOException {
+    temp.newFolder("plugins");
     opts = mock(Options.class);
     reportFactory = mock(ReportFactory.class);
     when(opts.properties()).thenReturn(new Properties());
     setUpLogger();
     sonarLint = mock(SonarLint.class);
+    sonarLintFactory = mock(SonarLintFactory.class);
+    when(sonarLintFactory.createSonarLint(anyBoolean(), anyBoolean())).thenReturn(sonarLint);
     fileFinder = new InputFileFinder(null, null, Charset.defaultCharset());
-    main = new Main(opts, sonarLint, reportFactory, fileFinder);
+    main = new Main(opts, sonarLintFactory, reportFactory, fileFinder);
   }
 
   private void setUpLogger() {
@@ -109,7 +122,7 @@ public class MainTest {
   @Test
   public void errorStart() throws IOException {
     Exception e = createException("invalid operation", "analysis failed");
-    doThrow(e).when(sonarLint).runAnalysis(any(Options.class), any(ReportFactory.class), any(InputFileFinder.class));
+    doThrow(e).when(sonarLint).runAnalysis(anyMapOf(String.class, String.class), any(ReportFactory.class), any(InputFileFinder.class));
     assertThat(main.run()).isEqualTo(Main.ERROR);
     assertThat(getLogs(out)).contains("EXECUTION FAILURE");
     assertThat(getLogs(err)).contains("invalid operation");
@@ -117,6 +130,8 @@ public class MainTest {
 
   @Test
   public void invalidCharset() {
+    System.setProperty("sonarlint.home", temp.getRoot().getAbsolutePath());
+
     System2 sys = mock(System2.class);
     String[] args = {"--charset", "invalid"};
     Main.execute(args, sys);
@@ -159,7 +174,7 @@ public class MainTest {
 
     assertThat(mutableInt.get()).isEqualTo(Main.SUCCESS);
     verify(sonarLint, times(1)).stop();
-    verify(sonarLint, times(2)).runAnalysis(any(Options.class), eq(reportFactory), eq(fileFinder));
+    verify(sonarLint, times(2)).runAnalysis(anyMapOf(String.class, String.class), eq(reportFactory), eq(fileFinder));
   }
 
   @Test
@@ -184,7 +199,7 @@ public class MainTest {
   @Test
   public void errorAnalysis() throws IOException {
     Exception e = createException("invalid operation", "analysis failed");
-    doThrow(e).when(sonarLint).runAnalysis(any(Options.class), eq(reportFactory), eq(fileFinder));
+    doThrow(e).when(sonarLint).runAnalysis(anyMapOf(String.class, String.class), eq(reportFactory), eq(fileFinder));
     assertThat(main.run()).isEqualTo(Main.ERROR);
     assertThat(getLogs(out)).contains("EXECUTION FAILURE");
     assertThat(getLogs(err)).contains("invalid operation");
@@ -194,7 +209,7 @@ public class MainTest {
   public void showStack() throws IOException {
     when(opts.showStack()).thenReturn(true);
     Exception e = createException("invalid operation", "analysis failed");
-    doThrow(e).when(sonarLint).runAnalysis(any(Options.class), any(ReportFactory.class), any(InputFileFinder.class));
+    doThrow(e).when(sonarLint).runAnalysis(anyMapOf(String.class, String.class), any(ReportFactory.class), any(InputFileFinder.class));
     assertThat(main.run()).isEqualTo(Main.ERROR);
     assertThat(getLogs(out)).contains("EXECUTION FAILURE");
     assertThat(getLogs(err)).contains("invalid operation");

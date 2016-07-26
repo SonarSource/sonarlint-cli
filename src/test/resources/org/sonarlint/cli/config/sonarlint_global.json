@@ -1,0 +1,10 @@
+{
+  servers: [
+    {
+      "id": "local",
+      "url": "http://localhost:9000",
+      "login": "admin",
+      "password": "admin"
+    }
+  ]
+}

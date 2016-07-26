@@ -17,15 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarlint.cli.report;
+@ParametersAreNonnullByDefault
+package org.sonarlint.cli.analysis;
 
-import java.util.Date;
-import java.util.List;
-
-import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
-import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
-
-@FunctionalInterface
-public interface Reporter {
-  void execute(String projectName, Date date, List<Issue> issues, AnalysisResults result);
-}
+import javax.annotation.ParametersAreNonnullByDefault;

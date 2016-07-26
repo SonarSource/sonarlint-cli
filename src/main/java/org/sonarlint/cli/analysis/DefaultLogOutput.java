@@ -17,15 +17,37 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarlint.cli.report;
+package org.sonarlint.cli.analysis;
 
-import java.util.Date;
-import java.util.List;
+import org.sonarlint.cli.util.Logger;
+import org.sonarsource.sonarlint.core.client.api.common.LogOutput;
 
-import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
-import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+class DefaultLogOutput implements LogOutput {
 
-@FunctionalInterface
-public interface Reporter {
-  void execute(String projectName, Date date, List<Issue> issues, AnalysisResults result);
+  private final Logger logger;
+  private final boolean verbose;
+
+  public DefaultLogOutput(Logger logger, boolean verbose) {
+    this.logger = logger;
+    this.verbose = verbose;
+  }
+
+  @Override
+  public void log(String formattedMessage, Level level) {
+    switch (level) {
+      case TRACE:
+      case DEBUG:
+        if (verbose) {
+          logger.debug(formattedMessage);
+        }
+        break;
+      case ERROR:
+        logger.error(formattedMessage);
+        break;
+      case INFO:
+      case WARN:
+      default:
+        logger.info(formattedMessage);
+    }
+  }
 }

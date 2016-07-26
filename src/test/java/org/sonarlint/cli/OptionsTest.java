@@ -72,6 +72,15 @@ public class OptionsTest {
   }
 
   @Test
+  public void testUpdate() throws ParseException {
+    Options opt = Options.parse(args("-u"));
+    assertThat(opt.isUpdate()).isTrue();
+
+    opt = Options.parse(args("--update"));
+    assertThat(opt.isUpdate()).isTrue();
+  }
+
+  @Test
   public void testInteractive() throws ParseException {
     Options opt = Options.parse(args("-i"));
     assertThat(opt.isInteractive()).isTrue();

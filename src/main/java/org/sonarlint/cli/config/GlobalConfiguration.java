@@ -17,15 +17,17 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarlint.cli.report;
+package org.sonarlint.cli.config;
 
-import java.util.Date;
 import java.util.List;
 
-import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
-import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+import javax.annotation.CheckForNull;
 
-@FunctionalInterface
-public interface Reporter {
-  void execute(String projectName, Date date, List<Issue> issues, AnalysisResults result);
+public class GlobalConfiguration {
+  private List<SonarQubeServer> servers;
+
+  @CheckForNull
+  public List<SonarQubeServer> servers() {
+    return servers;
+  }
 }

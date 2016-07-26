@@ -106,5 +106,6 @@ exec "$JAVA_CMD" \
   -classpath  $JAR_FILE \
   "-Dsonarlint.home=\${SONARLINT_HOME}" \
   "-Dproject.home=\${PROJECT_HOME}" \
+  -Dorg.freemarker.loggerLibrary=none \
   org.sonarlint.cli.Main "$@"
 

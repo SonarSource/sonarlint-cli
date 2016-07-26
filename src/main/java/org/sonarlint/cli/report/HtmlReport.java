@@ -19,6 +19,7 @@
  */
 package org.sonarlint.cli.report;
 
+import freemarker.template.Configuration;
 import freemarker.template.Template;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -77,8 +78,7 @@ public class HtmlReport implements Reporter {
 
   private void writeToFile(IssuesReport report, Path toFile) {
     try {
-      freemarker.log.Logger.selectLoggerLibrary(freemarker.log.Logger.LIBRARY_NONE);
-      freemarker.template.Configuration cfg = new freemarker.template.Configuration();
+      Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
       cfg.setClassForTemplateLoading(HtmlReport.class, "");
 
       Map<String, Object> root = new HashMap<>();

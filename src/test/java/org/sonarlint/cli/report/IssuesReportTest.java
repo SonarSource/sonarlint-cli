@@ -19,10 +19,15 @@
  */
 package org.sonarlint.cli.report;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
@@ -31,11 +36,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class IssuesReportTest {
+
+  @Rule
+  public TemporaryFolder temp = new TemporaryFolder();
+
   private IssuesReport report;
 
   @Before
   public void setUp() {
-    report = new IssuesReport(Paths.get(""));
+    report = new IssuesReport(Paths.get(""), StandardCharsets.UTF_8);
   }
 
   @Test
@@ -56,17 +65,6 @@ public class IssuesReportTest {
   }
 
   @Test
-  public void issueId() {
-    Issue i1 = createTestIssue("comp", "rule1", "name1", "MAJOR", 10);
-    Issue i2 = createTestIssue("comp", "rule2", "name2", "MAJOR", 11);
-    report.addIssue(i1);
-    report.addIssue(i2);
-
-    assertThat(report.issueId(i1)).isEqualTo("issue0");
-    assertThat(report.issueId(i2)).isEqualTo("issue1");
-  }
-
-  @Test
   public void testAdd() {
     report.addIssue(createTestIssue("comp", "rule1", "name1", "MAJOR", 10));
     report.addIssue(createTestIssue("comp", "rule2", "name2", "MAJOR", 11));
@@ -77,12 +75,40 @@ public class IssuesReportTest {
     assertThat(report.getRuleName("rule1")).isEqualTo("name1");
   }
 
+  @Test
+  public void testHtmlDecoratorFullLine() throws Exception {
+    Path file = temp.newFile().toPath();
+    FileUtils.write(file.toFile(), "if (a && b)\nif (a < b)\nif (a > b)", StandardCharsets.UTF_8);
+    report.addIssue(createTestIssue(file.toString(), "rule1", "name1", "MAJOR", 1));
+    report.addIssue(createTestIssue(file.toString(), "rule2", "name2", "MAJOR", 2));
+    assertThat(report.getEscapedSource(file)).containsExactly("<span class=\"issue-0\">if (a &amp;&amp; b)</span>", "<span class=\"issue-1\">if (a &lt; b)</span>",
+      "if (a &gt; b)");
+  }
+
+  @Test
+  public void testHtmlDecoratorPreciseLocation() throws Exception {
+    Path file = temp.newFile().toPath();
+    FileUtils.write(file.toFile(), " foo bar ", StandardCharsets.UTF_8);
+    Issue issue1 = createTestIssue(file.toString(), "rule1", "name1", "MAJOR", 1);
+    when(issue1.getStartLineOffset()).thenReturn(1);
+    when(issue1.getEndLineOffset()).thenReturn(8);
+    Issue issue2 = createTestIssue(file.toString(), "rule2", "name2", "MAJOR", 1);
+    when(issue2.getStartLineOffset()).thenReturn(5);
+    when(issue2.getEndLineOffset()).thenReturn(8);
+    report.addIssue(issue1);
+    report.addIssue(issue2);
+    assertThat(report.getEscapedSource(file)).containsExactly(" <span class=\"issue-0\">foo <span class=\"issue-1\">bar</span></span> ");
+  }
+
   private static Issue createTestIssue(String filePath, String ruleKey, String name, String severity, int line) {
     ClientInputFile inputFile = mock(ClientInputFile.class);
     when(inputFile.getPath()).thenReturn(Paths.get(filePath));
 
     Issue issue = mock(Issue.class);
     when(issue.getStartLine()).thenReturn(line);
+    when(issue.getStartLineOffset()).thenReturn(null);
+    when(issue.getEndLine()).thenReturn(line);
+    when(issue.getEndLineOffset()).thenReturn(null);
     when(issue.getRuleName()).thenReturn(name);
     when(issue.getInputFile()).thenReturn(inputFile);
     when(issue.getRuleKey()).thenReturn(ruleKey);

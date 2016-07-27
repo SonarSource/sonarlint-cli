@@ -23,11 +23,10 @@ import java.util.LinkedList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
-import static org.sonarlint.cli.TestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
+import static org.sonarlint.cli.TestUtils.createTestIssue;
 
 public class ReportSummaryTest {
   private ReportSummary summary;
@@ -39,7 +38,7 @@ public class ReportSummaryTest {
 
   @Test
   public void test() {
-    for (Issue i : createTestIssues()) {
+    for (IssueWithId i : createTestIssues()) {
       summary.addIssue(i);
     }
 
@@ -66,8 +65,8 @@ public class ReportSummaryTest {
     assertThat(iv.getResolvedIssuesCount()).isEqualTo(resolved);
   }
 
-  private static List<Issue> createTestIssues() {
-    List<Issue> issueList = new LinkedList<>();
+  private static List<IssueWithId> createTestIssues() {
+    List<IssueWithId> issueList = new LinkedList<>();
 
     issueList.add(createTestIssue("comp1", "rule1", "MAJOR", 10));
     issueList.add(createTestIssue("comp1", "rule2", "MINOR", 11));

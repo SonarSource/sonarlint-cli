@@ -19,8 +19,6 @@
  */
 package org.sonarlint.cli.report;
 
-import javax.annotation.Nullable;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -28,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import javax.annotation.Nullable;
 
 public class ReportFactory {
   private static final String DEFAULT_REPORT_PATH = ".sonarlint/sonarlint-report.html";
@@ -42,7 +41,7 @@ public class ReportFactory {
     List<Reporter> list = new LinkedList<>();
 
     list.add(new ConsoleReport());
-    list.add(new HtmlReport(basePath, getReportFile(basePath), new SourceProvider(charset)));
+    list.add(new HtmlReport(basePath, getReportFile(basePath), charset));
 
     return list;
   }

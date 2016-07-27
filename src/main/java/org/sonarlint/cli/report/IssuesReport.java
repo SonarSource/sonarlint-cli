@@ -19,14 +19,19 @@
  */
 package org.sonarlint.cli.report;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.stream.Collectors;
+import org.sonarlint.cli.report.source.HtmlSourceDecorator;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
@@ -39,12 +44,13 @@ public class IssuesReport {
   private final ReportSummary summary = new ReportSummary();
   private final Map<Path, ResourceReport> resourceReportsByFilePath = new HashMap<>();
   private final Map<String, String> ruleNameByKey = new HashMap<>();
-  private final Map<Issue, Integer> ids = new HashMap<>();
+  private final Charset charset;
   private int id = 0;
   private Path basePath;
 
-  IssuesReport(Path basePath) {
+  IssuesReport(Path basePath, Charset charset) {
     this.basePath = basePath;
+    this.charset = charset;
   }
 
   public boolean noIssues() {
@@ -99,13 +105,10 @@ public class IssuesReport {
     return ruleNameByKey.get(ruleKey);
   }
 
-  public String issueId(Issue issue) {
-    return "issue" + ids.get(issue).toString();
-  }
-
   public void addIssue(Issue issue) {
+    IssueWithId issueWithId = new IssueWithIdImpl(issue, id);
+    id++;
     ruleNameByKey.put(issue.getRuleKey(), issue.getRuleName());
-    ids.put(issue, id++);
 
     Path filePath;
     ClientInputFile inputFile = issue.getInputFile();
@@ -116,8 +119,76 @@ public class IssuesReport {
       filePath = inputFile.getPath();
     }
     ResourceReport report = getOrCreate(filePath);
-    getSummary().addIssue(issue);
-    report.addIssue(issue);
+    getSummary().addIssue(issueWithId);
+    report.addIssue(issueWithId);
+  }
+
+  private static class IssueWithIdImpl implements IssueWithId {
+
+    private final Issue wrapped;
+    private final int id;
+
+    public IssueWithIdImpl(Issue wrapped, int id) {
+      this.wrapped = wrapped;
+      this.id = id;
+    }
+
+    @Override
+    public String getSeverity() {
+      return wrapped.getSeverity();
+    }
+
+    @Override
+    public Integer getStartLine() {
+      return wrapped.getStartLine() != null ? wrapped.getStartLine() : 1;
+    }
+
+    @Override
+    public Integer getStartLineOffset() {
+      return wrapped.getStartLineOffset();
+    }
+
+    @Override
+    public Integer getEndLine() {
+      return wrapped.getEndLine() != null ? wrapped.getEndLine() : getStartLine();
+
+    }
+
+    @Override
+    public Integer getEndLineOffset() {
+      return wrapped.getEndLineOffset();
+
+    }
+
+    @Override
+    public String getMessage() {
+      return wrapped.getMessage();
+
+    }
+
+    @Override
+    public String getRuleKey() {
+      return wrapped.getRuleKey();
+
+    }
+
+    @Override
+    public String getRuleName() {
+      return wrapped.getRuleName();
+
+    }
+
+    @Override
+    public ClientInputFile getInputFile() {
+      return wrapped.getInputFile();
+
+    }
+
+    @Override
+    public int id() {
+      return id;
+    }
+
   }
 
   private ResourceReport getOrCreate(Path filePath) {
@@ -129,4 +200,38 @@ public class IssuesReport {
     resourceReportsByFilePath.put(filePath, report);
     return report;
   }
+
+  public List<String> getEscapedSource(Path filePath) {
+    if (filePath == null) {
+      return Collections.emptyList();
+    }
+    List<String> lines;
+    try {
+      if (!Files.isRegularFile(filePath)) {
+        // invalid, directory, project issue, ...
+        return Collections.emptyList();
+      }
+
+      lines = Files.readAllLines(filePath, charset);
+    } catch (IOException e) {
+      throw new IllegalStateException("Unable to read source code of file: " + filePath, e);
+    }
+    ResourceReport resourceReport = resourceReportsByFilePath.get(filePath);
+    List<String> escapedLines = new ArrayList<>(lines.size());
+    int lineIdx = 1;
+    for (String line : lines) {
+      final int currentLineIdx = lineIdx;
+      List<IssueWithId> issuesAtLine = resourceReport != null
+        ? resourceReport.getIssues().stream()
+          .filter(i -> i.getStartLine() <= currentLineIdx && i.getEndLine() >= currentLineIdx)
+          .collect(Collectors.toList())
+        : Collections.emptyList();
+
+      escapedLines.add(HtmlSourceDecorator.getDecoratedSourceAsHtml(line, currentLineIdx, issuesAtLine));
+      lineIdx++;
+    }
+    return escapedLines;
+
+  }
+
 }

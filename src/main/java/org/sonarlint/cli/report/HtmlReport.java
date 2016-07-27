@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,19 +44,19 @@ public class HtmlReport implements Reporter {
   private static final Logger LOGGER = Logger.get();
   private final Path reportFile;
   private final Path reportDir;
-  private final SourceProvider sourceProvider;
-  private Path basePath;
+  private final Charset charset;
+  private final Path basePath;
 
-  HtmlReport(Path basePath, Path reportFile, SourceProvider sourceProvider) {
+  HtmlReport(Path basePath, Path reportFile, Charset charset) {
     this.basePath = basePath;
-    this.sourceProvider = sourceProvider;
+    this.charset = charset;
     this.reportDir = reportFile.getParent().toAbsolutePath();
     this.reportFile = reportFile.toAbsolutePath();
   }
 
   @Override
   public void execute(String projectName, Date date, List<Issue> issues, AnalysisResults result) {
-    IssuesReport report = new IssuesReport(basePath);
+    IssuesReport report = new IssuesReport(basePath, charset);
     for (Issue i : issues) {
       report.addIssue(i);
     }
@@ -83,7 +84,6 @@ public class HtmlReport implements Reporter {
 
       Map<String, Object> root = new HashMap<>();
       root.put("report", report);
-      root.put("sources", sourceProvider);
 
       Template template = cfg.getTemplate("sonarlintreport.ftl");
 

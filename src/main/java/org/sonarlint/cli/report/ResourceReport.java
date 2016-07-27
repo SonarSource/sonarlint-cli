@@ -28,21 +28,19 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.sonarlint.cli.util.MutableInt;
-import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
-
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.sonarlint.cli.util.MutableInt;
 
 import static org.sonarlint.cli.util.Util.getOrCreate;
 
 public final class ResourceReport {
   private final Path filePath;
   private final IssueVariation total = new IssueVariation();
-  private final List<Issue> issues = new ArrayList<>();
+  private final List<IssueWithId> issues = new ArrayList<>();
 
   private final Map<IssueCategory, CategoryReport> reportByCategory = new HashMap<>();
-  private final Map<Integer, List<Issue>> issuesPerLine = new HashMap<>();
+  private final Map<Integer, List<IssueWithId>> issuesPerLine = new HashMap<>();
 
   private final Map<String, MutableInt> issuesByRule = new HashMap<>();
   private final EnumMap<Severity, MutableInt> issuesBySeverity = new EnumMap<>(Severity.class);
@@ -74,22 +72,22 @@ public final class ResourceReport {
     return total;
   }
 
-  public List<Issue> getIssues() {
+  public List<IssueWithId> getIssues() {
     return issues;
   }
 
-  public Map<Integer, List<Issue>> getIssuesPerLine() {
+  public Map<Integer, List<IssueWithId>> getIssuesPerLine() {
     return issuesPerLine;
   }
 
-  public List<Issue> getIssuesAtLine(int lineId) {
+  public List<IssueWithId> getIssuesAtLine(int lineId) {
     if (issuesPerLine.containsKey(lineId)) {
       return issuesPerLine.get(lineId);
     }
     return Collections.emptyList();
   }
 
-  public void addIssue(Issue issue) {
+  public void addIssue(IssueWithId issue) {
     Severity severity = Severity.create(issue.getSeverity());
     String ruleKey = issue.getRuleKey();
     IssueCategory reportRuleKey = new IssueCategory(ruleKey, severity, issue.getRuleName());
@@ -126,7 +124,7 @@ public final class ResourceReport {
   }
 
   private boolean hasIssues(Integer lineId) {
-    List<Issue> issuesAtLine = issuesPerLine.get(lineId);
+    List<IssueWithId> issuesAtLine = issuesPerLine.get(lineId);
     return issuesAtLine != null && !issuesAtLine.isEmpty();
   }
 

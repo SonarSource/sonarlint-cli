@@ -1,3 +1,4 @@
+<#assign component_id_prefix = 'comp'>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
 <head>
@@ -7,17 +8,17 @@
   <link rel="shortcut icon" type="image/x-icon" href="sonarlintreport_files/favicon.ico">
   <script type="text/javascript" src="sonarlintreport_files/jquery.min.js"></script>
   <script type="text/javascript">
-    var issuesPerResource = [
+    var issuesPerComponent = [
     <#list report.getResourceReports() as resourceReport>
       [
         <#list resourceReport.getIssues() as issue>
-          {'k': '${report.issueId(issue)?html}', 'r': 'R${issue.getRuleKey()}', 'l': ${(issue.getStartLine()!0)?c}, 's': '${issue.getSeverity()?lower_case}'}<#if issue_has_next>,</#if>
+          {'id': '${issue.id()?html}', 'r': '${issue.getRuleKey()}', 'startLine': ${(issue.getStartLine()!0)?c}, 'startLineOffset': ${(issue.getStartLineOffset()!0)?c}, 'endLine': ${(issue.getEndLine()!0)?c}, 'endLineOffset': ${(issue.getEndLineOffset()!0)?c}, 's': '${issue.getSeverity()?lower_case}'}<#if issue_has_next>,</#if>
         </#list>
       ]
       <#if resourceReport_has_next>,</#if>
     </#list>
     ];
-    var nbResources = ${report.getResourcesWithReport()?size?c};
+    var nbComponents = ${report.getResourcesWithReport()?size?c};
     var separators = new Array();
 
     function showLine(fileIndex, lineId) {
@@ -59,19 +60,19 @@
          separators[separatorIndex].removeClass('visible');
        }
        separators.length = 0;
-       $('.sources td.ko').removeClass('ko');
+       $('.sources span.ko').removeClass('ko');
      }
 
      function showIssues(fileIndex, issues) {
        $.each(issues, function(index, issue) {
-         $('#' + issue['k']).show();
-         $('#' + fileIndex + 'L' + issue['l'] + ' td.line').addClass('ko');
+         $('#' + issue['id']).show();
+         $('span.issue-' + issue['id']).addClass('ko');
        });
-       var showResource = issues.length > 0;
-       if (showResource) {
-         $('#resource-' + fileIndex).show();
+       var showComponent = issues.length > 0;
+       if (showComponent) {
+         $('#${component_id_prefix}-table-' + fileIndex).show();
        } else {
-         $('#resource-' + fileIndex).hide();
+         $('#${component_id_prefix}-table-' + fileIndex).hide();
        }
      }
 
@@ -84,19 +85,19 @@
 
       hideAll();
       $('.all').removeClass('all-masked');
-      for (var resourceIndex = 0; resourceIndex < nbResources; resourceIndex++) {
-        var filteredIssues = $.grep(issuesPerResource[resourceIndex], function(v) {
+      for (var compIndex = 0; compIndex < nbComponents; compIndex++) {
+        var filteredIssues = $.grep(issuesPerComponent[compIndex], function(v) {
               return (ruleFilter == '' || v['r'] == ruleFilter || v['s'] == ruleFilter);
             }
         );
 
         var linesToDisplay = $.map(filteredIssues, function(v, i) {
-          return v['l'];
+          return v['startLine'];
         });
 
         linesToDisplay.sort();// the showLines() requires sorted ids
-        showLines(resourceIndex, linesToDisplay);
-        showIssues(resourceIndex, filteredIssues);
+        showLines(compIndex, linesToDisplay);
+        showIssues(compIndex, filteredIssues);
       }
     }
 
@@ -138,7 +139,7 @@
          output += '<optgroup label="Rule">';
          $.each(ruleFilter, function(key, value) {
            if (value.total > 0) {
-             output += '<option value="R' + value.key + '">' + value.label + ' (' + value.total + ')</option>';
+             output += '<option value="' + value.key + '">' + value.label + ' (' + value.total + ')</option>';
            }
          });
          return output;
@@ -218,17 +219,16 @@
 
   <div id="summary-per-file">
   <#list report.getResourceReports() as resourceReport>
-  <#assign issueId=0>
-  <table width="100%" class="data" id="resource-${resourceReport_index?c}">
+  <table width="100%" class="data" id="${component_id_prefix}-table-${resourceReport_index?c}">
     <thead>
     <tr class="total">
       <th align="left" colspan="2" nowrap>
         <div class="file_title">
           <img src="sonarlintreport_files/${resourceReport.getType()}.png" title="Resource icon"/>
-          <a href="#" onclick="$('.resource-details-${resourceReport_index?c}').toggleClass('masked'); return false;" style="color: black">${resourceReport.getName()}</a>
+          <a href="#" onclick="$('.${component_id_prefix}-details-${resourceReport_index?c}').toggleClass('masked'); return false;" style="color: black">${resourceReport.getName()}</a>
         </div>
       </th>
-      <th align="right" width="1%" nowrap class="resource-details-${resourceReport_index?c}">
+      <th align="right" width="1%" nowrap class="${component_id_prefix}-details-${resourceReport_index?c}">
         <#if resourceReport.getTotal().getCountInCurrentAnalysis() gt 0>
           <span class="worst" id="total">${resourceReport.getTotal().getCountInCurrentAnalysis()?c}</span>
         <#else>
@@ -238,7 +238,7 @@
       </th>
     </tr>
     </thead>
-    <tbody class="resource-details-${resourceReport_index?c}">
+    <tbody class="${component_id_prefix}-details-${resourceReport_index?c}">
     <#list resourceReport.getCategoryReports() as categoryReport>
       <tr class="hoverable">
         <td width="20">
@@ -258,7 +258,7 @@
       <tr class="globalIssues">
         <td colspan="${colspan}">
           <#list issues as issue>
-            <div class="issue" id="$report.issueId(issue)?html">
+            <div class="issue" id="${issue.id()?html}">
               <div class="vtitle">
                 <i class="icon-severity-${issue.getSeverity()?lower_case}"></i>
                 <#if issue.getMessage()?has_content>
@@ -274,7 +274,6 @@
                 ${issue.getRuleName()}
               </div>
             </div>
-            <#assign issueId = issueId + 1>
           </#list>
         </td>
       </tr>
@@ -282,7 +281,7 @@
       <tr>
         <td colspan="${colspan}">
           <table class="sources" border="0" cellpadding="0" cellspacing="0">
-            <#list sources.getEscapedSource(resourceReport.getPath()) as line>
+            <#list report.getEscapedSource(resourceReport.getPath()) as line>
               <#assign lineIndex=line_index+1>
               <#if resourceReport.isDisplayableLine(lineIndex)>
                 <tr id="${resourceReport_index?c}L${lineIndex?c}" class="row">
@@ -300,7 +299,7 @@
                     <td class="lid"></td>
                     <td class="issues">
                       <#list issues as issue>
-                        <div class="issue" id="${report.issueId(issue)?html}">
+                        <div class="issue" id="${issue.id()?html}">
                           <div class="vtitle">
                             <i class="icon-severity-${issue.getSeverity()?lower_case}"></i>
                             <#if issue.getMessage()?has_content>
@@ -316,7 +315,6 @@
                             ${issue.getRuleName()}
                           </div>
                         </div>
-                        <#assign issueId = issueId + 1>
                       </#list>
                     </td>
                   </tr>

@@ -19,6 +19,7 @@
  */
 package org.sonarlint.cli.report;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.LinkedList;
@@ -40,15 +41,13 @@ public class HtmlReportTest {
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
   private Path reportFile;
-  private SourceProvider sources;
 
   @Before
   public void setUp() {
     result = mock(AnalysisResults.class);
     when(result.fileCount()).thenReturn(1);
     reportFile = temp.getRoot().toPath().resolve("report.html");
-    sources = mock(SourceProvider.class);
-    html = new HtmlReport(temp.getRoot().toPath(), reportFile, sources);
+    html = new HtmlReport(temp.getRoot().toPath(), reportFile, StandardCharsets.UTF_8);
   }
 
   @Test

@@ -27,11 +27,10 @@ import java.util.LinkedList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
-import static org.sonarlint.cli.TestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
+import static org.sonarlint.cli.TestUtils.createTestIssue;
 
 public class ResourceReportTest {
   private final static Path RESOURCE = Paths.get("resource");
@@ -44,8 +43,8 @@ public class ResourceReportTest {
 
   @Test
   public void testIssuesLines() {
-    Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
-    Issue i2 = createTestIssue("file1", "rule1", "MAJOR", 11);
+    IssueWithId i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
+    IssueWithId i2 = createTestIssue("file1", "rule1", "MAJOR", 11);
     resourceReport.addIssue(i1);
     resourceReport.addIssue(i2);
 
@@ -75,10 +74,10 @@ public class ResourceReportTest {
 
   @Test
   public void testCategoryReport() {
-    Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
-    Issue i2 = createTestIssue("file1", "rule1", "MINOR", 11);
-    Issue i3 = createTestIssue("file1", "rule2", "MINOR", 11);
-    Issue i4 = createTestIssue("file1", "rule2", "MINOR", 12);
+    IssueWithId i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
+    IssueWithId i2 = createTestIssue("file1", "rule1", "MINOR", 11);
+    IssueWithId i3 = createTestIssue("file1", "rule2", "MINOR", 11);
+    IssueWithId i4 = createTestIssue("file1", "rule2", "MINOR", 12);
     resourceReport.addIssue(i1);
     resourceReport.addIssue(i2);
     resourceReport.addIssue(i3);
@@ -106,8 +105,8 @@ public class ResourceReportTest {
 
   @Test
   public void lineIssues() {
-    Issue i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
-    Issue i2 = createTestIssue("file1", "rule1", "MINOR", 11);
+    IssueWithId i1 = createTestIssue("file1", "rule1", "MAJOR", 10);
+    IssueWithId i2 = createTestIssue("file1", "rule1", "MINOR", 11);
     resourceReport.addIssue(i1);
     resourceReport.addIssue(i2);
 

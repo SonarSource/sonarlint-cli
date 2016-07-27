@@ -17,25 +17,12 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarlint.cli;
+package org.sonarlint.cli.report;
 
-import java.nio.file.Paths;
-import org.sonarlint.cli.report.IssueWithId;
-import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+public interface IssueWithId extends Issue {
 
-public class TestUtils {
-  public static IssueWithId createTestIssue(String filePath, String ruleKey, String severity, int line) {
-    ClientInputFile inputFile = mock(ClientInputFile.class);
-    when(inputFile.getPath()).thenReturn(Paths.get(filePath));
+  int id();
 
-    IssueWithId issue = mock(IssueWithId.class);
-    when(issue.getStartLine()).thenReturn(line);
-    when(issue.getInputFile()).thenReturn(inputFile);
-    when(issue.getRuleKey()).thenReturn(ruleKey);
-    when(issue.getSeverity()).thenReturn(severity);
-    return issue;
-  }
 }

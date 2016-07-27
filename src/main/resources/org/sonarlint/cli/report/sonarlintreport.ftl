@@ -100,6 +100,8 @@
         showIssues(compIndex, filteredIssues);
       }
     }
+    
+    var all_severities = ['blocker', 'critical', 'major', 'minor', 'info'];
 
 
     var severityFilter = [
@@ -110,7 +112,10 @@
          "total": ${severities[severity].getCountInCurrentAnalysis()?c}
        }<#if severity_has_next>,</#if>
        </#list>
-    ];
+    ].sort(function(a, b) {
+        var x = all_severities.indexOf(a.key); var y = all_severities.indexOf(b.key);
+        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    });
 
     var ruleFilter = [
     <#assign rules = report.getSummary().getTotalByRuleKey()>

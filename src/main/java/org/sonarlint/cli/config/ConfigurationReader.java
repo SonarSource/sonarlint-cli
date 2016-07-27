@@ -33,12 +33,28 @@ import com.google.gson.GsonBuilder;
 public class ConfigurationReader {
   public GlobalConfiguration readGlobal(Path configFilePath) {
     String contents = getContents(configFilePath);
-    return validate(new GsonBuilder().create().fromJson(contents, GlobalConfiguration.class), configFilePath);
+    GlobalConfiguration config;
+
+    try {
+      config = new GsonBuilder().create().fromJson(contents, GlobalConfiguration.class);
+    } catch (RuntimeException ex) {
+      throw new IllegalStateException("Failed to parse JSON file: " + configFilePath, ex);
+    }
+
+    return validate(config, configFilePath);
   }
 
   public ProjectConfiguration readProject(Path configFilePath) {
     String contents = getContents(configFilePath);
-    return validate(new GsonBuilder().create().fromJson(contents, ProjectConfiguration.class), configFilePath);
+    ProjectConfiguration config;
+
+    try {
+      config = new GsonBuilder().create().fromJson(contents, ProjectConfiguration.class);
+    } catch (RuntimeException ex) {
+      throw new IllegalStateException("Failed to parse JSON file: " + configFilePath, ex);
+    }
+
+    return validate(config, configFilePath);
   }
 
   private static String getContents(Path filePath) {

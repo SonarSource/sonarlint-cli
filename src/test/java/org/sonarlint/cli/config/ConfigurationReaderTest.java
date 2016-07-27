@@ -50,6 +50,32 @@ public class ConfigurationReaderTest {
   }
 
   @Test
+  public void readInvalidJsonGlobal() throws IOException {
+    String json = "{"
+      + "servers = ["
+      + " { ] {]}";
+
+    Path file = temp.newFile().toPath();
+    Files.write(file, json.getBytes(StandardCharsets.UTF_8));
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("Failed to parse JSON file");
+    new ConfigurationReader().readGlobal(file);
+  }
+
+  @Test
+  public void readInvalidJsonProject() throws IOException {
+    String json = "{"
+      + "servers = ["
+      + " { ] {]}";
+
+    Path file = temp.newFile().toPath();
+    Files.write(file, json.getBytes(StandardCharsets.UTF_8));
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("Failed to parse JSON file");
+    new ConfigurationReader().readProject(file);
+  }
+
+  @Test
   public void readGlobalConfig() throws IOException {
     String json = "{"
       + "servers = [{"

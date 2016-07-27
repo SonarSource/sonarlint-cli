@@ -136,6 +136,27 @@ public class SonarLintFactoryTest {
     exception.expectMessage("No SonarQube server configuration found");
     sonarLintFactory.createSonarLint(globalConfigPath, projectConfigPath, false, true);
   }
+  
+  @Test
+  public void failIfSeveralServerOptions() {
+    GlobalConfiguration global = createGlobalConfig("http://localhost:9000", "http://localhost:9001");
+    ProjectConfiguration project = createProjectConfig(null, "project1");
+    mockConfigs(global, project);
+
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("there are multiple servers defined in the global configuration");
+    sonarLintFactory.createSonarLint(globalConfigPath, projectConfigPath, false, true);
+  }
+  
+  @Test
+  public void failIfNoGlobalConfig() {
+    ProjectConfiguration project = createProjectConfig("http://localhost:9001", "project1");
+    mockConfigs(null, project);
+
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("there is no SonarQube server configured in");
+    sonarLintFactory.createSonarLint(globalConfigPath, projectConfigPath, false, true);
+  }
 
   public void failIfMultipleServers() {
     GlobalConfiguration global = createGlobalConfig("http://localhost:9000", "http://localhost:9001");

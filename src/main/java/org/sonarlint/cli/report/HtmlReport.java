@@ -77,7 +77,7 @@ public class HtmlReport implements Reporter {
     }
   }
 
-  private void writeToFile(IssuesReport report, Path toFile) {
+  private static void writeToFile(IssuesReport report, Path toFile) {
     try {
       Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
       cfg.setClassForTemplateLoading(HtmlReport.class, "");

@@ -74,7 +74,7 @@ echo %SONARLINT_HOME%
 
 set PROJECT_HOME=%CD%
 
-%JAVA_EXEC% -Djava.awt.headless=true %SONARLINT_OPTS% -cp "%SONARLINT_HOME%\lib\sonarlint-cli-${project.version}.jar" "-Dsonarlint.home=%SONARLINT_HOME%" "-Dproject.home=%PROJECT_HOME%" -Dorg.freemarker.loggerLibrary=none org.sonarlint.cli.Main %*
+%JAVA_EXEC% -Djava.awt.headless=true "%SONARLINT_OPTS%" -cp "%SONARLINT_HOME%\lib\sonarlint-cli-${project.version}.jar" "-Dsonarlint.home=%SONARLINT_HOME%" "-Dproject.home=%PROJECT_HOME%" -Dorg.freemarker.loggerLibrary=none org.sonarlint.cli.Main %*
 if ERRORLEVEL 1 goto error
 goto end
 

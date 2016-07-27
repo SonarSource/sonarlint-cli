@@ -40,7 +40,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class CommandExecutor {
@@ -57,10 +60,10 @@ public class CommandExecutor {
   }
 
   public int execute(String[] args) throws IOException {
-    return execute(args, null);
+    return execute(args, null, Collections.<String, String>emptyMap());
   }
 
-  public int execute(String[] args, @Nullable Path workingDir) throws IOException {
+  public int execute(String[] args, @Nullable Path workingDir, Map<String, String> addEnv) throws IOException {
     if (!Files.isExecutable(file)) {
       Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
       perms.add(PosixFilePermission.OWNER_READ);
@@ -80,7 +83,9 @@ public class CommandExecutor {
     }
     in.close();
     LOG.info("Executing: {}", cmd.toString());
-    return exec.execute(cmd);
+    Map<String, String> env = new HashMap<>(System.getenv());
+    env.putAll(addEnv);
+    return exec.execute(cmd, env);
   }
 
   public String getStdOut() {

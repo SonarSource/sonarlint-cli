@@ -19,15 +19,17 @@
  */
 package it.sonarlint.cli.tools;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.rules.ExternalResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.rules.ExternalResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SonarlintCli extends ExternalResource {
   private static final Logger LOG = LoggerFactory.getLogger(SonarlintCli.class);
@@ -35,6 +37,7 @@ public class SonarlintCli extends ExternalResource {
   private Path installPath;
   private Path project;
   private CommandExecutor exec;
+  private Map<String, String> env = new HashMap<>();
 
   public void install() {
     String version = System.getProperty("sonarlint.version");
@@ -48,23 +51,27 @@ public class SonarlintCli extends ExternalResource {
     SonarlintInstaller installer = new SonarlintInstaller();
     this.script = installer.install(installPath, version);
   }
+  
+  public void addEnv(String key, String value) {
+    env.put(key, value);
+  }
 
   public int run(Path workingDir, String... args) {
     LOG.info("Running SonarLint CLI in '{}'", workingDir.toAbsolutePath());
     try {
       exec = new CommandExecutor(script);
-      return exec.execute(args, workingDir.toAbsolutePath());
+      return exec.execute(args, workingDir.toAbsolutePath(), env);
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
   }
-
+  
   public int deployAndRunProject(String location, String... args) {
     LOG.info("Running SonarLint CLI on project '{}'", location);
     try {
       Path project = deployProject(location);
       exec = new CommandExecutor(script);
-      return exec.execute(args, project);
+      return exec.execute(args, project, env);
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }

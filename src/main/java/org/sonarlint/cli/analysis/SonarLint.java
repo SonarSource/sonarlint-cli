@@ -19,22 +19,22 @@
  */
 package org.sonarlint.cli.analysis;
 
-import static org.sonarlint.cli.SonarProperties.PROJECT_HOME;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import org.sonarlint.cli.InputFileFinder;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarlint.cli.report.Reporter;
 import org.sonarlint.cli.util.Logger;
+import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+
+import static org.sonarlint.cli.SonarProperties.PROJECT_HOME;
 
 public abstract class SonarLint {
   private static final Logger LOGGER = Logger.get();
@@ -68,15 +68,17 @@ public abstract class SonarLint {
     doAnalysis(properties, reportFactory, inputFiles, baseDirPath);
   }
 
+  protected abstract RuleDetails getRuleDetails(String ruleKey);
+
   protected abstract void doAnalysis(Map<String, String> properties, ReportFactory reportFactory, List<ClientInputFile> inputFiles, Path baseDirPath);
 
   public abstract void stop();
 
-  protected static void generateReports(List<Issue> issues, AnalysisResults result, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
+  protected void generateReports(List<Issue> issues, AnalysisResults result, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
     List<Reporter> reporters = reportFactory.createReporters(baseDir);
 
     for (Reporter r : reporters) {
-      r.execute(projectName, date, issues, result);
+      r.execute(projectName, date, issues, result, this::getRuleDetails);
     }
   }
 }

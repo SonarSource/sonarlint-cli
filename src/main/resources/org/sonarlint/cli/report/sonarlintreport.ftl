@@ -273,7 +273,7 @@
                 </#if>
                 &nbsp;
                 <img src="sonarlintreport_files/sep12.png">&nbsp;
-                <span class="rule_key">${issue.getRuleKey()}</span>
+                <span class="rule_key"><a href="sonarlintreport_rules/${issue.getRuleKey()}.html" target="sonarlint_rule">${issue.getRuleKey()}</a></span>
               </div>
               <div class="discussionComment">
                 ${issue.getRuleName()}
@@ -314,7 +314,7 @@
                             </#if>
                             &nbsp;
                             <img src="sonarlintreport_files/sep12.png">&nbsp;
-                            <span class="rule_key">${issue.getRuleKey()}</span>
+                            <span class="rule_key"><a href="sonarlintreport_rules/${issue.getRuleKey()}.html" target="sonarlint_rule">${issue.getRuleKey()}</a></span>
                           </div>
                           <div class="discussionComment">
                             ${issue.getRuleName()}

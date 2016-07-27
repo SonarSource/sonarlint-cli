@@ -34,10 +34,10 @@ import org.sonarlint.cli.util.Logger;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
-import static org.sonarlint.cli.TestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.sonarlint.cli.TestUtils.createTestIssue;
 
 public class ConsoleReportTest {
   private final static String PROJECT_NAME = "project";
@@ -68,7 +68,7 @@ public class ConsoleReportTest {
     issues.add(createTestIssue("comp1", "rule", "INFO", 10));
     issues.add(createTestIssue("comp1", "rule", "BLOCKER", 10));
 
-    report.execute(PROJECT_NAME, DATE, issues, result);
+    report.execute(PROJECT_NAME, DATE, issues, result, k -> null);
 
     stdOut.flush();
     assertThat(getLog(out)).contains("SonarLint Report");
@@ -89,13 +89,13 @@ public class ConsoleReportTest {
 
     exception.expect(IllegalStateException.class);
     exception.expectMessage("Unknown severity");
-    report.execute(PROJECT_NAME, DATE, issues, result);
+    report.execute(PROJECT_NAME, DATE, issues, result, k -> null);
   }
 
   @Test
   public void testReportWithoutIssues() throws IOException {
     List<Issue> issues = new LinkedList<>();
-    report.execute(PROJECT_NAME, DATE, issues, result);
+    report.execute(PROJECT_NAME, DATE, issues, result, k -> null);
     stdOut.flush();
     assertThat(getLog(out)).contains("SonarLint Report");
     assertThat(getLog(out)).contains("No issues to display");
@@ -106,7 +106,7 @@ public class ConsoleReportTest {
   public void testReportMultipleFiles() throws IOException {
     when(result.fileCount()).thenReturn(2);
     List<Issue> issues = new LinkedList<>();
-    report.execute(PROJECT_NAME, DATE, issues, result);
+    report.execute(PROJECT_NAME, DATE, issues, result, k -> null);
     stdOut.flush();
     assertThat(getLog(out)).contains("SonarLint Report");
     assertThat(getLog(out)).contains("No issues to display");
@@ -117,7 +117,7 @@ public class ConsoleReportTest {
   public void testReportNoFilesAnalyzed() throws IOException {
     List<Issue> issues = new LinkedList<>();
     when(result.fileCount()).thenReturn(0);
-    report.execute(PROJECT_NAME, DATE, issues, result);
+    report.execute(PROJECT_NAME, DATE, issues, result, k -> null);
     stdOut.flush();
     assertThat(getLog(out)).contains("SonarLint Report");
     assertThat(getLog(out)).contains("No files analyzed");

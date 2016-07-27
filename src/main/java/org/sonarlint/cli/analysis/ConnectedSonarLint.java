@@ -23,11 +23,11 @@ import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import org.sonarlint.cli.config.SonarQubeServer;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarlint.cli.util.Logger;
 import org.sonarlint.cli.util.SystemInfo;
+import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 import org.sonarsource.sonarlint.core.client.api.connected.ConnectedAnalysisConfiguration;
@@ -119,6 +119,11 @@ public class ConnectedSonarLint extends SonarLint {
       inputFiles, properties);
     AnalysisResults result = engine.analyze(config, collector);
     generateReports(collector.get(), result, reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);
+  }
+
+  @Override
+  protected RuleDetails getRuleDetails(String ruleKey) {
+    return engine.getRuleDetails(ruleKey);
   }
 
   @Override

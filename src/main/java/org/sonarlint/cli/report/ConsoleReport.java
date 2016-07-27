@@ -21,7 +21,9 @@ package org.sonarlint.cli.report;
 
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import org.sonarlint.cli.util.Logger;
+import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
@@ -74,7 +76,7 @@ public class ConsoleReport implements Reporter {
   }
 
   @Override
-  public void execute(String projectName, Date date, List<Issue> issues, AnalysisResults result) {
+  public void execute(String projectName, Date date, List<Issue> issues, AnalysisResults result, Function<String, RuleDetails> ruleDescriptionProducer) {
     Report r = new Report();
     for (Issue issue : issues) {
       r.process(issue);

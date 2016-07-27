@@ -36,7 +36,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import org.apache.commons.io.FileUtils;
 import org.sonarlint.cli.util.Logger;
+import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
@@ -55,7 +59,7 @@ public class HtmlReport implements Reporter {
   }
 
   @Override
-  public void execute(String projectName, Date date, List<Issue> issues, AnalysisResults result) {
+  public void execute(String projectName, Date date, List<Issue> issues, AnalysisResults result, Function<String, RuleDetails> ruleDescriptionProducer) {
     IssuesReport report = new IssuesReport(basePath, charset);
     for (Issue i : issues) {
       report.addIssue(i);
@@ -63,7 +67,28 @@ public class HtmlReport implements Reporter {
     report.setTitle(projectName);
     report.setDate(date);
     report.setFilesAnalyzed(result.fileCount());
+    copyRuleHtmlDescriptions(ruleDescriptionProducer, report);
     print(report);
+  }
+
+  private void copyRuleHtmlDescriptions(Function<String, RuleDetails> ruleDescriptionProducer, IssuesReport report) {
+    try {
+      Set<String> ruleKeys = report.getSummary().getTotalByRuleKey().keySet();
+      Path target = reportDir.resolve("sonarlintreport_rules");
+      Files.createDirectories(target);
+      copyDependency(target, "rule.css");
+      for (String ruleKey : ruleKeys) {
+        RuleDetails ruleDetails = ruleDescriptionProducer.apply(ruleKey);
+        FileUtils.write(target.resolve(ruleKey + ".html").toFile(),
+          "<!doctype html><html><head><link href=\"rule.css\" rel=\"stylesheet\" type=\"text/css\" /></head><body><h1><big>" + ruleDetails.getName() + "</big> ("
+            + ruleKey
+            + ")</h1><div class=\"rule-desc\">" + ruleDetails.getHtmlDescription()
+            + "</div></body></html>",
+          StandardCharsets.UTF_8);
+      }
+    } catch (IOException e) {
+      throw new IllegalStateException("Unable to copy rule descriptions", e);
+    }
   }
 
   public void print(IssuesReport report) {

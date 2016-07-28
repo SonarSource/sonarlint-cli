@@ -28,16 +28,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.regex.PatternSyntaxException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.sonarlint.cli.util.Logger;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class InputFileFinderTest {
   private Path root;
@@ -50,9 +49,6 @@ public class InputFileFinderTest {
 
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
-
-  @Rule
-  public ExpectedException exception = ExpectedException.none();
 
   @Before
   public void setUp() throws IOException {
@@ -94,7 +90,7 @@ public class InputFileFinderTest {
   }
 
   public void onlyTest(String pattern) throws IOException {
-    fileFinder = new InputFileFinder(null, pattern, Charset.defaultCharset());
+    fileFinder = new InputFileFinder(null, pattern, null, Charset.defaultCharset());
 
     List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(2);
@@ -102,14 +98,35 @@ public class InputFileFinderTest {
   }
 
   @Test
-  public void invalidPattern() throws IOException {
-    exception.expect(PatternSyntaxException.class);
+  public void invalidSourcePattern() throws IOException {
     try {
-      fileFinder = new InputFileFinder(null, "\\", Charset.defaultCharset());
+      fileFinder = new InputFileFinder("\\", null, null, Charset.defaultCharset());
+      fail("Expected exception");
     } catch (Exception e) {
       err.flush();
-      assertThat(getLogs(err)).contains("Error creating matcher with pattern: \\");
-      throw e;
+      assertThat(getLogs(err)).contains("Error creating matcher for sources with pattern: \\");
+    }
+  }
+
+  @Test
+  public void invalidTestPattern() throws IOException {
+    try {
+      fileFinder = new InputFileFinder(null, "\\", null, Charset.defaultCharset());
+      fail("Expected exception");
+    } catch (Exception e) {
+      err.flush();
+      assertThat(getLogs(err)).contains("Error creating matcher for tests with pattern: \\");
+    }
+  }
+
+  @Test
+  public void invalidExclusionPattern() throws IOException {
+    try {
+      fileFinder = new InputFileFinder(null, null, "\\", Charset.defaultCharset());
+      fail("Expected exception");
+    } catch (Exception e) {
+      err.flush();
+      assertThat(getLogs(err)).contains("Error creating matcher for exclusions with pattern: \\");
     }
   }
 
@@ -124,7 +141,7 @@ public class InputFileFinderTest {
   }
 
   public void onlySrc(String pattern) throws IOException {
-    fileFinder = new InputFileFinder(pattern, null, Charset.defaultCharset());
+    fileFinder = new InputFileFinder(pattern, null, null, Charset.defaultCharset());
 
     List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(1);
@@ -136,7 +153,7 @@ public class InputFileFinderTest {
 
   @Test
   public void testDefault() throws IOException {
-    fileFinder = new InputFileFinder(null, null, Charset.defaultCharset());
+    fileFinder = new InputFileFinder(null, null, null, Charset.defaultCharset());
 
     List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(2);
@@ -145,7 +162,7 @@ public class InputFileFinderTest {
 
   @Test
   public void testOverlapping() throws IOException {
-    fileFinder = new InputFileFinder("**tests**", "**tests**", Charset.defaultCharset());
+    fileFinder = new InputFileFinder("**tests**", "**tests**", null, Charset.defaultCharset());
 
     List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(1);
@@ -154,7 +171,7 @@ public class InputFileFinderTest {
 
   @Test
   public void testIgnoreHidden() throws IOException {
-    fileFinder = new InputFileFinder(null, null, Charset.defaultCharset());
+    fileFinder = new InputFileFinder(null, null, null, Charset.defaultCharset());
     File hiddenFolder = temp.newFolder(".test");
     Path hiddenSrc = hiddenFolder.toPath().resolve("Test.java");
     List<ClientInputFile> files = fileFinder.collect(root);
@@ -165,7 +182,7 @@ public class InputFileFinderTest {
 
   @Test
   public void testDisjoint() throws IOException {
-    fileFinder = new InputFileFinder("**abc**", "**abc**", Charset.defaultCharset());
+    fileFinder = new InputFileFinder("**abc**", "**abc**", null, Charset.defaultCharset());
 
     List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).isEmpty();
@@ -173,7 +190,7 @@ public class InputFileFinderTest {
 
   @Test
   public void testCharset() throws IOException {
-    fileFinder = new InputFileFinder(null, null, StandardCharsets.US_ASCII);
+    fileFinder = new InputFileFinder(null, null, null, StandardCharsets.US_ASCII);
 
     List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(2);
@@ -194,10 +211,18 @@ public class InputFileFinderTest {
     Files.createFile(test2);
     Files.createFile(externalTest);
 
-    fileFinder = new InputFileFinder("src/**", "*Test.*", Charset.defaultCharset());
+    fileFinder = new InputFileFinder("src/**", "*Test.*", null, Charset.defaultCharset());
 
     List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).extracting("path").containsOnly(test1, test2, src1);
+  }
+
+  @Test
+  public void testExclusions() throws IOException {
+    fileFinder = new InputFileFinder(null, null, "tests/**", Charset.defaultCharset());
+
+    List<ClientInputFile> files = fileFinder.collect(root);
+    assertThat(files).extracting("path").containsOnly(src1);
   }
 
 }

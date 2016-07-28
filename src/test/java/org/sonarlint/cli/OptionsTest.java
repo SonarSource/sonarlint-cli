@@ -19,14 +19,12 @@
  */
 package org.sonarlint.cli;
 
+import java.text.ParseException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.sonarlint.cli.Options;
 
-import java.text.ParseException;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class OptionsTest {
   @Rule
@@ -50,10 +48,11 @@ public class OptionsTest {
 
   @Test
   public void testGlobs() throws ParseException {
-    Options opt = Options.parse(args("--src", "source", "--tests", "tests"));
+    Options opt = Options.parse(args("--src", "source", "--tests", "tests", "--exclude", "exclude"));
 
     assertThat(opt.src()).isEqualTo("source");
     assertThat(opt.tests()).isEqualTo("tests");
+    assertThat(opt.exclusions()).isEqualTo("exclude");
   }
 
   @Test

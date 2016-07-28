@@ -74,7 +74,7 @@ public class MainTest {
     sonarLint = mock(SonarLint.class);
     sonarLintFactory = mock(SonarLintFactory.class);
     when(sonarLintFactory.createSonarLint(anyBoolean(), anyBoolean())).thenReturn(sonarLint);
-    fileFinder = new InputFileFinder(null, null, Charset.defaultCharset());
+    fileFinder = new InputFileFinder(null, null, null, Charset.defaultCharset());
     main = new Main(opts, sonarLintFactory, reportFactory, fileFinder);
   }
 

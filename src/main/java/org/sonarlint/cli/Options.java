@@ -19,10 +19,9 @@
  */
 package org.sonarlint.cli;
 
-import org.sonarlint.cli.util.Logger;
-
 import java.text.ParseException;
 import java.util.Properties;
+import org.sonarlint.cli.util.Logger;
 
 public class Options {
   private static final Logger LOGGER = Logger.get();
@@ -35,6 +34,7 @@ public class Options {
   private String htmlReport = null;
   private String src = null;
   private String tests = "";
+  private String exclusions = "";
   private String charset = null;
   private boolean update = false;
   private String task;
@@ -64,7 +64,7 @@ public class Options {
 
       } else if ("-u".equals(arg) || "--update".equals(arg)) {
         options.update = true;
-        
+
       } else if (arg.startsWith("-D") && !"-D".equals(arg)) {
         arg = arg.substring(2);
         appendPropertyTo(arg, options.props);
@@ -87,6 +87,10 @@ public class Options {
         } else if ("--tests".equals(arg)) {
           checkAdditionalArg(i, args.length, arg);
           options.tests = args[i];
+
+        } else if ("--exclude".equals(arg)) {
+          checkAdditionalArg(i, args.length, arg);
+          options.exclusions = args[i];
 
         } else if ("-D".equals(arg) || "--define".equals(arg)) {
           checkAdditionalArg(i, args.length, arg);
@@ -134,7 +138,11 @@ public class Options {
   public String tests() {
     return tests;
   }
-  
+
+  public String exclusions() {
+    return exclusions;
+  }
+
   public boolean isUpdate() {
     return update;
   }
@@ -160,17 +168,18 @@ public class Options {
     LOGGER.info("usage: sonarlint [options]");
     LOGGER.info("");
     LOGGER.info("Options:");
-    LOGGER.info(" -u,--update            Update binding with SonarQube server before analysis");
-    LOGGER.info(" -D,--define <arg>      Define property");
-    LOGGER.info(" -e,--errors            Produce execution error messages");
-    LOGGER.info(" -h,--help              Display help information");
-    LOGGER.info(" -v,--version           Display version information");
-    LOGGER.info(" -X,--debug             Produce execution debug output");
-    LOGGER.info(" -i,--interactive       Run interactively");
-    LOGGER.info(" --html-report <path>   HTML report output path (relative or absolute)");
-    LOGGER.info(" --src <glob pattern>   GLOB pattern to identify source files");
-    LOGGER.info(" --tests <glob pattern> GLOB pattern to identify test files");
-    LOGGER.info(" --charset <name>       Character encoding of the source files");
+    LOGGER.info(" -u,--update              Update binding with SonarQube server before analysis");
+    LOGGER.info(" -D,--define <arg>        Define property");
+    LOGGER.info(" -e,--errors              Produce execution error messages");
+    LOGGER.info(" -h,--help                Display help information");
+    LOGGER.info(" -v,--version             Display version information");
+    LOGGER.info(" -X,--debug               Produce execution debug output");
+    LOGGER.info(" -i,--interactive         Run interactively");
+    LOGGER.info(" --html-report <path>     HTML report output path (relative or absolute)");
+    LOGGER.info(" --src <glob pattern>     GLOB pattern to identify source files");
+    LOGGER.info(" --tests <glob pattern>   GLOB pattern to identify test files");
+    LOGGER.info(" --exclude <glob pattern> GLOB pattern to exclude files");
+    LOGGER.info(" --charset <name>         Character encoding of the source files");
   }
 
   private static void appendPropertyTo(String arg, Properties props) {

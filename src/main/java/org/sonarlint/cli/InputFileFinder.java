@@ -36,36 +36,49 @@ import org.sonarlint.cli.util.Logger;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 
 public class InputFileFinder {
+  private static final String GLOB_PREFIX = "glob:";
   private static final Logger LOGGER = Logger.get();
   private final PathMatcher srcMatcher;
   private final PathMatcher testsMatcher;
+  private final PathMatcher excludeMatcher;
   private final Charset charset;
 
   private static PathMatcher acceptAll = p -> true;
   private static PathMatcher refuseAll = p -> false;
 
-  public InputFileFinder(@Nullable String srcGlobPattern, @Nullable String testsGlobPattern, Charset charset) {
+  public InputFileFinder(@Nullable String srcGlobPattern, @Nullable String testsGlobPattern, @Nullable String excludeGlobPattern, Charset charset) {
     this.charset = charset;
     FileSystem fs = FileSystems.getDefault();
     try {
       if (srcGlobPattern != null) {
-        srcMatcher = fs.getPathMatcher("glob:" + srcGlobPattern);
+        srcMatcher = fs.getPathMatcher(GLOB_PREFIX + srcGlobPattern);
       } else {
         srcMatcher = acceptAll;
       }
     } catch (Exception e) {
-      LOGGER.error("Error creating matcher with pattern: " + srcGlobPattern);
+      LOGGER.error("Error creating matcher for sources with pattern: " + srcGlobPattern);
       throw e;
     }
 
     try {
       if (testsGlobPattern != null) {
-        testsMatcher = fs.getPathMatcher("glob:" + testsGlobPattern);
+        testsMatcher = fs.getPathMatcher(GLOB_PREFIX + testsGlobPattern);
       } else {
         testsMatcher = refuseAll;
       }
     } catch (Exception e) {
-      LOGGER.error("Error creating matcher with pattern: " + testsGlobPattern);
+      LOGGER.error("Error creating matcher for tests with pattern: " + testsGlobPattern);
+      throw e;
+    }
+
+    try {
+      if (excludeGlobPattern != null) {
+        excludeMatcher = fs.getPathMatcher(GLOB_PREFIX + excludeGlobPattern);
+      } else {
+        excludeMatcher = refuseAll;
+      }
+    } catch (Exception e) {
+      LOGGER.error("Error creating matcher for exclusions with pattern: " + excludeGlobPattern);
       throw e;
     }
   }
@@ -90,7 +103,8 @@ public class InputFileFinder {
       Path absoluteFilePath = file;
       Path relativeFilePath = baseDir.relativize(absoluteFilePath);
       boolean isSrc = srcMatcher.matches(absoluteFilePath) || srcMatcher.matches(relativeFilePath);
-      if (isSrc) {
+      boolean isExcluded = excludeMatcher.matches(absoluteFilePath) || excludeMatcher.matches(relativeFilePath);
+      if (isSrc && !isExcluded) {
         boolean isTest = testsMatcher.matches(absoluteFilePath) || testsMatcher.matches(relativeFilePath);
         files.add(new DefaultClientInputFile(absoluteFilePath, isTest, charset));
       }

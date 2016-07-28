@@ -19,6 +19,7 @@
  */
 package org.sonarlint.cli;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,9 +28,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Map;
-
-import com.google.common.annotations.VisibleForTesting;
-
 import org.sonarlint.cli.analysis.SonarLint;
 import org.sonarlint.cli.analysis.SonarLintFactory;
 import org.sonarlint.cli.config.ConfigurationReader;
@@ -161,7 +159,7 @@ public class Main {
       return;
     }
 
-    InputFileFinder fileFinder = new InputFileFinder(parsedOpts.src(), parsedOpts.tests(), charset);
+    InputFileFinder fileFinder = new InputFileFinder(parsedOpts.src(), parsedOpts.tests(), parsedOpts.exclusions(), charset);
     ReportFactory reportFactory = new ReportFactory(charset);
     ConfigurationReader reader = new ConfigurationReader();
     SonarLintFactory sonarLintFactory = new SonarLintFactory(reader);

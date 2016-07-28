@@ -19,4 +19,4 @@ echo "Running for $CI_BUILD_NUMBER"
 
   # Run ITs
   cd it
-  mvn test -Dsonarlint.version=${sonarlintVersion} -B -e -V
+  mvn test -Dsonarlint.version=${sonarlintVersion} -Dsonar.runtimeVersion=LATEST_RELEASE -B -e -V

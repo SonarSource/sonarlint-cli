@@ -20,6 +20,8 @@
 package it.sonarlint.cli;
 
 import it.sonarlint.cli.tools.SonarlintCli;
+
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -43,10 +45,10 @@ public class LanguageTest {
     int code = sonarlint.deployAndRunProject("java-sample");
     assertThat(code).isEqualTo(0);
     
-    assertThat(sonarlint.getOut()).contains("6 issues");
-    assertThat(sonarlint.getOut()).contains("1 blocker");
-    assertThat(sonarlint.getOut()).contains("4 major");
-    assertThat(sonarlint.getOut()).contains("1 minor");
+    assertThat(sonarlint.getOut()).contains("11 issues");
+    assertThat(sonarlint.getOut()).contains("1 critical");
+    assertThat(sonarlint.getOut()).contains("5 major");
+    assertThat(sonarlint.getOut()).contains("5 minor");
     assertThat(sonarlint.getOut()).contains("2 files analyzed");
   }
   
@@ -56,19 +58,20 @@ public class LanguageTest {
     int code = sonarlint.run(project);
     assertThat(code).isEqualTo(0);
     
-    assertThat(sonarlint.getOut()).contains("6 issues");
-    assertThat(sonarlint.getOut()).contains("1 blocker");
-    assertThat(sonarlint.getOut()).contains("4 major");
-    assertThat(sonarlint.getOut()).contains("1 minor");
+    assertThat(sonarlint.getOut()).contains("11 issues");
+    assertThat(sonarlint.getOut()).contains("1 critical");
+    assertThat(sonarlint.getOut()).contains("5 major");
+    assertThat(sonarlint.getOut()).contains("5 minor");
     assertThat(sonarlint.getOut()).contains("2 files analyzed");
     
+    FileUtils.deleteDirectory(project.resolve(".sonarlint").toFile());
     code = sonarlint.run(project);
     assertThat(code).isEqualTo(0);
     
-    assertThat(sonarlint.getOut()).contains("6 issues");
-    assertThat(sonarlint.getOut()).contains("1 blocker");
-    assertThat(sonarlint.getOut()).contains("4 major");
-    assertThat(sonarlint.getOut()).contains("1 minor");
+    assertThat(sonarlint.getOut()).contains("11 issues");
+    assertThat(sonarlint.getOut()).contains("1 critical");
+    assertThat(sonarlint.getOut()).contains("5 major");
+    assertThat(sonarlint.getOut()).contains("5 minor");
     assertThat(sonarlint.getOut()).contains("2 files analyzed");
   }
 
@@ -80,9 +83,9 @@ public class LanguageTest {
     assertThat(sonarlint.getOut()).contains("src/main/js/Hello.js' is detected to be 'js'");
     assertThat(sonarlint.getOut()).contains("src/main/java/Hello.java' is detected to be 'java'");
 
-    assertThat(sonarlint.getOut()).contains("3 issues");
+    assertThat(sonarlint.getOut()).contains("4 issues");
     assertThat(sonarlint.getOut()).contains("2 major");
-    assertThat(sonarlint.getOut()).contains("1 minor");
+    assertThat(sonarlint.getOut()).contains("2 minor");
     
     // 1 of each lang
     assertThat(sonarlint.getOut()).contains("2 files analyzed");
@@ -99,10 +102,10 @@ public class LanguageTest {
   
   @Test
   public void testNoFiles() {
-    int code = sonarlint.deployAndRunProject("no-lang-files", "-X");
+    int code = sonarlint.deployAndRunProject("no-files", "-X");
     assertThat(code).isEqualTo(0);
     
-    assertThat(sonarlint.getOut()).contains("No files analyzed");
+    assertThat(sonarlint.getOut()).contains("No files to analyze");
   }
 
 }

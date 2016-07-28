@@ -8,25 +8,6 @@ function installTravisTools {
   source ~/.local/bin/install
 }
 
-function strongEcho {
-  echo ""
-  echo "================ $1 ================="
-}
-
 installTravisTools
-#build_snapshot "SonarSource/sonarlint-core"
 
-case "$TARGET" in
-
-CI)
-  regular_mvn_build_deploy_analyze
-  ;;
-
-
-*)
-  echo "Unexpected TARGET value: $TARGET"
-  exit 1
-  ;;
-
-esac
-
+regular_mvn_build_deploy_analyze

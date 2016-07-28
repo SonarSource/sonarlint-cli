@@ -19,13 +19,13 @@
  */
 package it.sonarlint.cli;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import com.sonar.orchestrator.Orchestrator;
+import com.sonar.orchestrator.locator.FileLocation;
+import it.sonarlint.cli.tools.SonarlintCli;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -34,10 +34,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
-import com.sonar.orchestrator.Orchestrator;
-import com.sonar.orchestrator.locator.FileLocation;
-
-import it.sonarlint.cli.tools.SonarlintCli;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ConnectedModeTest {
   private static final String PROJECT_KEY_JAVA = "sample-java";
@@ -47,6 +44,7 @@ public class ConnectedModeTest {
 
   @ClassRule
   public static Orchestrator ORCHESTRATOR = Orchestrator.builderEnv()
+    .setOrchestratorProperty("javaVersion", "LATEST_RELEASE")
     .addPlugin("java")
     .restoreProfileAtStartup(FileLocation.ofClasspath("/java-sonarlint.xml"))
     .build();

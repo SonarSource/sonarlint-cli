@@ -180,4 +180,24 @@ public class InputFileFinderTest {
     assertThat(files).extracting("charset").containsOnly(StandardCharsets.US_ASCII);
   }
 
+  @Test
+  public void testPatternAppliedToSourceFilesOnly() throws Exception {
+    Path src = root.resolve("src");
+
+    test1 = src.resolve("FirstTest.java");
+    Path test2 = src.resolve("SecondTest.java");
+    Path externalTest = root.resolve("ExternalTest.java");
+
+    Files.createDirectories(src);
+
+    Files.createFile(test1);
+    Files.createFile(test2);
+    Files.createFile(externalTest);
+
+    fileFinder = new InputFileFinder("src/**", "*Test.*", Charset.defaultCharset());
+
+    List<ClientInputFile> files = fileFinder.collect(root);
+    assertThat(files).extracting("path").containsOnly(test1, test2, src1);
+  }
+
 }

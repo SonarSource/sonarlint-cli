@@ -89,10 +89,9 @@ public class InputFileFinder {
     public FileVisitResult visitFile(final Path file, BasicFileAttributes attrs) throws IOException {
       Path absoluteFilePath = file;
       Path relativeFilePath = baseDir.relativize(absoluteFilePath);
-      boolean isTest = testsMatcher.matches(absoluteFilePath) || testsMatcher.matches(relativeFilePath);
       boolean isSrc = srcMatcher.matches(absoluteFilePath) || srcMatcher.matches(relativeFilePath);
-
-      if (isTest || isSrc) {
+      if (isSrc) {
+        boolean isTest = testsMatcher.matches(absoluteFilePath) || testsMatcher.matches(relativeFilePath);
         files.add(new DefaultClientInputFile(absoluteFilePath, isTest, charset));
       }
 

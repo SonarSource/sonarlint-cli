@@ -19,14 +19,6 @@
  */
 package org.sonarlint.cli;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.sonarlint.cli.util.Logger;
-import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +29,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
+import org.sonarlint.cli.util.Logger;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -85,8 +84,17 @@ public class InputFileFinderTest {
   }
 
   @Test
-  public void onlyTest() throws IOException {
-    fileFinder = new InputFileFinder(null, "**tests**", Charset.defaultCharset());
+  public void onlyTestByAbsolutePath() throws IOException {
+    onlyTest("**tests**");
+  }
+
+  @Test
+  public void onlyTestByRelativePath() throws IOException {
+    onlyTest("tests**");
+  }
+
+  public void onlyTest(String pattern) throws IOException {
+    fileFinder = new InputFileFinder(null, pattern, Charset.defaultCharset());
 
     List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(2);
@@ -106,8 +114,17 @@ public class InputFileFinderTest {
   }
 
   @Test
-  public void onlySrc() throws IOException {
-    fileFinder = new InputFileFinder("**src**", null, Charset.defaultCharset());
+  public void onlySrcByAbsolutePath() throws IOException {
+    onlySrc("**src**");
+  }
+
+  @Test
+  public void onlySrcByRelativePath() throws IOException {
+    onlySrc("src**");
+  }
+
+  public void onlySrc(String pattern) throws IOException {
+    fileFinder = new InputFileFinder(pattern, null, Charset.defaultCharset());
 
     List<ClientInputFile> files = fileFinder.collect(root);
     assertThat(files).hasSize(1);

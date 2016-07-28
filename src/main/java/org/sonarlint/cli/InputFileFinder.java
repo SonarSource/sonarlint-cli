@@ -19,11 +19,6 @@
  */
 package org.sonarlint.cli;
 
-import org.sonarlint.cli.util.Logger;
-import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
-
-import javax.annotation.Nullable;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
@@ -36,6 +31,9 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
+import org.sonarlint.cli.util.Logger;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 
 public class InputFileFinder {
   private static final Logger LOGGER = Logger.get();
@@ -74,27 +72,31 @@ public class InputFileFinder {
 
   public List<ClientInputFile> collect(Path dir) throws IOException {
     final List<ClientInputFile> files = new ArrayList<>();
-    Files.walkFileTree(dir, new FileCollector(files));
+    Files.walkFileTree(dir, new FileCollector(dir, files));
     return files;
   }
 
   private class FileCollector extends SimpleFileVisitor<Path> {
-    private List<ClientInputFile> files;
+    private final List<ClientInputFile> files;
+    private final Path baseDir;
 
-    private FileCollector(List<ClientInputFile> files) {
+    private FileCollector(Path baseDir, List<ClientInputFile> files) {
+      this.baseDir = baseDir;
       this.files = files;
     }
 
     @Override
     public FileVisitResult visitFile(final Path file, BasicFileAttributes attrs) throws IOException {
-      boolean isTest = testsMatcher.matches(file);
-      boolean isSrc = srcMatcher.matches(file);
+      Path absoluteFilePath = file;
+      Path relativeFilePath = baseDir.relativize(absoluteFilePath);
+      boolean isTest = testsMatcher.matches(absoluteFilePath) || testsMatcher.matches(relativeFilePath);
+      boolean isSrc = srcMatcher.matches(absoluteFilePath) || srcMatcher.matches(relativeFilePath);
 
       if (isTest || isSrc) {
-        files.add(new DefaultClientInputFile(file, isTest, charset));
+        files.add(new DefaultClientInputFile(absoluteFilePath, isTest, charset));
       }
 
-      return super.visitFile(file, attrs);
+      return super.visitFile(absoluteFilePath, attrs);
     }
 
     @Override

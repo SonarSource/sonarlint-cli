@@ -71,7 +71,7 @@ public class ConnectedModeTest {
   public void testSimpleJava() throws IOException {
     Path projectRoot = sonarlint.deployProject("java-sample");
 
-    createProjectConfig(projectRoot, ORCHESTRATOR.getServer().getUrl(), PROJECT_KEY_JAVA);
+    createProjectConfig(projectRoot, PROJECT_KEY_JAVA);
 
     int code = sonarlint.run(projectRoot, "-u");
     assertThat(code).isEqualTo(0);
@@ -85,9 +85,9 @@ public class ConnectedModeTest {
     assertThat(sonarlint.getOut()).contains("3 files analyzed");
   }
 
-  private void createProjectConfig(Path projectRoot, String serverUrl, String projectKey) throws IOException {
+  private void createProjectConfig(Path projectRoot, String projectKey) throws IOException {
     Path configFile = projectRoot.resolve("sonarlint.json");
-    String json = "{serverUrl=\"" + serverUrl + "\", projectKey=" + projectKey + "}";
+    String json = "{serverId=\"local\", projectKey=" + projectKey + "}";
     Files.write(configFile, json.getBytes(StandardCharsets.UTF_8));
   }
 
@@ -95,7 +95,7 @@ public class ConnectedModeTest {
     Path configDir = temp.getRoot().toPath().resolve(".sonarlint").resolve("conf");
     Files.createDirectories(configDir);
     Path configFile = configDir.resolve("global.json");
-    String json = "{servers=[{url=\"" + serverUrl + "\"}]}";
+    String json = "{servers=[{id=\"local\",url=\"" + serverUrl + "\"}]}";
     Files.write(configFile, json.getBytes(StandardCharsets.UTF_8));
     sonarlint.addEnv("SONARLINT_OPTS", "-Duser.home=" + temp.getRoot().toPath().toAbsolutePath().toString());
   }

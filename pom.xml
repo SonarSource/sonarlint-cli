@@ -9,7 +9,7 @@
 
   <groupId>org.sonarsource.sonarlint</groupId>
   <artifactId>sonarlint-cli</artifactId>
-  <version>1.1-SNAPSHOT</version>
+  <version>2.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>SonarLint CLI</name>
   <url>http://www.sonarlint.org</url>

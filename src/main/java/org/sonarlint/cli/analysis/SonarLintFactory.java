@@ -19,6 +19,7 @@
  */
 package org.sonarlint.cli.analysis;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
@@ -29,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import org.sonarlint.cli.SonarProperties;
 import org.sonarlint.cli.config.ConfigurationReader;
 import org.sonarlint.cli.config.GlobalConfiguration;
@@ -41,8 +41,6 @@ import org.sonarsource.sonarlint.core.StandaloneSonarLintEngineImpl;
 import org.sonarsource.sonarlint.core.client.api.connected.ConnectedGlobalConfiguration;
 import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneGlobalConfiguration;
 import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneSonarLintEngine;
-
-import com.google.common.annotations.VisibleForTesting;
 
 public class SonarLintFactory {
   private static final Logger LOGGER = Logger.get();
@@ -92,18 +90,18 @@ public class SonarLintFactory {
     String projectKey = project.projectKey();
     SonarQubeServer server;
 
-    if (project.serverUrl() == null) {
+    if (project.serverId() == null) {
       if (servers.size() > 1) {
         throw new IllegalStateException(
-          String.format("No SonarQube server URL is defined in the project binding (%s) and there are multiple servers defined in the global configuration",
+          String.format("No SonarQube server id is defined in the project binding (%s) and there are multiple servers defined in the global configuration",
             projectConfigPath.toAbsolutePath()));
       }
       server = servers.get(0);
     } else {
-      Optional<SonarQubeServer> optionalServer = servers.stream().filter(s -> s.url().equals(project.serverUrl())).findFirst();
+      Optional<SonarQubeServer> optionalServer = servers.stream().filter(s -> s.id().equals(project.serverId())).findFirst();
       server = optionalServer
-        .orElseThrow(() -> new IllegalStateException(String.format("No SonarQube server configuration found in '%s' for the server URL defined in the project binding: '%s'",
-          globalConfigPath.toAbsolutePath(), project.serverUrl())));
+        .orElseThrow(() -> new IllegalStateException(String.format("No SonarQube server configuration found in '%s' for the server id defined in the project binding: '%s'",
+          globalConfigPath.toAbsolutePath(), project.serverId())));
     }
 
     return createConnected(server, projectKey, verbose);
@@ -122,7 +120,7 @@ public class SonarLintFactory {
     LOGGER.info(String.format("Connected mode (%s)", projectKey));
     ConnectedGlobalConfiguration config = ConnectedGlobalConfiguration.builder()
       .setLogOutput(new DefaultLogOutput(LOGGER, verbose))
-      .setServerId(server.url())
+      .setServerId(server.id())
       .build();
     ConnectedSonarLintEngineImpl engine = new ConnectedSonarLintEngineImpl(config);
     return new ConnectedSonarLint(engine, server, projectKey);

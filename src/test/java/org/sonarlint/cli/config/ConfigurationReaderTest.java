@@ -23,11 +23,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ConfigurationReaderTest {
@@ -39,13 +39,13 @@ public class ConfigurationReaderTest {
 
   @Test
   public void readProjectConfig() throws IOException {
-    String json = "{serverUrl=\"http://localhost:9000\",projectKey=project1}";
+    String json = "{serverId=\"localhost\",projectKey=project1}";
 
     Path file = temp.newFile().toPath();
     Files.write(file, json.getBytes(StandardCharsets.UTF_8));
     ProjectConfiguration projectConfig = new ConfigurationReader().readProject(file);
 
-    assertThat(projectConfig.serverUrl()).isEqualTo("http://localhost:9000");
+    assertThat(projectConfig.serverId()).isEqualTo("localhost");
     assertThat(projectConfig.projectKey()).isEqualTo("project1");
   }
 

@@ -20,10 +20,15 @@
 package org.sonarlint.cli.config;
 
 public class SonarQubeServer {
+  private String id;
   private String url;
   private String token;
   private String login;
   private String password;
+
+  public String id() {
+    return id;
+  }
 
   public String url() {
     return url;

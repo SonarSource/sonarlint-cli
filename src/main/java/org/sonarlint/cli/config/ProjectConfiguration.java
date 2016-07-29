@@ -22,12 +22,12 @@ package org.sonarlint.cli.config;
 import javax.annotation.CheckForNull;
 
 public class ProjectConfiguration {
-  private String serverUrl;
+  private String serverId;
   private String projectKey;
 
   @CheckForNull
-  public String serverUrl() {
-    return serverUrl;
+  public String serverId() {
+    return serverId;
   }
 
   @CheckForNull

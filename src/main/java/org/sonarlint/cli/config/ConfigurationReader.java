@@ -19,16 +19,14 @@
  */
 package org.sonarlint.cli.config;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import com.google.gson.GsonBuilder;
 
 public class ConfigurationReader {
   public GlobalConfiguration readGlobal(Path configFilePath) {

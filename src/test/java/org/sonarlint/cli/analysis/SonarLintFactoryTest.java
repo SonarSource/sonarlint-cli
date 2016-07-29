@@ -19,11 +19,6 @@
  */
 package org.sonarlint.cli.analysis;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
@@ -33,9 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.annotation.Nullable;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,6 +39,11 @@ import org.sonarlint.cli.config.ConfigurationReader;
 import org.sonarlint.cli.config.GlobalConfiguration;
 import org.sonarlint.cli.config.ProjectConfiguration;
 import org.sonarlint.cli.config.SonarQubeServer;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class SonarLintFactoryTest {
   private ConfigurationReader reader;
@@ -95,7 +93,7 @@ public class SonarLintFactoryTest {
     assertThat(sonarLint).isNotNull();
     assertThat(sonarLint).isInstanceOf(StandaloneSonarLint.class);
   }
-  
+
   @Test
   public void failIfUpdateAndStandalone() {
     mockConfigs(null, null);
@@ -106,8 +104,8 @@ public class SonarLintFactoryTest {
 
   @Test
   public void testCreateConnected() {
-    GlobalConfiguration global = createGlobalConfig("http://localhost:9000");
-    ProjectConfiguration project = createProjectConfig("http://localhost:9000", "project1");
+    GlobalConfiguration global = createGlobalConfig("localhost");
+    ProjectConfiguration project = createProjectConfig("localhost", "project1");
     mockConfigs(global, project);
     SonarLint sonarLint = sonarLintFactory.createSonarLint(globalConfigPath, projectConfigPath, false, true);
 
@@ -117,7 +115,7 @@ public class SonarLintFactoryTest {
 
   @Test
   public void testCreateConnectedWithoutExplicitServer() {
-    GlobalConfiguration global = createGlobalConfig("http://localhost:9000");
+    GlobalConfiguration global = createGlobalConfig("localhost");
     ProjectConfiguration project = createProjectConfig(null, "project1");
     mockConfigs(global, project);
     SonarLint sonarLint = sonarLintFactory.createSonarLint(globalConfigPath, projectConfigPath, false, true);
@@ -128,18 +126,18 @@ public class SonarLintFactoryTest {
 
   @Test
   public void failIfServerNotFound() {
-    GlobalConfiguration global = createGlobalConfig("http://localhost:9000");
-    ProjectConfiguration project = createProjectConfig("http://localhost:9001", "project1");
+    GlobalConfiguration global = createGlobalConfig("localhost");
+    ProjectConfiguration project = createProjectConfig("localhost2", "project1");
     mockConfigs(global, project);
 
     exception.expect(IllegalStateException.class);
     exception.expectMessage("No SonarQube server configuration found");
     sonarLintFactory.createSonarLint(globalConfigPath, projectConfigPath, false, true);
   }
-  
+
   @Test
   public void failIfSeveralServerOptions() {
-    GlobalConfiguration global = createGlobalConfig("http://localhost:9000", "http://localhost:9001");
+    GlobalConfiguration global = createGlobalConfig("localhost", "localhost2");
     ProjectConfiguration project = createProjectConfig(null, "project1");
     mockConfigs(global, project);
 
@@ -147,10 +145,10 @@ public class SonarLintFactoryTest {
     exception.expectMessage("there are multiple servers defined in the global configuration");
     sonarLintFactory.createSonarLint(globalConfigPath, projectConfigPath, false, true);
   }
-  
+
   @Test
   public void failIfNoGlobalConfig() {
-    ProjectConfiguration project = createProjectConfig("http://localhost:9001", "project1");
+    ProjectConfiguration project = createProjectConfig("localhost2", "project1");
     mockConfigs(null, project);
 
     exception.expect(IllegalStateException.class);
@@ -159,7 +157,7 @@ public class SonarLintFactoryTest {
   }
 
   public void failIfMultipleServers() {
-    GlobalConfiguration global = createGlobalConfig("http://localhost:9000", "http://localhost:9001");
+    GlobalConfiguration global = createGlobalConfig("localhost", "localhost2");
     ProjectConfiguration project = createProjectConfig(null, "project1");
     mockConfigs(global, project);
 
@@ -186,12 +184,12 @@ public class SonarLintFactoryTest {
     assertThat(Paths.get(plugins[0].toURI())).isEqualTo(plugin);
   }
 
-  private GlobalConfiguration createGlobalConfig(String... serverUrls) {
+  private GlobalConfiguration createGlobalConfig(String... serverIds) {
     List<SonarQubeServer> servers = new LinkedList<>();
 
-    for (String url : serverUrls) {
+    for (String id : serverIds) {
       SonarQubeServer server = mock(SonarQubeServer.class);
-      when(server.url()).thenReturn(url);
+      when(server.id()).thenReturn(id);
       servers.add(server);
     }
 
@@ -200,9 +198,9 @@ public class SonarLintFactoryTest {
     return config;
   }
 
-  private ProjectConfiguration createProjectConfig(@Nullable String serverUrl, @Nullable String projectKey) {
+  private ProjectConfiguration createProjectConfig(@Nullable String serverId, @Nullable String projectKey) {
     ProjectConfiguration config = mock(ProjectConfiguration.class);
-    when(config.serverUrl()).thenReturn(serverUrl);
+    when(config.serverId()).thenReturn(serverId);
     when(config.projectKey()).thenReturn(projectKey);
     return config;
   }

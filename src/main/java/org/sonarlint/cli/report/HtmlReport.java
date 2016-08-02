@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.function.Function;
 import org.apache.commons.io.FileUtils;
 import org.sonarlint.cli.util.Logger;
+import org.sonarlint.cli.util.Util;
 import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
@@ -79,7 +80,7 @@ public class HtmlReport implements Reporter {
       copyDependency(target, "rule.css");
       for (String ruleKey : ruleKeys) {
         RuleDetails ruleDetails = ruleDescriptionProducer.apply(ruleKey);
-        FileUtils.write(target.resolve(ruleKey + ".html").toFile(),
+        FileUtils.write(target.resolve(Util.escapeFileName(ruleKey) + ".html").toFile(),
           "<!doctype html><html><head><link href=\"rule.css\" rel=\"stylesheet\" type=\"text/css\" /></head><body><h1><big>" + ruleDetails.getName() + "</big> ("
             + ruleKey
             + ")</h1><div class=\"rule-desc\">" + ruleDetails.getHtmlDescription()

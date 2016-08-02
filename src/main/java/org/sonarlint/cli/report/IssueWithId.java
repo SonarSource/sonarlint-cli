@@ -24,5 +24,7 @@ import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 public interface IssueWithId extends Issue {
 
   int id();
+  
+  String ruleDescriptionFileName();
 
 }

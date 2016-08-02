@@ -65,7 +65,7 @@ public class HtmlReportTest {
       k -> "squid:1234".equals(k) ? mockRuleDetails() : null);
 
     assertThat(reportFile.getParent().resolve("sonarlintreport_rules/rule.css").toFile()).exists();
-    assertThat(reportFile.getParent().resolve("sonarlintreport_rules/squid:1234.html").toFile()).usingCharset(StandardCharsets.UTF_8).hasContent(
+    assertThat(reportFile.getParent().resolve("sonarlintreport_rules/squid_1234.html").toFile()).usingCharset(StandardCharsets.UTF_8).hasContent(
       "<!doctype html><html><head><link href=\"rule.css\" rel=\"stylesheet\" type=\"text/css\" /></head><body><h1><big>Foo</big> (squid:1234)</h1><div class=\"rule-desc\">foo bar</div></body></html>");
   }
 

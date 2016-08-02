@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.sonarlint.cli.report.source.HtmlSourceDecorator;
+import org.sonarlint.cli.util.Util;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
@@ -187,6 +188,11 @@ public class IssuesReport {
     @Override
     public int id() {
       return id;
+    }
+
+    @Override
+    public String ruleDescriptionFileName() {
+      return Util.escapeFileName(wrapped.getRuleKey()) + ".html";
     }
 
   }

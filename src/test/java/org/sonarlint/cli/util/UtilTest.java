@@ -19,30 +19,16 @@
  */
 package org.sonarlint.cli.util;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class Util {
-  private Util() {
-    // static only
-  }
+import org.junit.Test;
 
-  public static <T, U> U getOrCreate(Map<T, U> map, T key, Function<U> f) {
-    U value = map.get(key);
-    if (value != null) {
-      return value;
-    }
-    value = f.call();
-    map.put(key, value);
-    return value;
-  }
-  
-  public static Map<String, String> toMap(Properties properties) {
-    return new HashMap<>((Map) properties);
-  }
-  
-  public static String escapeFileName(String fileName) {
-    return fileName.replaceAll("[^a-zA-Z0-9.-]", "_");
+public class UtilTest {
+  @Test
+  public void testEscapeFileName() {
+    assertThat(Util.escapeFileName("myfile.html")).isEqualTo("myfile.html");
+    assertThat(Util.escapeFileName("myfile.h.html")).isEqualTo("myfile.h.html");
+    assertThat(Util.escapeFileName("invalid:name.html")).isEqualTo("invalid_name.html");
+    assertThat(Util.escapeFileName("name-ok.html")).isEqualTo("name-ok.html");
   }
 }

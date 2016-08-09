@@ -32,6 +32,8 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
 
 public class ConfigurationReader {
+  private static final String FAIL_PARSE_JSON = "Failed to parse JSON file: ";
+
   public GlobalConfiguration readGlobal(Path configFilePath) {
     String contents = getContents(configFilePath);
     GlobalConfiguration config;
@@ -39,7 +41,7 @@ public class ConfigurationReader {
     try {
       config = new GsonBuilder().create().fromJson(contents, GlobalConfiguration.class);
     } catch (RuntimeException ex) {
-      throw new IllegalStateException("Failed to parse JSON file: " + configFilePath, ex);
+      throw new IllegalStateException(FAIL_PARSE_JSON + configFilePath, ex);
     }
 
     return validate(config, configFilePath);
@@ -52,7 +54,7 @@ public class ConfigurationReader {
     try {
       config = new GsonBuilder().create().fromJson(contents, ProjectConfiguration.class);
     } catch (RuntimeException ex) {
-      throw new IllegalStateException("Failed to parse JSON file: " + configFilePath, ex);
+      throw new IllegalStateException(FAIL_PARSE_JSON + configFilePath, ex);
     }
 
     return validate(config, configFilePath);
@@ -68,7 +70,7 @@ public class ConfigurationReader {
 
   private static ProjectConfiguration validate(@Nullable ProjectConfiguration projectConfig, Path configFilePath) {
     if (projectConfig == null) {
-      throw new IllegalStateException("Failed to parse JSON file: " + configFilePath.toAbsolutePath());
+      throw new IllegalStateException(FAIL_PARSE_JSON + configFilePath.toAbsolutePath());
     }
     if (StringUtils.isEmpty(projectConfig.projectKey())) {
       throw new IllegalStateException("Project binding must have a project key defined. Check the configuration in: " + configFilePath.toAbsolutePath());
@@ -80,7 +82,7 @@ public class ConfigurationReader {
     Set<String> serverUrls = new HashSet<>();
 
     if (globalConfig == null) {
-      throw new IllegalStateException("Failed to parse JSON file: " + configFilePath.toAbsolutePath());
+      throw new IllegalStateException(FAIL_PARSE_JSON + configFilePath.toAbsolutePath());
     }
     if (globalConfig.servers() != null) {
       for (SonarQubeServer s : globalConfig.servers()) {

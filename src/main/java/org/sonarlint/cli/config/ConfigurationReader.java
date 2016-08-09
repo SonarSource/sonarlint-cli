@@ -26,6 +26,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang.StringUtils;
 
 public class ConfigurationReader {
@@ -63,16 +66,22 @@ public class ConfigurationReader {
     }
   }
 
-  private static ProjectConfiguration validate(ProjectConfiguration projectConfig, Path configFilePath) {
+  private static ProjectConfiguration validate(@Nullable ProjectConfiguration projectConfig, Path configFilePath) {
+    if (projectConfig == null) {
+      throw new IllegalStateException("Failed to parse JSON file: " + configFilePath.toAbsolutePath());
+    }
     if (StringUtils.isEmpty(projectConfig.projectKey())) {
       throw new IllegalStateException("Project binding must have a project key defined. Check the configuration in: " + configFilePath.toAbsolutePath());
     }
     return projectConfig;
   }
 
-  private static GlobalConfiguration validate(GlobalConfiguration globalConfig, Path configFilePath) {
+  private static GlobalConfiguration validate(@Nullable GlobalConfiguration globalConfig, Path configFilePath) {
     Set<String> serverUrls = new HashSet<>();
 
+    if (globalConfig == null) {
+      throw new IllegalStateException("Failed to parse JSON file: " + configFilePath.toAbsolutePath());
+    }
     if (globalConfig.servers() != null) {
       for (SonarQubeServer s : globalConfig.servers()) {
         if (StringUtils.isEmpty(s.url())) {

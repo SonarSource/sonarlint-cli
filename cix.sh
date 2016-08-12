@@ -24,8 +24,7 @@ echo "Running for $CI_BUILD_NUMBER"
   mvn install:install-file -Dfile=target/sonarlint-cli-$NEW_VERSION.zip -DgroupId=org.sonarsource.sonarlint \
     -DartifactId=sonarlint-cli -Dversion=$NEW_VERSION -Dpackaging=zip
 
-  sonarlintVersion=`mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -Ev '(^\[|Download\w+:)'`
-
+  
   # Run ITs
   cd it
-  mvn test -Dsonarlint.version=${sonarlintVersion} -Dsonar.runtimeVersion=LATEST_RELEASE -B -e -V
+  mvn test -Dsonarlint.version=$NEW_VERSION -Dsonar.runtimeVersion=LATEST_RELEASE -B -e -V

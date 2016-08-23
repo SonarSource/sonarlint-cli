@@ -49,6 +49,13 @@ public class ReportFactoryTest {
   }
 
   @Test
+  public void consoleRun() {
+    ReportFactory tempFactory = new ReportFactory(Charset.defaultCharset(), "console");
+    List<Reporter> reporters = tempFactory.createReporters(Paths.get("test"));
+    assertThat(reporters).hasSize(1);
+  }
+
+  @Test
   public void defaultReportFile() {
     Path report = factory.getReportFile(temp.getRoot().toPath());
     assertThat(report).isEqualTo(temp.getRoot().toPath().resolve(".sonarlint").resolve("sonarlint-report.html"));

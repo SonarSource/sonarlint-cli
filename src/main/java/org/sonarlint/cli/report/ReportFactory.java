@@ -26,22 +26,34 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nullable;
 
 public class ReportFactory {
   private static final String DEFAULT_REPORT_PATH = ".sonarlint/sonarlint-report.html";
   private String htmlPath = null;
   private Charset charset;
+  private String reportType;
 
   public ReportFactory(Charset charset) {
+    this(charset, "");
+  }
+
+  public ReportFactory(Charset charset, String reportType) {
     this.charset = charset;
+    this.reportType = reportType;
   }
 
   public List<Reporter> createReporters(Path basePath) {
     List<Reporter> list = new LinkedList<>();
 
-    list.add(new ConsoleReport());
-    list.add(new HtmlReport(basePath, getReportFile(basePath), charset));
+    if (Objects.equals(reportType, "") || Objects.equals(reportType.toLowerCase(), "html")) {
+      list.add(new ConsoleReport());
+      list.add(new HtmlReport(basePath, getReportFile(basePath), charset));
+    } else if (Objects.equals(reportType.toLowerCase(), "console")) {
+      boolean verboseConsoleLog = true;
+      list.add(new ConsoleReport(verboseConsoleLog));
+    }
 
     return list;
   }

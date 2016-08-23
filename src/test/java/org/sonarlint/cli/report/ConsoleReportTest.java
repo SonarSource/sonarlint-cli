@@ -83,6 +83,38 @@ public class ConsoleReportTest {
   }
 
   @Test
+  public void testVerboseLog() throws IOException {
+
+    ConsoleReport verboseReport = new ConsoleReport(true);
+
+    List<Issue> issues = new LinkedList<>();
+    issues.add(createTestIssue("comp1", "rule", "MAJOR", 20));
+    issues.add(createTestIssue("comp1", "rule", "MINOR", 20));
+    issues.add(createTestIssue("comp1", "rule", "CRITICAL", 20));
+    issues.add(createTestIssue("comp1", "rule", "INFO", 20));
+    issues.add(createTestIssue("comp1", "rule", "BLOCKER", 20));
+
+    verboseReport.execute(PROJECT_NAME, DATE, issues, result, k -> null);
+
+    stdOut.flush();
+    assertThat(getLog(out)).contains("SonarLint Report");
+    assertThat(getLog(out)).contains("5 issues");
+    assertThat(getLog(out)).contains("1 major");
+    assertThat(getLog(out)).contains("1 minor");
+    assertThat(getLog(out)).contains("1 info");
+    assertThat(getLog(out)).contains("1 critical");
+    assertThat(getLog(out)).contains("1 blocker");
+
+    assertThat(getLog(out)).contains("{comp1} {MAJOR} {20:0 - 0:0} {null}");
+    assertThat(getLog(out)).contains("{comp1} {MINOR} {20:0 - 0:0} {null}");
+    assertThat(getLog(out)).contains("{comp1} {CRITICAL} {20:0 - 0:0} {null}");
+    assertThat(getLog(out)).contains("{comp1} {INFO} {20:0 - 0:0} {null}");
+    assertThat(getLog(out)).contains("{comp1} {BLOCKER} {20:0 - 0:0} {null}");
+
+    assertThat(getLog(out)).doesNotContain("new");
+  }
+
+  @Test
   public void testInvalidSeverity() throws IOException {
     List<Issue> issues = new LinkedList<>();
     issues.add(createTestIssue("comp1", "rule", "INVALID", 10));

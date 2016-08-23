@@ -159,8 +159,15 @@ public class Main {
       return;
     }
 
+    String reportType;
+    if (parsedOpts.reportType() != "") {
+      reportType = parsedOpts.reportType();
+    } else {
+      reportType = "html";
+    }
+
     InputFileFinder fileFinder = new InputFileFinder(parsedOpts.src(), parsedOpts.tests(), parsedOpts.exclusions(), charset);
-    ReportFactory reportFactory = new ReportFactory(charset);
+    ReportFactory reportFactory = new ReportFactory(charset, reportType);
     ConfigurationReader reader = new ConfigurationReader();
     SonarLintFactory sonarLintFactory = new SonarLintFactory(reader);
 

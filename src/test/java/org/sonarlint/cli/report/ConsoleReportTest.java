@@ -105,11 +105,11 @@ public class ConsoleReportTest {
     assertThat(getLog(out)).contains("1 critical");
     assertThat(getLog(out)).contains("1 blocker");
 
-    assertThat(getLog(out)).contains("{comp1} {MAJOR} {20:0 - 0:0} {null}");
-    assertThat(getLog(out)).contains("{comp1} {MINOR} {20:0 - 0:0} {null}");
-    assertThat(getLog(out)).contains("{comp1} {CRITICAL} {20:0 - 0:0} {null}");
-    assertThat(getLog(out)).contains("{comp1} {INFO} {20:0 - 0:0} {null}");
-    assertThat(getLog(out)).contains("{comp1} {BLOCKER} {20:0 - 0:0} {null}");
+    assertThat(getLog(out)).contains("{comp1} {MAJOR} {20:0 - 0:0} {rule} {null}");
+    assertThat(getLog(out)).contains("{comp1} {MINOR} {20:0 - 0:0} {rule} {null}");
+    assertThat(getLog(out)).contains("{comp1} {CRITICAL} {20:0 - 0:0} {rule} {null}");
+    assertThat(getLog(out)).contains("{comp1} {INFO} {20:0 - 0:0} {rule} {null}");
+    assertThat(getLog(out)).contains("{comp1} {BLOCKER} {20:0 - 0:0} {rule} {null}");
 
     assertThat(getLog(out)).doesNotContain("new");
   }

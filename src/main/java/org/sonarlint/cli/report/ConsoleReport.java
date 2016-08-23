@@ -58,13 +58,14 @@ public class ConsoleReport implements Reporter {
       if (verboseConsoleLog) {
         sb.append(
           String.format(
-            "{%s} {%s} {%d:%d - %d:%d} {%s}\n",
+            "{%s} {%s} {%d:%d - %d:%d} {%s} {%s}\n",
             issue.getInputFile().getPath(),
             issue.getSeverity(),
             issue.getStartLine(),
             issue.getStartLineOffset(),
             issue.getEndLine(),
             issue.getEndLineOffset(),
+            issue.getRuleKey(),
             issue.getMessage()));
       }
       switch (issue.getSeverity()) {

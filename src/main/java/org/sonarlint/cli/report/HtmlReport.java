@@ -80,10 +80,15 @@ public class HtmlReport implements Reporter {
       copyDependency(target, "rule.css");
       for (String ruleKey : ruleKeys) {
         RuleDetails ruleDetails = ruleDescriptionProducer.apply(ruleKey);
+        String htmlDescription = ruleDetails.getHtmlDescription();
+        String extendedDescription = ruleDetails.getExtendedDescription();
+        if (!extendedDescription.isEmpty()) {
+          htmlDescription += "\n<div>" + extendedDescription + "</div>";
+        }
         FileUtils.write(target.resolve(Util.escapeFileName(ruleKey) + ".html").toFile(),
           "<!doctype html><html><head><link href=\"rule.css\" rel=\"stylesheet\" type=\"text/css\" /></head><body><h1><big>" + ruleDetails.getName() + "</big> ("
             + ruleKey
-            + ")</h1><div class=\"rule-desc\">" + ruleDetails.getHtmlDescription()
+            + ")</h1><div class=\"rule-desc\">" + htmlDescription
             + "</div></body></html>",
           StandardCharsets.UTF_8);
       }

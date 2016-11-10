@@ -187,15 +187,13 @@ public class Main {
       }
     } else {
       LOGGER.error(message);
-      if (e != null) {
-        LOGGER.error(e.getMessage());
-        String previousMsg = "";
-        for (Throwable cause = e.getCause(); cause != null
-          && cause.getMessage() != null
-          && !cause.getMessage().equals(previousMsg); cause = cause.getCause()) {
-          LOGGER.error("Caused by: " + cause.getMessage());
-          previousMsg = cause.getMessage();
-        }
+      LOGGER.error(e.getMessage());
+      String previousMsg = "";
+      for (Throwable cause = e.getCause(); cause != null
+        && cause.getMessage() != null
+        && !cause.getMessage().equals(previousMsg); cause = cause.getCause()) {
+        LOGGER.error("Caused by: " + cause.getMessage());
+        previousMsg = cause.getMessage();
       }
       LOGGER.error("");
       LOGGER.error("To see the full stack trace of the errors, re-run SonarLint with the -e switch.");

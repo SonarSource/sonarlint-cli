@@ -82,7 +82,7 @@ public class Logger {
 
   public void error(String message, Throwable t) {
     stdErr.println("ERROR: " + message);
-    if (t != null && displayStackTrace) {
+    if (displayStackTrace) {
       t.printStackTrace(stdErr);
     }
   }

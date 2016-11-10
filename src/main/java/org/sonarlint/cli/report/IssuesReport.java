@@ -31,6 +31,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
 import org.sonarlint.cli.report.source.HtmlSourceDecorator;
 import org.sonarlint.cli.util.Util;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
@@ -207,13 +210,13 @@ public class IssuesReport {
     return report;
   }
 
-  public List<String> getEscapedSource(Path filePath) {
+  public List<String> getEscapedSource(@Nullable Path filePath) {
     if (filePath == null) {
       return Collections.emptyList();
     }
     List<String> lines;
     try {
-      if (!Files.isRegularFile(filePath)) {
+      if (!filePath.toFile().exists()) {
         // invalid, directory, project issue, ...
         return Collections.emptyList();
       }

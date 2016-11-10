@@ -111,7 +111,7 @@ public final class ResourceReport {
     }
   }
 
-  public boolean isDisplayableLine(Integer lineNumber) {
+  public boolean isDisplayableLine(@Nullable Integer lineNumber) {
     if (lineNumber == null || lineNumber < 1) {
       return false;
     }

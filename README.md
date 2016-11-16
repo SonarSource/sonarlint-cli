@@ -2,8 +2,11 @@ SonarLint CLI [![Build Status](https://travis-ci.org/SonarSource/sonarlint-cli.s
 =========================
 
 Documentation:
+
 http://www.sonarlint.org/commandline
-http://docs.sonarqube.org/display/SONAR/Analyzing+with+SonarQube+Scanner
+
+http://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner
 
 Issue Tracker:
+
 http://jira.sonarsource.com/browse/SLCLI

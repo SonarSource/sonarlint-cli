@@ -120,7 +120,7 @@ public class IssuesReport {
       // issue on project (no specific file)
       filePath = Paths.get("");
     } else {
-      filePath = inputFile.getPath();
+      filePath = Paths.get(inputFile.getPath());
     }
     ResourceReport report = getOrCreate(filePath);
     getSummary().addIssue(issueWithId);

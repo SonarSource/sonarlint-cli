@@ -21,7 +21,6 @@ package org.sonarlint.cli.report;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -92,7 +91,7 @@ public class HtmlReportTest {
 
   private static Issue createTestIssue(String filePath, String ruleKey, String name, String severity, int line) {
     ClientInputFile inputFile = mock(ClientInputFile.class);
-    when(inputFile.getPath()).thenReturn(Paths.get(filePath));
+    when(inputFile.getPath()).thenReturn(filePath);
 
     Issue issue = mock(Issue.class);
     when(issue.getStartLine()).thenReturn(line);

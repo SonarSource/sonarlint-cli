@@ -20,6 +20,7 @@
 package org.sonarlint.cli;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -123,12 +124,12 @@ public class InputFileFinder {
     }
   }
 
-  private static class DefaultClientInputFile implements ClientInputFile {
+  public static class DefaultClientInputFile implements ClientInputFile {
     private final Path path;
     private final boolean test;
     private final Charset charset;
 
-    DefaultClientInputFile(Path path, boolean test, Charset charset) {
+    public DefaultClientInputFile(Path path, boolean test, Charset charset) {
       this.path = path;
       this.test = test;
       this.charset = charset;
@@ -140,8 +141,8 @@ public class InputFileFinder {
     }
 
     @Override
-    public Path getPath() {
-      return path;
+    public String getPath() {
+      return path.toString();
     }
 
     @Override
@@ -152,6 +153,16 @@ public class InputFileFinder {
     @Override
     public <G> G getClientObject() {
       return null;
+    }
+
+    @Override
+    public InputStream inputStream() throws IOException {
+      return Files.newInputStream(path);
+    }
+
+    @Override
+    public String contents() throws IOException {
+      return new String(Files.readAllBytes(path));
     }
   }
 }

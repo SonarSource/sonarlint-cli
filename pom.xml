@@ -43,18 +43,19 @@
   <properties>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
     <gitRepositoryName>sonarlint-cli</gitRepositoryName>
+    <sonarlint.version>2.5.0.36</sonarlint.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.sonarsource.sonarlint.core</groupId>
       <artifactId>sonarlint-core</artifactId>
-      <version>2.5-build644</version>
+      <version>${sonarlint.version}</version>
     </dependency>
     <dependency>
       <groupId>org.sonarsource.sonarlint.core</groupId>
       <artifactId>sonarlint-client-api</artifactId>
-      <version>2.5-build644</version>
+      <version>${sonarlint.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -211,7 +212,7 @@
               <rules>
                 <requireFilesSize>
                   <minsize>30000000</minsize>
-                  <maxsize>33000000</maxsize>
+                  <maxsize>33300000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonarlint-cli-${project.version}.zip</file>
                   </files>

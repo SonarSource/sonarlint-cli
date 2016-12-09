@@ -35,8 +35,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.sonarlint.cli.config.SonarQubeServer;
 import org.sonarsource.sonarlint.core.client.api.connected.ConnectedSonarLintEngine;
-import org.sonarsource.sonarlint.core.client.api.connected.GlobalUpdateStatus;
-import org.sonarsource.sonarlint.core.client.api.connected.ModuleUpdateStatus;
+import org.sonarsource.sonarlint.core.client.api.connected.GlobalStorageStatus;
+import org.sonarsource.sonarlint.core.client.api.connected.ModuleStorageStatus;
 import org.sonarsource.sonarlint.core.client.api.connected.RemoteModule;
 import org.sonarsource.sonarlint.core.client.api.connected.ServerConfiguration;
 
@@ -76,10 +76,10 @@ public class ConnectedSonarLintTest {
 
   @Test
   public void testStaleUpdate() {
-    GlobalUpdateStatus status = mock(GlobalUpdateStatus.class);
+    GlobalStorageStatus status = mock(GlobalStorageStatus.class);
     when(status.isStale()).thenReturn(true);
     when(engine.allModulesByKey()).thenReturn(getModulesByKey("project1"));
-    when(engine.getUpdateStatus()).thenReturn(status);
+    when(engine.getGlobalStorageStatus()).thenReturn(status);
     sonarLint.start(false);
 
     verify(engine).update(any(ServerConfiguration.class));
@@ -88,25 +88,25 @@ public class ConnectedSonarLintTest {
 
   @Test
   public void testModuleUpdateOnly() {
-    GlobalUpdateStatus status = mock(GlobalUpdateStatus.class);
+    GlobalStorageStatus status = mock(GlobalStorageStatus.class);
     when(status.isStale()).thenReturn(false);
     when(engine.allModulesByKey()).thenReturn(getModulesByKey("project1"));
-    when(engine.getUpdateStatus()).thenReturn(status);
+    when(engine.getGlobalStorageStatus()).thenReturn(status);
     sonarLint.start(false);
 
     verify(engine).updateModule(any(ServerConfiguration.class), eq("project1"));
     verify(engine).allModulesByKey();
-    verify(engine).getUpdateStatus();
-    verify(engine).getModuleUpdateStatus("project1");
+    verify(engine).getGlobalStorageStatus();
+    verify(engine).getModuleStorageStatus("project1");
     verifyNoMoreInteractions(engine);
   }
 
   @Test
   public void testModuleDoesntExistInUpdate() {
-    GlobalUpdateStatus status = mock(GlobalUpdateStatus.class);
+    GlobalStorageStatus status = mock(GlobalStorageStatus.class);
     when(status.isStale()).thenReturn(true);
     when(engine.allModulesByKey()).thenReturn(getModulesByKey("p"));
-    when(engine.getUpdateStatus()).thenReturn(status);
+    when(engine.getGlobalStorageStatus()).thenReturn(status);
 
     exception.expect(IllegalStateException.class);
     exception.expectMessage("Project key 'project1' not found in the SonarQube server");
@@ -116,10 +116,10 @@ public class ConnectedSonarLintTest {
 
   @Test
   public void testModuleDoesntExist() {
-    GlobalUpdateStatus status = mock(GlobalUpdateStatus.class);
+    GlobalStorageStatus status = mock(GlobalStorageStatus.class);
     when(status.isStale()).thenReturn(false);
     when(engine.allModulesByKey()).thenReturn(getModulesByKey("p"));
-    when(engine.getUpdateStatus()).thenReturn(status);
+    when(engine.getGlobalStorageStatus()).thenReturn(status);
 
     exception.expect(IllegalStateException.class);
     exception.expectMessage("Project key 'project1' not found in the binding storage");
@@ -135,17 +135,17 @@ public class ConnectedSonarLintTest {
 
   @Test
   public void testUpdateNotNeeded() {
-    GlobalUpdateStatus status = mock(GlobalUpdateStatus.class);
-    ModuleUpdateStatus moduleStatus = mock(ModuleUpdateStatus.class);
+    GlobalStorageStatus status = mock(GlobalStorageStatus.class);
+    ModuleStorageStatus moduleStatus = mock(ModuleStorageStatus.class);
     when(status.isStale()).thenReturn(false);
-    when(engine.getModuleUpdateStatus("project1")).thenReturn(moduleStatus);
+    when(engine.getModuleStorageStatus("project1")).thenReturn(moduleStatus);
     when(engine.allModulesByKey()).thenReturn(getModulesByKey("project1"));
-    when(engine.getUpdateStatus()).thenReturn(status);
+    when(engine.getGlobalStorageStatus()).thenReturn(status);
     sonarLint.start(false);
 
     verify(engine).allModulesByKey();
-    verify(engine).getUpdateStatus();
-    verify(engine).getModuleUpdateStatus("project1");
+    verify(engine).getGlobalStorageStatus();
+    verify(engine).getModuleStorageStatus("project1");
     verifyNoMoreInteractions(engine);
   }
 

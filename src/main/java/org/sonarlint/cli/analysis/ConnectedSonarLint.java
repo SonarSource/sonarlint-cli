@@ -32,8 +32,8 @@ import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 import org.sonarsource.sonarlint.core.client.api.connected.ConnectedAnalysisConfiguration;
 import org.sonarsource.sonarlint.core.client.api.connected.ConnectedSonarLintEngine;
-import org.sonarsource.sonarlint.core.client.api.connected.GlobalUpdateStatus;
-import org.sonarsource.sonarlint.core.client.api.connected.ModuleUpdateStatus;
+import org.sonarsource.sonarlint.core.client.api.connected.GlobalStorageStatus;
+import org.sonarsource.sonarlint.core.client.api.connected.ModuleStorageStatus;
 import org.sonarsource.sonarlint.core.client.api.connected.ServerConfiguration;
 
 public class ConnectedSonarLint extends SonarLint {
@@ -50,15 +50,15 @@ public class ConnectedSonarLint extends SonarLint {
 
   @Override
   public void start(boolean forceUpdate) {
-    GlobalUpdateStatus updateStatus = engine.getUpdateStatus();
+    GlobalStorageStatus globalStorageStatus = engine.getGlobalStorageStatus();
 
     if (forceUpdate) {
       LOGGER.info("Updating binding..");
       update();
-    } else if (updateStatus == null) {
+    } else if (globalStorageStatus == null) {
       LOGGER.info("No binding storage found. Updating..");
       update();
-    } else if (updateStatus.isStale()) {
+    } else if (globalStorageStatus.isStale()) {
       LOGGER.info("Binding storage is stale. Updating..");
       update();
     } else {
@@ -72,12 +72,12 @@ public class ConnectedSonarLint extends SonarLint {
       .findAny()
       .orElseThrow(() -> new IllegalStateException("Project key '" + moduleKey + "' not found in the binding storage. Maybe an update of the storage is needed with '-u'?"));
 
-    ModuleUpdateStatus moduleUpdateStatus = engine.getModuleUpdateStatus(moduleKey);
-    if (moduleUpdateStatus == null) {
+    ModuleStorageStatus moduleStorageStatus = engine.getModuleStorageStatus(moduleKey);
+    if (moduleStorageStatus == null) {
       LOGGER.info("Updating data for module..");
       engine.updateModule(getServerConfiguration(server), moduleKey);
       LOGGER.info("Module updated");
-    } else if (moduleUpdateStatus.isStale()) {
+    } else if (moduleStorageStatus.isStale()) {
       LOGGER.info("Module's data is stale. Updating..");
       engine.updateModule(getServerConfiguration(server), moduleKey);
       LOGGER.info("Module updated");

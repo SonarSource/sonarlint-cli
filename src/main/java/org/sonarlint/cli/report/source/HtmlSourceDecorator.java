@@ -26,6 +26,10 @@ import org.sonarlint.cli.report.IssueWithId;
 
 public class HtmlSourceDecorator {
 
+  private HtmlSourceDecorator() {
+    // utility class, forbidden constructor
+  }
+
   @CheckForNull
   public static String getDecoratedSourceAsHtml(@Nullable String sourceLine, int currentLineIdx, List<IssueWithId> issues) {
     if (sourceLine == null) {

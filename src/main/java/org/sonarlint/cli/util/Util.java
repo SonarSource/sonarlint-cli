@@ -22,18 +22,19 @@ package org.sonarlint.cli.util;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 public class Util {
   private Util() {
     // static only
   }
 
-  public static <T, U> U getOrCreate(Map<T, U> map, T key, Function<U> f) {
+  public static <T, U> U getOrCreate(Map<T, U> map, T key, Supplier<U> f) {
     U value = map.get(key);
     if (value != null) {
       return value;
     }
-    value = f.call();
+    value = f.get();
     map.put(key, value);
     return value;
   }

@@ -43,10 +43,9 @@ public class LanguageTest {
     int code = sonarlint.deployAndRunProject("java-sample");
     assertThat(code).isEqualTo(0);
 
-    assertThat(sonarlint.getOut()).contains("11 issues");
-    assertThat(sonarlint.getOut()).contains("1 critical");
+    assertThat(sonarlint.getOut()).contains("6 issues");
     assertThat(sonarlint.getOut()).contains("5 major");
-    assertThat(sonarlint.getOut()).contains("5 minor");
+    assertThat(sonarlint.getOut()).contains("1 minor");
     assertThat(sonarlint.getOut()).contains("2 files analyzed");
   }
 
@@ -56,20 +55,18 @@ public class LanguageTest {
     int code = sonarlint.run(project);
     assertThat(code).isEqualTo(0);
 
-    assertThat(sonarlint.getOut()).contains("11 issues");
-    assertThat(sonarlint.getOut()).contains("1 critical");
+    assertThat(sonarlint.getOut()).contains("6 issues");
     assertThat(sonarlint.getOut()).contains("5 major");
-    assertThat(sonarlint.getOut()).contains("5 minor");
+    assertThat(sonarlint.getOut()).contains("1 minor");
     assertThat(sonarlint.getOut()).contains("2 files analyzed");
 
     FileUtils.deleteDirectory(project.resolve(".sonarlint").toFile());
     code = sonarlint.run(project);
     assertThat(code).isEqualTo(0);
 
-    assertThat(sonarlint.getOut()).contains("11 issues");
-    assertThat(sonarlint.getOut()).contains("1 critical");
+    assertThat(sonarlint.getOut()).contains("6 issues");
     assertThat(sonarlint.getOut()).contains("5 major");
-    assertThat(sonarlint.getOut()).contains("5 minor");
+    assertThat(sonarlint.getOut()).contains("1 minor");
     assertThat(sonarlint.getOut()).contains("2 files analyzed");
   }
 
@@ -81,9 +78,8 @@ public class LanguageTest {
     assertThat(sonarlint.getOut()).contains("src/main/js/Hello.js' is detected to be 'js'");
     assertThat(sonarlint.getOut()).contains("src/main/java/Hello.java' is detected to be 'java'");
 
-    assertThat(sonarlint.getOut()).contains("4 issues");
-    assertThat(sonarlint.getOut()).contains("2 major");
-    assertThat(sonarlint.getOut()).contains("2 minor");
+    assertThat(sonarlint.getOut()).contains("3 issues");
+    assertThat(sonarlint.getOut()).contains("3 minor");
 
     // 1 of each lang
     assertThat(sonarlint.getOut()).contains("2 files analyzed");

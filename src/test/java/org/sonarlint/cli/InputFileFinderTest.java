@@ -147,7 +147,7 @@ public class InputFileFinderTest {
     assertThat(files).hasSize(1);
     assertThat(files).extracting("test").containsOnly(false);
 
-    assertThat(files.get(0).getPath()).isEqualTo(src1);
+    assertThat(files.get(0).getPath()).isEqualTo(src1.toString());
     assertThat(files.get(0).getCharset()).isEqualTo(Charset.defaultCharset());
   }
 
@@ -177,7 +177,7 @@ public class InputFileFinderTest {
     List<ClientInputFile> files = fileFinder.collect(root);
 
     assertThat(files).extracting("path").doesNotContain(hiddenSrc);
-    assertThat(files).extracting("path").contains(src1);
+    assertThat(files).extracting("path").contains(src1.toString());
   }
 
   @Test
@@ -214,7 +214,7 @@ public class InputFileFinderTest {
     fileFinder = new InputFileFinder("src/**", "*Test.*", null, Charset.defaultCharset());
 
     List<ClientInputFile> files = fileFinder.collect(root);
-    assertThat(files).extracting("path").containsOnly(test1, test2, src1);
+    assertThat(files).extracting("path").containsOnly(test1.toString(), test2.toString(), src1.toString());
   }
 
   @Test
@@ -222,7 +222,7 @@ public class InputFileFinderTest {
     fileFinder = new InputFileFinder(null, null, "tests/**", Charset.defaultCharset());
 
     List<ClientInputFile> files = fileFinder.collect(root);
-    assertThat(files).extracting("path").containsOnly(src1);
+    assertThat(files).extracting("path").containsOnly(src1.toString());
   }
 
 }

@@ -26,7 +26,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.sonarlint.cli.InputFileFinder;
 import org.sonarlint.cli.SonarProperties;
-import org.sonarlint.cli.analysis.StandaloneSonarLint;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarsource.sonarlint.core.StandaloneSonarLintEngineImpl;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
@@ -34,7 +33,6 @@ import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneGlobalConf
 import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneSonarLintEngine;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -100,27 +98,6 @@ public class StandaloneSonarLintTest {
   }
 
   private static ClientInputFile createInputFile(final Path filePath, final boolean test) {
-    return new ClientInputFile() {
-
-      @Override
-      public Path getPath() {
-        return filePath;
-      }
-
-      @Override
-      public boolean isTest() {
-        return test;
-      }
-
-      @Override
-      public Charset getCharset() {
-        return StandardCharsets.UTF_8;
-      }
-
-      @Override
-      public <G> G getClientObject() {
-        return null;
-      }
-    };
+    return new InputFileFinder.DefaultClientInputFile(filePath, test, StandardCharsets.UTF_8);
   }
 }

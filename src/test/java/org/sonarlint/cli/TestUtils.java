@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 public class TestUtils {
   public static IssueWithId createTestIssue(String filePath, String ruleKey, String severity, int line) {
     ClientInputFile inputFile = mock(ClientInputFile.class);
-    when(inputFile.getPath()).thenReturn(Paths.get(filePath));
+    when(inputFile.getPath()).thenReturn(filePath);
 
     IssueWithId issue = mock(IssueWithId.class);
     when(issue.getStartLine()).thenReturn(line);

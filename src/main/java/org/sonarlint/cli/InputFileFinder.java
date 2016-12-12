@@ -162,7 +162,7 @@ public class InputFileFinder {
 
     @Override
     public String contents() throws IOException {
-      return new String(Files.readAllBytes(path));
+      return new String(Files.readAllBytes(path), charset);
     }
   }
 }

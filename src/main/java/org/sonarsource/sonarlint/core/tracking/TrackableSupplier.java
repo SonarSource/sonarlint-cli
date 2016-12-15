@@ -24,5 +24,5 @@ import java.util.function.Supplier;
 import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 @FunctionalInterface
-public interface Input<T extends Trackable> extends Supplier<Collection<T>> {
+public interface TrackableSupplier<T extends Trackable> extends Supplier<Collection<T>> {
 }

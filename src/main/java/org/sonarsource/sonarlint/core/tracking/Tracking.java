@@ -42,9 +42,9 @@ public class Tracking<R extends Trackable, B extends Trackable> {
   private final Collection<R> raws;
   private final Collection<B> bases;
 
-  public Tracking(Input<R> rawInput, Input<B> baseInput) {
-    this.raws = rawInput.get();
-    this.bases = baseInput.get();
+  public Tracking(TrackableSupplier<R> rawTrackableSupplier, TrackableSupplier<B> baseTrackableSupplier) {
+    this.raws = rawTrackableSupplier.get();
+    this.bases = baseTrackableSupplier.get();
   }
 
   /**

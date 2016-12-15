@@ -36,8 +36,8 @@ import javax.annotation.Nullable;
  */
 public class Tracker<R extends Trackable, B extends Trackable> {
 
-  public Tracking<R, B> track(Input<R> rawInput, Input<B> baseInput) {
-    Tracking<R, B> tracking = new Tracking<>(rawInput, baseInput);
+  public Tracking<R, B> track(TrackableSupplier<R> rawTrackableSupplier, TrackableSupplier<B> baseTrackableSupplier) {
+    Tracking<R, B> tracking = new Tracking<>(rawTrackableSupplier, baseTrackableSupplier);
 
     // 1. match issues with same rule, same line and same text range hash, but not necessarily with same message
     match(tracking, LineAndTextRangeHashKeyFactory.INSTANCE);

@@ -19,6 +19,7 @@
  */
 package org.sonarsource.sonarlint.core.tracking;
 
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 import org.sonarsource.sonarlint.core.client.api.connected.ServerIssue;
 
 public class ServerIssueTrackable implements Trackable {
@@ -27,6 +28,11 @@ public class ServerIssueTrackable implements Trackable {
 
   public ServerIssueTrackable(ServerIssue serverIssue) {
     this.serverIssue = serverIssue;
+  }
+
+  @Override
+  public Issue getIssue() {
+    throw new IllegalStateException("should not try to get Issue from this kind of trackable");
   }
 
   @Override

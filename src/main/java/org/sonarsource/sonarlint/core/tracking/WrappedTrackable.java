@@ -19,12 +19,19 @@
  */
 package org.sonarsource.sonarlint.core.tracking;
 
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+
 public class WrappedTrackable implements Trackable {
 
   private final Trackable trackable;
 
   public WrappedTrackable(Trackable trackable) {
     this.trackable = trackable;
+  }
+
+  @Override
+  public Issue getIssue() {
+    return trackable.getIssue();
   }
 
   @Override

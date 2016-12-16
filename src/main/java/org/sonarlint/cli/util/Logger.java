@@ -77,6 +77,15 @@ public class Logger {
     }
   }
 
+  public void debug(String message, Throwable t) {
+    if (isDebugEnabled()) {
+      stdErr.println("DEBUG: " + message);
+      if (displayStackTrace) {
+        t.printStackTrace(stdErr);
+      }
+    }
+  }
+
   public void info(String message) {
     stdOut.println("INFO: " + message);
   }

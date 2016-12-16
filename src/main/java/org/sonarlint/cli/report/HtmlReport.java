@@ -32,9 +32,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -60,7 +60,7 @@ public class HtmlReport implements Reporter {
   }
 
   @Override
-  public void execute(String projectName, Date date, List<Issue> issues, AnalysisResults result, Function<String, RuleDetails> ruleDescriptionProducer) {
+  public void execute(String projectName, Date date, Collection<Issue> issues, AnalysisResults result, Function<String, RuleDetails> ruleDescriptionProducer) {
     IssuesReport report = new IssuesReport(basePath, charset);
     for (Issue i : issues) {
       report.addIssue(i);

@@ -20,8 +20,11 @@
 package org.sonarsource.sonarlint.core.tracking;
 
 import javax.annotation.CheckForNull;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
 public interface Trackable {
+
+  Issue getIssue();
 
   String getRuleKey();
 

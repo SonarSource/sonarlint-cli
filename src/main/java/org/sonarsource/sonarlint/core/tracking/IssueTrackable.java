@@ -47,6 +47,11 @@ public class IssueTrackable implements Trackable {
   }
 
   @Override
+  public Issue getIssue() {
+    return issue;
+  }
+
+  @Override
   public String getRuleKey() {
     return issue.getRuleKey();
   }

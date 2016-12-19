@@ -49,7 +49,7 @@ import org.sonarsource.sonarlint.core.tracking.Console;
 import org.sonarsource.sonarlint.core.tracking.InMemoryIssueTrackerCache;
 import org.sonarsource.sonarlint.core.tracking.IssueTrackable;
 import org.sonarsource.sonarlint.core.tracking.IssueTrackerCache;
-import org.sonarsource.sonarlint.core.tracking.SimpleServerIssueUpdater;
+import org.sonarsource.sonarlint.core.tracking.ServerIssueTracker;
 import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 public class ConnectedSonarLint extends SonarLint {
@@ -152,8 +152,8 @@ public class ConnectedSonarLint extends SonarLint {
     IssueTrackerCache cache = new InMemoryIssueTrackerCache();
     CachingIssueTracker issueTracker = new CachingIssueTrackerImpl(cache);
     trackablesPerFile.entrySet().forEach(entry -> issueTracker.matchAndTrackAsNew(entry.getKey(), entry.getValue()));
-    SimpleServerIssueUpdater serverIssueUpdater = new SimpleServerIssueUpdater(new MyLogger(), new MyConsole(), issueTracker);
-    serverIssueUpdater.update(getServerConfiguration(server), engine, moduleKey, relativePaths);
+    ServerIssueTracker serverIssueTracker = new ServerIssueTracker(new MyLogger(), new MyConsole(), issueTracker);
+    serverIssueTracker.update(getServerConfiguration(server), engine, moduleKey, relativePaths);
     return cache;
   }
 

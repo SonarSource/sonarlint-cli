@@ -209,7 +209,7 @@ public class ConnectedSonarLintTest {
     Collection<Issue> issues = Arrays.asList(unresolved, resolved);
     ServerIssue resolvedServerIssue = mockServerIssue(resolved);
     List<ServerIssue> serverIssues = Arrays.asList(mockServerIssue(unresolved), resolvedServerIssue);
-    when(engine.getServerIssues(any(), any())).thenReturn(serverIssues);
+    when(engine.downloadServerIssues(any(), any(), any())).thenReturn(serverIssues);
 
     Collection<Trackable> trackables = sonarLint.matchAndTrack(moduleRoot, issues);
     assertThat(trackables).extracting("issue").containsOnlyElementsOf(issues);
@@ -232,7 +232,7 @@ public class ConnectedSonarLintTest {
     Collection<Issue> issues = Arrays.asList(unmatched, matched);
     ServerIssue matchedServerIssue = mockServerIssue(matched);
     List<ServerIssue> serverIssues = Arrays.asList(mockServerIssue(mockIssue()), matchedServerIssue);
-    when(engine.getServerIssues(any(), any())).thenReturn(serverIssues);
+    when(engine.downloadServerIssues(any(), any(), any())).thenReturn(serverIssues);
 
     Collection<Trackable> trackables = sonarLint.matchAndTrack(moduleRoot, issues);
     assertThat(trackables).extracting("ruleKey").containsOnly(unmatched.getRuleKey(), matched.getRuleKey());

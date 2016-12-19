@@ -27,13 +27,13 @@ import org.sonarsource.sonarlint.core.client.api.connected.ServerConfiguration;
 import org.sonarsource.sonarlint.core.client.api.connected.ServerIssue;
 import org.sonarsource.sonarlint.core.client.api.exceptions.DownloadException;
 
-public class SimpleServerIssueUpdater {
+public class ServerIssueTracker {
 
   private final Logger logger;
   private final Console console;
   private final CachingIssueTracker issueTracker;
 
-  public SimpleServerIssueUpdater(Logger logger, Console console, CachingIssueTracker issueTracker) {
+  public ServerIssueTracker(Logger logger, Console console, CachingIssueTracker issueTracker) {
     this.logger = logger;
     this.console = console;
     this.issueTracker = issueTracker;

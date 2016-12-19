@@ -21,6 +21,7 @@ package org.sonarsource.sonarlint.core.tracking;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.sonarsource.sonarlint.core.client.api.connected.ConnectedSonarLintEngine;
 import org.sonarsource.sonarlint.core.client.api.connected.ServerConfiguration;
@@ -40,9 +41,17 @@ public class ServerIssueTracker {
   }
 
   public void update(ServerConfiguration serverConfiguration, ConnectedSonarLintEngine engine, String moduleKey, Collection<String> fileKeys) {
+    update(fileKeys, fileKey -> fetchServerIssues(serverConfiguration, engine, moduleKey, fileKey));
+  }
+
+  public void update(ConnectedSonarLintEngine engine, String moduleKey, Collection<String> fileKeys) {
+    update(fileKeys, fileKey -> engine.getServerIssues(moduleKey, fileKey));
+  }
+
+  private void update(Collection<String> fileKeys, Function<String, List<ServerIssue>> issueGetter) {
     try {
       for (String fileKey : fileKeys) {
-        List<ServerIssue> serverIssues = fetchServerIssues(serverConfiguration, engine, moduleKey, fileKey);
+        List<ServerIssue> serverIssues = issueGetter.apply(fileKey);
         Collection<Trackable> serverIssuesTrackable = serverIssues.stream().map(ServerIssueTrackable::new).collect(Collectors.toList());
         issueTracker.matchAndTrackAsBase(fileKey, serverIssuesTrackable);
       }

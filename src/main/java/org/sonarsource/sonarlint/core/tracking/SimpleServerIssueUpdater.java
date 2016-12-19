@@ -46,9 +46,8 @@ public class SimpleServerIssueUpdater {
         Collection<Trackable> serverIssuesTrackable = serverIssues.stream().map(ServerIssueTrackable::new).collect(Collectors.toList());
         issueTracker.matchAndTrackAsBase(fileKey, serverIssuesTrackable);
       }
-    } catch (Exception t) {
-      // note: without catching Throwable, any exceptions raised in the thread will not be visible
-      console.error("error while fetching and matching server issues", t);
+    } catch (Exception e) {
+      console.error("error while fetching and matching server issues", e);
     }
   }
 

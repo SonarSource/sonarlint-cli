@@ -48,6 +48,7 @@ import org.sonarsource.sonarlint.core.tracking.CachingIssueTrackerImpl;
 import org.sonarsource.sonarlint.core.tracking.Console;
 import org.sonarsource.sonarlint.core.tracking.InMemoryIssueTrackerCache;
 import org.sonarsource.sonarlint.core.tracking.IssueTrackable;
+import org.sonarsource.sonarlint.core.tracking.IssueTrackerCache;
 import org.sonarsource.sonarlint.core.tracking.SimpleServerIssueUpdater;
 import org.sonarsource.sonarlint.core.tracking.Trackable;
 
@@ -141,11 +142,29 @@ public class ConnectedSonarLint extends SonarLint {
   }
 
   Collection<Trackable> matchAndTrack(Path baseDirPath, Collection<Issue> issues) {
-    Collection<String> relativePaths = issues.stream()
-      .map(issue -> getRelativePath(baseDirPath, issue))
-      .collect(Collectors.toSet());
+    Collection<String> relativePaths = getRelativePaths(baseDirPath, issues);
+    Map<String, List<Trackable>> trackablesPerFile = getTrackablesPerFile(baseDirPath, issues);
+    IssueTrackerCache cache = createCurrentIssueTrackerCache(relativePaths, trackablesPerFile);
+    return getCurrentTrackables(relativePaths, cache);
+  }
 
-    Map<String, List<Trackable>> trackablesPerFile = issues.stream()
+  private IssueTrackerCache createCurrentIssueTrackerCache(Collection<String> relativePaths, Map<String, List<Trackable>> trackablesPerFile) {
+    IssueTrackerCache cache = new InMemoryIssueTrackerCache();
+    CachingIssueTracker issueTracker = new CachingIssueTrackerImpl(cache);
+    trackablesPerFile.entrySet().forEach(entry -> issueTracker.matchAndTrackAsNew(entry.getKey(), entry.getValue()));
+    SimpleServerIssueUpdater serverIssueUpdater = new SimpleServerIssueUpdater(new MyLogger(), new MyConsole(), issueTracker);
+    serverIssueUpdater.update(getServerConfiguration(server), engine, moduleKey, relativePaths);
+    return cache;
+  }
+
+  private List<Trackable> getCurrentTrackables(Collection<String> relativePaths, IssueTrackerCache cache) {
+    return relativePaths.stream().flatMap(f -> cache.getCurrentTrackables(f).stream())
+      .filter(trackable -> !trackable.isResolved())
+      .collect(Collectors.toList());
+  }
+
+  private Map<String, List<Trackable>> getTrackablesPerFile(Path baseDirPath, Collection<Issue> issues) {
+    return issues.stream()
       .collect(Collectors.groupingBy(issue -> getRelativePath(baseDirPath, issue), Collectors.toList()))
       .entrySet().stream()
       .collect(Collectors.toMap(
@@ -153,16 +172,12 @@ public class ConnectedSonarLint extends SonarLint {
         entry -> entry.getValue().stream()
           .map(IssueTrackable::new)
           .collect(Collectors.toCollection(ArrayList::new))));
+  }
 
-    InMemoryIssueTrackerCache cache = new InMemoryIssueTrackerCache();
-    CachingIssueTracker issueTracker = new CachingIssueTrackerImpl(cache);
-    trackablesPerFile.entrySet().forEach(entry -> issueTracker.matchAndTrackAsNew(entry.getKey(), entry.getValue()));
-    SimpleServerIssueUpdater serverIssueUpdater = new SimpleServerIssueUpdater(new MyLogger(), new MyConsole(), issueTracker);
-    serverIssueUpdater.update(getServerConfiguration(server), engine, moduleKey, relativePaths);
-
-    return relativePaths.stream().flatMap(f -> cache.getCurrentTrackables(f).stream())
-      .filter(trackable -> !trackable.isResolved())
-      .collect(Collectors.toList());
+  private Collection<String> getRelativePaths(Path baseDirPath, Collection<Issue> issues) {
+    return issues.stream()
+        .map(issue -> getRelativePath(baseDirPath, issue))
+        .collect(Collectors.toSet());
   }
 
   // note: engine.downloadServerIssues correctly figures out correct moduleKey and fileKey

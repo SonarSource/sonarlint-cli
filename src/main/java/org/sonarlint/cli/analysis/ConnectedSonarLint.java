@@ -142,8 +142,9 @@ public class ConnectedSonarLint extends SonarLint {
   }
 
   Collection<Trackable> matchAndTrack(Path baseDirPath, Collection<Issue> issues) {
-    Collection<String> relativePaths = getRelativePaths(baseDirPath, issues);
-    Map<String, List<Trackable>> trackablesPerFile = getTrackablesPerFile(baseDirPath, issues);
+    Collection<Issue> issuesWithFile = issues.stream().filter(issue -> issue.getInputFile() != null).collect(Collectors.toList());
+    Collection<String> relativePaths = getRelativePaths(baseDirPath, issuesWithFile);
+    Map<String, List<Trackable>> trackablesPerFile = getTrackablesPerFile(baseDirPath, issuesWithFile);
     IssueTrackerCache cache = createCurrentIssueTrackerCache(relativePaths, trackablesPerFile);
     return getCurrentTrackables(relativePaths, cache);
   }

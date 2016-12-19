@@ -136,7 +136,7 @@ public class ConnectedSonarLint extends SonarLint {
       inputFiles, properties);
     IssueCollector collector = new IssueCollector();
     AnalysisResults result = engine.analyze(config, collector);
-    // TODO here, download all server issues at once, and then matchAndTrack should never look at server
+    engine.downloadServerIssues(getServerConfiguration(server), moduleKey);
     Collection<Issue> issues = matchAndTrack(baseDirPath, collector.get()).stream().map(Trackable::getIssue).collect(Collectors.toList());
     generateReports(issues, result, reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);
   }

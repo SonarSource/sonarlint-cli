@@ -153,7 +153,7 @@ public class ConnectedSonarLint extends SonarLint {
     CachingIssueTracker issueTracker = new CachingIssueTrackerImpl(cache);
     trackablesPerFile.entrySet().forEach(entry -> issueTracker.matchAndTrackAsNew(entry.getKey(), entry.getValue()));
     ServerIssueTracker serverIssueTracker = new ServerIssueTracker(new MyLogger(), new MyConsole(), issueTracker);
-    serverIssueTracker.update(getServerConfiguration(server), engine, moduleKey, relativePaths);
+    serverIssueTracker.update(engine, moduleKey, relativePaths);
     return cache;
   }
 

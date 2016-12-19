@@ -396,7 +396,7 @@ public class Tracker<R extends Trackable, B extends Trackable> {
     }
 
     private static boolean isBlank(String s) {
-      return s != null && !s.isEmpty();
+      return s == null || s.isEmpty();
     }
 
     @Override

@@ -22,7 +22,7 @@ package org.sonarlint.cli.report.source;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.sonarlint.cli.report.IssueWithId;
+import org.sonarlint.cli.report.RichIssue;
 
 public class HtmlSourceDecorator {
 
@@ -31,7 +31,7 @@ public class HtmlSourceDecorator {
   }
 
   @CheckForNull
-  public static String getDecoratedSourceAsHtml(@Nullable String sourceLine, int currentLineIdx, List<IssueWithId> issues) {
+  public static String getDecoratedSourceAsHtml(@Nullable String sourceLine, int currentLineIdx, List<RichIssue> issues) {
     if (sourceLine == null) {
       return null;
     }

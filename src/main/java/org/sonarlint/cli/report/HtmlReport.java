@@ -43,7 +43,7 @@ import org.sonarlint.cli.util.Logger;
 import org.sonarlint.cli.util.Util;
 import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
-import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 public class HtmlReport implements Reporter {
   private static final Logger LOGGER = Logger.get();
@@ -60,10 +60,10 @@ public class HtmlReport implements Reporter {
   }
 
   @Override
-  public void execute(String projectName, Date date, Collection<Issue> issues, AnalysisResults result, Function<String, RuleDetails> ruleDescriptionProducer) {
+  public void execute(String projectName, Date date, Collection<Trackable> trackables, AnalysisResults result, Function<String, RuleDetails> ruleDescriptionProducer) {
     IssuesReport report = new IssuesReport(basePath, charset);
-    for (Issue i : issues) {
-      report.addIssue(i);
+    for (Trackable trackable : trackables) {
+      report.addIssue(trackable);
     }
     report.setTitle(projectName);
     report.setDate(date);

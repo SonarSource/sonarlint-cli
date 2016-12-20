@@ -37,10 +37,10 @@ import static org.sonarlint.cli.util.Util.getOrCreate;
 public final class ResourceReport {
   private final Path filePath;
   private final IssueVariation total = new IssueVariation();
-  private final List<IssueWithId> issues = new ArrayList<>();
+  private final List<RichIssue> issues = new ArrayList<>();
 
   private final Map<IssueCategory, CategoryReport> reportByCategory = new HashMap<>();
-  private final Map<Integer, List<IssueWithId>> issuesPerLine = new HashMap<>();
+  private final Map<Integer, List<RichIssue>> issuesPerLine = new HashMap<>();
 
   private final Map<String, MutableInt> issuesByRule = new HashMap<>();
   private final EnumMap<Severity, MutableInt> issuesBySeverity = new EnumMap<>(Severity.class);
@@ -72,22 +72,22 @@ public final class ResourceReport {
     return total;
   }
 
-  public List<IssueWithId> getIssues() {
+  public List<RichIssue> getIssues() {
     return issues;
   }
 
-  public Map<Integer, List<IssueWithId>> getIssuesPerLine() {
+  public Map<Integer, List<RichIssue>> getIssuesPerLine() {
     return issuesPerLine;
   }
 
-  public List<IssueWithId> getIssuesAtLine(int lineId) {
+  public List<RichIssue> getIssuesAtLine(int lineId) {
     if (issuesPerLine.containsKey(lineId)) {
       return issuesPerLine.get(lineId);
     }
     return Collections.emptyList();
   }
 
-  public void addIssue(IssueWithId issue) {
+  public void addIssue(RichIssue issue) {
     Severity severity = Severity.create(issue.getSeverity());
     String ruleKey = issue.getRuleKey();
     IssueCategory reportRuleKey = new IssueCategory(ruleKey, severity, issue.getRuleName());
@@ -124,7 +124,7 @@ public final class ResourceReport {
   }
 
   private boolean hasIssues(Integer lineId) {
-    List<IssueWithId> issuesAtLine = issuesPerLine.get(lineId);
+    List<RichIssue> issuesAtLine = issuesPerLine.get(lineId);
     return issuesAtLine != null && !issuesAtLine.isEmpty();
   }
 

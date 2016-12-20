@@ -22,7 +22,7 @@ package org.sonarlint.cli.report.source;
 import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
-import org.sonarlint.cli.report.IssueWithId;
+import org.sonarlint.cli.report.RichIssue;
 
 class DecorationDataHolder {
 
@@ -36,8 +36,8 @@ class DecorationDataHolder {
     closingTagsOffsets = Lists.newArrayList();
   }
 
-  void loadIssues(List<IssueWithId> issues, int currentLineIdx, int currentLineLength) {
-    for (IssueWithId issue : issues) {
+  void loadIssues(List<RichIssue> issues, int currentLineIdx, int currentLineLength) {
+    for (RichIssue issue : issues) {
       int startOffset = issue.getStartLine() == currentLineIdx && issue.getStartLineOffset() != null ? issue.getStartLineOffset() : 0;
       int endOffset = issue.getEndLine() == currentLineIdx && issue.getEndLineOffset() != null ? issue.getEndLineOffset() : currentLineLength;
       if (startOffset < endOffset) {

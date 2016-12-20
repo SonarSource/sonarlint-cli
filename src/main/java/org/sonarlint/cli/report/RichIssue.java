@@ -21,10 +21,15 @@ package org.sonarlint.cli.report;
 
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
-public interface IssueWithId extends Issue {
+/**
+ * Issue, enriched with additional information.
+ */
+public interface RichIssue extends Issue {
 
   int id();
-  
+
   String ruleDescriptionFileName();
+
+  String creationDate();
 
 }

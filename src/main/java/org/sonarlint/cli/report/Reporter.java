@@ -24,9 +24,9 @@ import java.util.Date;
 import java.util.function.Function;
 import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
-import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 @FunctionalInterface
 public interface Reporter {
-  void execute(String projectName, Date date, Collection<Issue> issues, AnalysisResults result, Function<String, RuleDetails> ruleDescriptionProducer);
+  void execute(String projectName, Date date, Collection<Trackable> trackables, AnalysisResults result, Function<String, RuleDetails> ruleDescriptionProducer);
 }

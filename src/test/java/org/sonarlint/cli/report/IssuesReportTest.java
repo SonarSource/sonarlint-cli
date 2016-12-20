@@ -30,6 +30,8 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+import org.sonarsource.sonarlint.core.tracking.IssueTrackable;
+import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -89,18 +91,18 @@ public class IssuesReportTest {
   public void testHtmlDecoratorPreciseLocation() throws Exception {
     Path file = temp.newFile().toPath();
     FileUtils.write(file.toFile(), " foo bar ", StandardCharsets.UTF_8);
-    Issue issue1 = createTestIssue(file.toString(), "rule1", "name1", "MAJOR", 1);
-    when(issue1.getStartLineOffset()).thenReturn(1);
-    when(issue1.getEndLineOffset()).thenReturn(8);
-    Issue issue2 = createTestIssue(file.toString(), "rule2", "name2", "MAJOR", 1);
-    when(issue2.getStartLineOffset()).thenReturn(5);
-    when(issue2.getEndLineOffset()).thenReturn(8);
+    Trackable issue1 = createTestIssue(file.toString(), "rule1", "name1", "MAJOR", 1);
+    when(issue1.getIssue().getStartLineOffset()).thenReturn(1);
+    when(issue1.getIssue().getEndLineOffset()).thenReturn(8);
+    Trackable issue2 = createTestIssue(file.toString(), "rule2", "name2", "MAJOR", 1);
+    when(issue2.getIssue().getStartLineOffset()).thenReturn(5);
+    when(issue2.getIssue().getEndLineOffset()).thenReturn(8);
     report.addIssue(issue1);
     report.addIssue(issue2);
     assertThat(report.getEscapedSource(file)).containsExactly(" <span class=\"issue-0\">foo <span class=\"issue-1\">bar</span></span> ");
   }
 
-  private static Issue createTestIssue(String filePath, String ruleKey, String name, String severity, int line) {
+  private static Trackable createTestIssue(String filePath, String ruleKey, String name, String severity, int line) {
     ClientInputFile inputFile = mock(ClientInputFile.class);
     when(inputFile.getPath()).thenReturn(filePath);
 
@@ -113,6 +115,6 @@ public class IssuesReportTest {
     when(issue.getInputFile()).thenReturn(inputFile);
     when(issue.getRuleKey()).thenReturn(ruleKey);
     when(issue.getSeverity()).thenReturn(severity);
-    return issue;
+    return new IssueTrackable(issue);
   }
 }

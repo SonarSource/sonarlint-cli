@@ -37,7 +37,7 @@ public class ReportSummary {
   ReportSummary() {
   }
 
-  public void addIssue(IssueWithId issue) {
+  public void addIssue(RichIssue issue) {
     Severity severity = Severity.create(issue.getSeverity());
     IssueCategory category = new IssueCategory(issue.getRuleKey(), severity, issue.getRuleName());
 

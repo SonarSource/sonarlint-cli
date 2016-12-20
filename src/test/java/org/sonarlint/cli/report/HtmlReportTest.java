@@ -32,6 +32,8 @@ import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+import org.sonarsource.sonarlint.core.tracking.IssueTrackable;
+import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -89,7 +91,7 @@ public class HtmlReportTest {
     return ruleDetails;
   }
 
-  private static Issue createTestIssue(String filePath, String ruleKey, String name, String severity, int line) {
+  private static Trackable createTestIssue(String filePath, String ruleKey, String name, String severity, int line) {
     ClientInputFile inputFile = mock(ClientInputFile.class);
     when(inputFile.getPath()).thenReturn(filePath);
 
@@ -102,6 +104,6 @@ public class HtmlReportTest {
     when(issue.getInputFile()).thenReturn(inputFile);
     when(issue.getRuleKey()).thenReturn(ruleKey);
     when(issue.getSeverity()).thenReturn(severity);
-    return issue;
+    return new IssueTrackable(issue);
   }
 }

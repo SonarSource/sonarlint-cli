@@ -26,6 +26,7 @@ import org.sonarlint.cli.util.Logger;
 import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 public class ConsoleReport implements Reporter {
 
@@ -76,10 +77,10 @@ public class ConsoleReport implements Reporter {
   }
 
   @Override
-  public void execute(String projectName, Date date, Collection<Issue> issues, AnalysisResults result, Function<String, RuleDetails> ruleDescriptionProducer) {
+  public void execute(String projectName, Date date, Collection<Trackable> trackables, AnalysisResults result, Function<String, RuleDetails> ruleDescriptionProducer) {
     Report r = new Report();
-    for (Issue issue : issues) {
-      r.process(issue);
+    for (Trackable trackable : trackables) {
+      r.process(trackable.getIssue());
     }
     printReport(r, result);
   }

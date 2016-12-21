@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.sonarlint.cli.InputFileFinder;
-import org.sonarlint.cli.SonarProperties;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarsource.sonarlint.core.StandaloneSonarLintEngineImpl;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
@@ -35,7 +34,6 @@ import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneSonarLintE
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -74,26 +72,23 @@ public class StandaloneSonarLintTest {
     InputFileFinder fileFinder = mock(InputFileFinder.class);
     Path inputFile = temp.newFile().toPath();
     when(fileFinder.collect(any(Path.class))).thenReturn(Collections.singletonList(createInputFile(inputFile, false)));
-    String path = temp.newFolder().getAbsolutePath();
-    System.setProperty(SonarProperties.PROJECT_HOME, path);
-    sonarLint.runAnalysis(new HashMap<>(), new ReportFactory(StandardCharsets.UTF_8), fileFinder);
+    Path projectHome = temp.newFolder().toPath();
+    sonarLint.runAnalysis(new HashMap<>(), new ReportFactory(StandardCharsets.UTF_8), fileFinder, projectHome);
 
-    verify(fileFinder).collect(Paths.get(path));
+    verify(fileFinder).collect(projectHome);
 
-    Path htmlReport = Paths.get(path).resolve(".sonarlint").resolve("sonarlint-report.html");
+    Path htmlReport = projectHome.resolve(".sonarlint").resolve("sonarlint-report.html");
     assertThat(htmlReport).exists();
   }
 
   @Test
   public void runWithoutFiles() throws IOException {
     InputFileFinder fileFinder = mock(InputFileFinder.class);
-    when(fileFinder.collect(any(Path.class))).thenReturn(Collections.<ClientInputFile>emptyList());
-    String path = temp.newFolder().getAbsolutePath();
-    System.setProperty(SonarProperties.PROJECT_HOME, path);
+    when(fileFinder.collect(any(Path.class))).thenReturn(Collections.emptyList());
+    Path projectHome = temp.newFolder().toPath();
+    sonarLint.runAnalysis(new HashMap<>(), new ReportFactory(StandardCharsets.UTF_8), fileFinder, projectHome);
 
-    sonarLint.runAnalysis(new HashMap<>(), new ReportFactory(StandardCharsets.UTF_8), fileFinder);
-
-    Path htmlReport = Paths.get(path).resolve(".sonarlint").resolve("sonarlint-report.html");
+    Path htmlReport = projectHome.resolve(".sonarlint").resolve("sonarlint-report.html");
     assertThat(htmlReport).doesNotExist();
   }
 

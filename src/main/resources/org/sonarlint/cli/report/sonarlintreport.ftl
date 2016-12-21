@@ -315,6 +315,11 @@
                             &nbsp;
                             <img src="sonarlintreport_files/sep12.png">&nbsp;
                             <span class="rule_key"><a href="sonarlintreport_rules/${issue.ruleDescriptionFileName()}" target="sonarlint_rule">${issue.getRuleKey()}</a></span>
+                            <#if issue.creationDate()?has_content>
+                              &nbsp;
+                              <img src="sonarlintreport_files/sep12.png">&nbsp;
+                              <span class="issue_date">${issue.creationDate()}</span>
+                            </#if>
                           </div>
                           <div class="discussionComment">
                             ${issue.getRuleName()}

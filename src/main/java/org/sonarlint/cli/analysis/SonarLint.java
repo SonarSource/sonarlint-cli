@@ -32,7 +32,7 @@ import org.sonarlint.cli.util.Logger;
 import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
-import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 public abstract class SonarLint {
   private static final Logger LOGGER = Logger.get();
@@ -65,11 +65,11 @@ public abstract class SonarLint {
 
   public abstract void stop();
 
-  protected void generateReports(Collection<Issue> issues, AnalysisResults result, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
+  protected void generateReports(Collection<Trackable> trackables, AnalysisResults result, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
     List<Reporter> reporters = reportFactory.createReporters(baseDir);
 
     for (Reporter r : reporters) {
-      r.execute(projectName, date, issues, result, this::getRuleDetails);
+      r.execute(projectName, date, trackables, result, this::getRuleDetails);
     }
   }
 }

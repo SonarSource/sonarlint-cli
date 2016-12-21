@@ -60,7 +60,7 @@ public class ConnectedSonarLint extends SonarLint {
   private final String moduleKey;
   private final SonarQubeServer server;
 
-  public ConnectedSonarLint(ConnectedSonarLintEngine engine, SonarQubeServer server, String moduleKey) {
+  ConnectedSonarLint(ConnectedSonarLintEngine engine, SonarQubeServer server, String moduleKey) {
     this.engine = engine;
     this.server = server;
     this.moduleKey = moduleKey;
@@ -137,8 +137,8 @@ public class ConnectedSonarLint extends SonarLint {
     IssueCollector collector = new IssueCollector();
     AnalysisResults result = engine.analyze(config, collector);
     engine.downloadServerIssues(getServerConfiguration(server), moduleKey);
-    Collection<Issue> issues = matchAndTrack(baseDirPath, collector.get()).stream().map(Trackable::getIssue).collect(Collectors.toList());
-    generateReports(issues, result, reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);
+    Collection<Trackable> trackables = matchAndTrack(baseDirPath, collector.get());
+    generateReports(trackables, result, reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);
   }
 
   Collection<Trackable> matchAndTrack(Path baseDirPath, Collection<Issue> issues) {
@@ -158,7 +158,7 @@ public class ConnectedSonarLint extends SonarLint {
     return cache;
   }
 
-  private List<Trackable> getCurrentTrackables(Collection<String> relativePaths, IssueTrackerCache cache) {
+  private static List<Trackable> getCurrentTrackables(Collection<String> relativePaths, IssueTrackerCache cache) {
     return relativePaths.stream().flatMap(f -> cache.getCurrentTrackables(f).stream())
       .filter(trackable -> !trackable.isResolved())
       .collect(Collectors.toList());
@@ -183,7 +183,7 @@ public class ConnectedSonarLint extends SonarLint {
 
   // note: engine.downloadServerIssues correctly figures out correct moduleKey and fileKey
   @CheckForNull
-  protected String getRelativePath(Path baseDirPath, Issue issue) {
+  String getRelativePath(Path baseDirPath, Issue issue) {
     ClientInputFile inputFile = issue.getInputFile();
     if (inputFile == null) {
       return null;
@@ -198,7 +198,7 @@ public class ConnectedSonarLint extends SonarLint {
    * @param relativePath relative path string in the local OS
    * @return SonarQube path format
    */
-  public static String toSonarQubePath(String relativePath) {
+  private static String toSonarQubePath(String relativePath) {
     if (File.separatorChar != '/') {
       return relativePath.replaceAll(PATH_SEPARATOR_PATTERN, "/");
     }

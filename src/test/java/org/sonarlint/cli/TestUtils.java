@@ -19,19 +19,18 @@
  */
 package org.sonarlint.cli;
 
-import java.nio.file.Paths;
-import org.sonarlint.cli.report.IssueWithId;
+import org.sonarlint.cli.report.RichIssue;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class TestUtils {
-  public static IssueWithId createTestIssue(String filePath, String ruleKey, String severity, int line) {
+  public static RichIssue createTestIssue(String filePath, String ruleKey, String severity, int line) {
     ClientInputFile inputFile = mock(ClientInputFile.class);
     when(inputFile.getPath()).thenReturn(filePath);
 
-    IssueWithId issue = mock(IssueWithId.class);
+    RichIssue issue = mock(RichIssue.class);
     when(issue.getStartLine()).thenReturn(line);
     when(issue.getInputFile()).thenReturn(inputFile);
     when(issue.getRuleKey()).thenReturn(ruleKey);

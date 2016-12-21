@@ -24,6 +24,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -38,6 +40,7 @@ import org.sonarlint.cli.report.source.HtmlSourceDecorator;
 import org.sonarlint.cli.util.Util;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 public class IssuesReport {
 
@@ -109,8 +112,10 @@ public class IssuesReport {
     return ruleNameByKey.get(ruleKey);
   }
 
-  public void addIssue(Issue issue) {
-    IssueWithId issueWithId = new IssueWithIdImpl(issue, id);
+  public void addIssue(Trackable trackable) {
+    Issue issue = trackable.getIssue();
+    Long millis = trackable.getServerIssueKey() != null ? trackable.getCreationDate() : null;
+    RichIssue richIssue = new RichIssueImpl(issue, id, millis);
     id++;
     ruleNameByKey.put(issue.getRuleKey(), issue.getRuleName());
 
@@ -123,18 +128,22 @@ public class IssuesReport {
       filePath = Paths.get(inputFile.getPath());
     }
     ResourceReport report = getOrCreate(filePath);
-    getSummary().addIssue(issueWithId);
-    report.addIssue(issueWithId);
+    getSummary().addIssue(richIssue);
+    report.addIssue(richIssue);
   }
 
-  private static class IssueWithIdImpl implements IssueWithId {
+  private static class RichIssueImpl implements RichIssue {
+
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MMMMM d, Y K:m a");
 
     private final Issue wrapped;
     private final int id;
+    private final String creationDate;
 
-    public IssueWithIdImpl(Issue wrapped, int id) {
+    public RichIssueImpl(Issue wrapped, int id, @Nullable Long creationDateMillis) {
       this.wrapped = wrapped;
       this.id = id;
+      this.creationDate = creationDateMillis != null ? DATE_FORMAT.format(new Date(creationDateMillis)) : null;
     }
 
     @Override
@@ -198,6 +207,10 @@ public class IssuesReport {
       return Util.escapeFileName(wrapped.getRuleKey()) + ".html";
     }
 
+    @Override
+    public String creationDate() {
+      return creationDate;
+    }
   }
 
   private ResourceReport getOrCreate(Path filePath) {
@@ -230,7 +243,7 @@ public class IssuesReport {
     int lineIdx = 1;
     for (String line : lines) {
       final int currentLineIdx = lineIdx;
-      List<IssueWithId> issuesAtLine = resourceReport != null
+      List<RichIssue> issuesAtLine = resourceReport != null
         ? resourceReport.getIssues().stream()
           .filter(i -> i.getStartLine() <= currentLineIdx && i.getEndLine() >= currentLineIdx)
           .collect(Collectors.toList())

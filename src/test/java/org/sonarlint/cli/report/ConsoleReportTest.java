@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,6 +34,8 @@ import org.junit.rules.ExpectedException;
 import org.sonarlint.cli.util.Logger;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
+import org.sonarsource.sonarlint.core.tracking.IssueTrackable;
+import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -68,7 +71,9 @@ public class ConsoleReportTest {
     issues.add(createTestIssue("comp1", "rule", "INFO", 10));
     issues.add(createTestIssue("comp1", "rule", "BLOCKER", 10));
 
-    report.execute(PROJECT_NAME, DATE, issues, result, k -> null);
+    List<Trackable> trackables = toTrackables(issues);
+
+    report.execute(PROJECT_NAME, DATE, toTrackables(issues), result, k -> null);
 
     stdOut.flush();
     assertThat(getLog(out)).contains("SonarLint Report");
@@ -82,6 +87,10 @@ public class ConsoleReportTest {
     assertThat(getLog(out)).doesNotContain("new");
   }
 
+  private List<Trackable> toTrackables(List<Issue> issues) {
+    return issues.stream().map(IssueTrackable::new).collect(Collectors.toList());
+  }
+
   @Test
   public void testInvalidSeverity() throws IOException {
     List<Issue> issues = new LinkedList<>();
@@ -89,13 +98,13 @@ public class ConsoleReportTest {
 
     exception.expect(IllegalStateException.class);
     exception.expectMessage("Unknown severity");
-    report.execute(PROJECT_NAME, DATE, issues, result, k -> null);
+    report.execute(PROJECT_NAME, DATE, toTrackables(issues), result, k -> null);
   }
 
   @Test
   public void testReportWithoutIssues() throws IOException {
     List<Issue> issues = new LinkedList<>();
-    report.execute(PROJECT_NAME, DATE, issues, result, k -> null);
+    report.execute(PROJECT_NAME, DATE, toTrackables(issues), result, k -> null);
     stdOut.flush();
     assertThat(getLog(out)).contains("SonarLint Report");
     assertThat(getLog(out)).contains("No issues to display");
@@ -106,7 +115,7 @@ public class ConsoleReportTest {
   public void testReportMultipleFiles() throws IOException {
     when(result.fileCount()).thenReturn(2);
     List<Issue> issues = new LinkedList<>();
-    report.execute(PROJECT_NAME, DATE, issues, result, k -> null);
+    report.execute(PROJECT_NAME, DATE, toTrackables(issues), result, k -> null);
     stdOut.flush();
     assertThat(getLog(out)).contains("SonarLint Report");
     assertThat(getLog(out)).contains("No issues to display");
@@ -117,7 +126,7 @@ public class ConsoleReportTest {
   public void testReportNoFilesAnalyzed() throws IOException {
     List<Issue> issues = new LinkedList<>();
     when(result.fileCount()).thenReturn(0);
-    report.execute(PROJECT_NAME, DATE, issues, result, k -> null);
+    report.execute(PROJECT_NAME, DATE, toTrackables(issues), result, k -> null);
     stdOut.flush();
     assertThat(getLog(out)).contains("SonarLint Report");
     assertThat(getLog(out)).contains("No files analyzed");

@@ -20,15 +20,19 @@
 package org.sonarlint.cli.analysis;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneAnalysisConfiguration;
 import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneSonarLintEngine;
+import org.sonarsource.sonarlint.core.tracking.IssueTrackable;
+import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 public class StandaloneSonarLint extends SonarLint {
   private final StandaloneSonarLintEngine engine;
@@ -45,7 +49,8 @@ public class StandaloneSonarLint extends SonarLint {
     StandaloneAnalysisConfiguration config = new StandaloneAnalysisConfiguration(baseDirPath, baseDirPath.resolve(".sonarlint"),
       inputFiles, properties);
     AnalysisResults result = engine.analyze(config, collector);
-    generateReports(collector.get(), result, reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);
+    Collection<Trackable> trackables = collector.get().stream().map(IssueTrackable::new).collect(Collectors.toList());
+    generateReports(trackables, result, reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);
   }
 
   @Override

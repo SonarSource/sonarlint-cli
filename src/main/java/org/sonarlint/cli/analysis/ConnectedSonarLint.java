@@ -60,7 +60,7 @@ public class ConnectedSonarLint extends SonarLint {
   private final String moduleKey;
   private final SonarQubeServer server;
 
-  public ConnectedSonarLint(ConnectedSonarLintEngine engine, SonarQubeServer server, String moduleKey) {
+  ConnectedSonarLint(ConnectedSonarLintEngine engine, SonarQubeServer server, String moduleKey) {
     this.engine = engine;
     this.server = server;
     this.moduleKey = moduleKey;
@@ -183,7 +183,7 @@ public class ConnectedSonarLint extends SonarLint {
 
   // note: engine.downloadServerIssues correctly figures out correct moduleKey and fileKey
   @CheckForNull
-  protected String getRelativePath(Path baseDirPath, Issue issue) {
+  String getRelativePath(Path baseDirPath, Issue issue) {
     ClientInputFile inputFile = issue.getInputFile();
     if (inputFile == null) {
       return null;
@@ -198,7 +198,7 @@ public class ConnectedSonarLint extends SonarLint {
    * @param relativePath relative path string in the local OS
    * @return SonarQube path format
    */
-  public static String toSonarQubePath(String relativePath) {
+  private static String toSonarQubePath(String relativePath) {
     if (File.separatorChar != '/') {
       return relativePath.replaceAll(PATH_SEPARATOR_PATTERN, "/");
     }

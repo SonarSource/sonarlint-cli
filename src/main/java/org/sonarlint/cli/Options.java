@@ -36,6 +36,7 @@ public class Options {
   private String tests = "";
   private String exclusions = "";
   private String charset = null;
+  private String reportType = "";
   private boolean update = false;
   private String task;
 
@@ -92,6 +93,10 @@ public class Options {
           checkAdditionalArg(i, args.length, arg);
           options.exclusions = args[i];
 
+        } else if ("--reportType".equals(arg)) {
+          checkAdditionalArg(i, args.length, arg);
+          options.reportType = args[i];
+
         } else if ("-D".equals(arg) || "--define".equals(arg)) {
           checkAdditionalArg(i, args.length, arg);
           appendPropertyTo(args[i], options.props);
@@ -125,6 +130,10 @@ public class Options {
 
   public String charset() {
     return charset;
+  }
+
+  public String reportType() {
+    return reportType;
   }
 
   public String htmlReport() {
@@ -180,6 +189,7 @@ public class Options {
     LOGGER.info(" --tests <glob pattern>   GLOB pattern to identify test files");
     LOGGER.info(" --exclude <glob pattern> GLOB pattern to exclude files");
     LOGGER.info(" --charset <name>         Character encoding of the source files");
+    LOGGER.info(" --reportType <type>      Type of generated report. Can be 'html' or 'console'. 'html' by default.");
   }
 
   private static void appendPropertyTo(String arg, Properties props) {

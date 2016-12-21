@@ -71,6 +71,12 @@ public class OptionsTest {
   }
 
   @Test
+  public void testReportType() throws ParseException {
+    Options opt = Options.parse(args("--reportType", "html"));
+    assertThat(opt.reportType()).isEqualTo("html");
+  }
+
+  @Test
   public void testUpdate() throws ParseException {
     Options opt = Options.parse(args("-u"));
     assertThat(opt.isUpdate()).isTrue();

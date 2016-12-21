@@ -19,10 +19,17 @@
  */
 package org.sonarlint.cli.analysis;
 
+import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javax.annotation.CheckForNull;
 import org.sonarlint.cli.config.SonarQubeServer;
 import org.sonarlint.cli.report.ReportFactory;
 import org.sonarlint.cli.util.Logger;
@@ -30,13 +37,24 @@ import org.sonarlint.cli.util.SystemInfo;
 import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 import org.sonarsource.sonarlint.core.client.api.connected.ConnectedAnalysisConfiguration;
 import org.sonarsource.sonarlint.core.client.api.connected.ConnectedSonarLintEngine;
 import org.sonarsource.sonarlint.core.client.api.connected.GlobalStorageStatus;
 import org.sonarsource.sonarlint.core.client.api.connected.ModuleStorageStatus;
 import org.sonarsource.sonarlint.core.client.api.connected.ServerConfiguration;
+import org.sonarsource.sonarlint.core.tracking.CachingIssueTracker;
+import org.sonarsource.sonarlint.core.tracking.CachingIssueTrackerImpl;
+import org.sonarsource.sonarlint.core.tracking.Console;
+import org.sonarsource.sonarlint.core.tracking.InMemoryIssueTrackerCache;
+import org.sonarsource.sonarlint.core.tracking.IssueTrackable;
+import org.sonarsource.sonarlint.core.tracking.IssueTrackerCache;
+import org.sonarsource.sonarlint.core.tracking.ServerIssueTracker;
+import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 public class ConnectedSonarLint extends SonarLint {
+  private static final String PATH_SEPARATOR_PATTERN = Pattern.quote(File.separator);
+
   private static final Logger LOGGER = Logger.get();
   private final ConnectedSonarLintEngine engine;
   private final String moduleKey;
@@ -114,11 +132,77 @@ public class ConnectedSonarLint extends SonarLint {
   @Override
   protected void doAnalysis(Map<String, String> properties, ReportFactory reportFactory, List<ClientInputFile> inputFiles, Path baseDirPath) {
     Date start = new Date();
-    IssueCollector collector = new IssueCollector();
     ConnectedAnalysisConfiguration config = new ConnectedAnalysisConfiguration(moduleKey, baseDirPath, baseDirPath.resolve(".sonarlint"),
       inputFiles, properties);
+    IssueCollector collector = new IssueCollector();
     AnalysisResults result = engine.analyze(config, collector);
-    generateReports(collector.get(), result, reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);
+    engine.downloadServerIssues(getServerConfiguration(server), moduleKey);
+    Collection<Issue> issues = matchAndTrack(baseDirPath, collector.get()).stream().map(Trackable::getIssue).collect(Collectors.toList());
+    generateReports(issues, result, reportFactory, baseDirPath.getFileName().toString(), baseDirPath, start);
+  }
+
+  Collection<Trackable> matchAndTrack(Path baseDirPath, Collection<Issue> issues) {
+    Collection<Issue> issuesWithFile = issues.stream().filter(issue -> issue.getInputFile() != null).collect(Collectors.toList());
+    Collection<String> relativePaths = getRelativePaths(baseDirPath, issuesWithFile);
+    Map<String, List<Trackable>> trackablesPerFile = getTrackablesPerFile(baseDirPath, issuesWithFile);
+    IssueTrackerCache cache = createCurrentIssueTrackerCache(relativePaths, trackablesPerFile);
+    return getCurrentTrackables(relativePaths, cache);
+  }
+
+  private IssueTrackerCache createCurrentIssueTrackerCache(Collection<String> relativePaths, Map<String, List<Trackable>> trackablesPerFile) {
+    IssueTrackerCache cache = new InMemoryIssueTrackerCache();
+    CachingIssueTracker issueTracker = new CachingIssueTrackerImpl(cache);
+    trackablesPerFile.entrySet().forEach(entry -> issueTracker.matchAndTrackAsNew(entry.getKey(), entry.getValue()));
+    ServerIssueTracker serverIssueTracker = new ServerIssueTracker(new MyLogger(), new MyConsole(), issueTracker);
+    serverIssueTracker.update(engine, moduleKey, relativePaths);
+    return cache;
+  }
+
+  private List<Trackable> getCurrentTrackables(Collection<String> relativePaths, IssueTrackerCache cache) {
+    return relativePaths.stream().flatMap(f -> cache.getCurrentTrackables(f).stream())
+      .filter(trackable -> !trackable.isResolved())
+      .collect(Collectors.toList());
+  }
+
+  private Map<String, List<Trackable>> getTrackablesPerFile(Path baseDirPath, Collection<Issue> issues) {
+    return issues.stream()
+      .collect(Collectors.groupingBy(issue -> getRelativePath(baseDirPath, issue), Collectors.toList()))
+      .entrySet().stream()
+      .collect(Collectors.toMap(
+        Map.Entry::getKey,
+        entry -> entry.getValue().stream()
+          .map(IssueTrackable::new)
+          .collect(Collectors.toCollection(ArrayList::new))));
+  }
+
+  private Collection<String> getRelativePaths(Path baseDirPath, Collection<Issue> issues) {
+    return issues.stream()
+        .map(issue -> getRelativePath(baseDirPath, issue))
+        .collect(Collectors.toSet());
+  }
+
+  // note: engine.downloadServerIssues correctly figures out correct moduleKey and fileKey
+  @CheckForNull
+  protected String getRelativePath(Path baseDirPath, Issue issue) {
+    ClientInputFile inputFile = issue.getInputFile();
+    if (inputFile == null) {
+      return null;
+    }
+
+    return toSonarQubePath(baseDirPath.relativize(Paths.get(inputFile.getPath())).toString());
+  }
+
+  /**
+   * Convert relative path to SonarQube path format
+   *
+   * @param relativePath relative path string in the local OS
+   * @return SonarQube path format
+   */
+  public static String toSonarQubePath(String relativePath) {
+    if (File.separatorChar != '/') {
+      return relativePath.replaceAll(PATH_SEPARATOR_PATTERN, "/");
+    }
+    return relativePath;
   }
 
   @Override
@@ -129,5 +213,29 @@ public class ConnectedSonarLint extends SonarLint {
   @Override
   public void stop() {
     engine.stop(false);
+  }
+
+  private static class MyLogger implements org.sonarsource.sonarlint.core.tracking.Logger {
+    @Override public void error(String message, Exception e) {
+      LOGGER.error(message, e);
+    }
+
+    @Override public void debug(String message, Exception e) {
+      LOGGER.debug(message, e);
+    }
+
+    @Override public void debug(String message) {
+      LOGGER.debug(message);
+    }
+  }
+
+  private static class MyConsole implements Console {
+    @Override public void info(String message) {
+      LOGGER.info(message);
+    }
+
+    @Override public void error(String message, Throwable t) {
+      LOGGER.error(message, t);
+    }
   }
 }

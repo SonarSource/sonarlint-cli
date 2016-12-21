@@ -21,6 +21,7 @@ package org.sonarlint.cli.analysis;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,7 @@ public abstract class SonarLint {
 
   public abstract void stop();
 
-  protected void generateReports(List<Issue> issues, AnalysisResults result, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
+  protected void generateReports(Collection<Issue> issues, AnalysisResults result, ReportFactory reportFactory, String projectName, Path baseDir, Date date) {
     List<Reporter> reporters = reportFactory.createReporters(baseDir);
 
     for (Reporter r : reporters) {

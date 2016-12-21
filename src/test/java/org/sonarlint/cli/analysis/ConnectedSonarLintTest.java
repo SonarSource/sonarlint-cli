@@ -19,6 +19,7 @@
  */
 package org.sonarlint.cli.analysis;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -26,31 +27,46 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import org.assertj.core.groups.Tuple;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.sonarlint.cli.config.SonarQubeServer;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
+import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 import org.sonarsource.sonarlint.core.client.api.connected.ConnectedSonarLintEngine;
 import org.sonarsource.sonarlint.core.client.api.connected.GlobalStorageStatus;
 import org.sonarsource.sonarlint.core.client.api.connected.ModuleStorageStatus;
 import org.sonarsource.sonarlint.core.client.api.connected.RemoteModule;
 import org.sonarsource.sonarlint.core.client.api.connected.ServerConfiguration;
+import org.sonarsource.sonarlint.core.client.api.connected.ServerIssue;
+import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 public class ConnectedSonarLintTest {
   private ConnectedSonarLintEngine engine;
   private ConnectedSonarLint sonarLint;
-  private SonarQubeServer server;
+
+  private static AtomicInteger counter = new AtomicInteger();
 
   @Rule
   public ExpectedException exception = ExpectedException.none();
 
   @Before
   public void setUp() {
-    server = mock(SonarQubeServer.class);
+    SonarQubeServer server = mock(SonarQubeServer.class);
     when(server.url()).thenReturn("http://localhost:9000");
     engine = mock(ConnectedSonarLintEngine.class);
     sonarLint = new ConnectedSonarLint(engine, server, "project1");
@@ -156,5 +172,113 @@ public class ConnectedSonarLintTest {
       map.put(k, module);
     }
     return map;
+  }
+
+  @Test
+  public void test_getRelativePath() {
+    Path moduleRoot = Paths.get("").toAbsolutePath();
+    String relativePath = Paths.get("some").resolve("relative").resolve("path").toString();
+
+    Issue issue = mockIssue();
+    when(issue.getInputFile().getPath()).thenReturn(moduleRoot.resolve(relativePath).toString());
+    assertThat(sonarLint.getRelativePath(moduleRoot, issue)).isEqualTo(relativePath);
+  }
+
+  @Test
+  public void should_not_match_server_issues_when_there_are_none() {
+    Path moduleRoot = Paths.get("").toAbsolutePath();
+
+    Issue issue = mockIssue();
+    when(issue.getInputFile().getPath()).thenReturn(moduleRoot.resolve("dummy").toString());
+
+    Collection<Issue> issues = Collections.singletonList(issue);
+    Collection<Trackable> trackables = sonarLint.matchAndTrack(moduleRoot, issues);
+    assertThat(trackables).extracting("issue").isEqualTo(issues);
+  }
+
+  @Test
+  public void should_hide_resolved_server_issues() {
+    Path moduleRoot = Paths.get("").toAbsolutePath();
+    String dummyFilePath = moduleRoot.resolve("dummy").toString();
+
+    Issue unresolved = mockIssue();
+    when(unresolved.getInputFile().getPath()).thenReturn(dummyFilePath);
+    Issue resolved = mockIssue();
+    when(resolved.getInputFile().getPath()).thenReturn(dummyFilePath);
+
+    Collection<Issue> issues = Arrays.asList(unresolved, resolved);
+    ServerIssue resolvedServerIssue = mockServerIssue(resolved);
+    List<ServerIssue> serverIssues = Arrays.asList(mockServerIssue(unresolved), resolvedServerIssue);
+    when(engine.getServerIssues(any(), any())).thenReturn(serverIssues);
+
+    Collection<Trackable> trackables = sonarLint.matchAndTrack(moduleRoot, issues);
+    assertThat(trackables).extracting("issue").containsOnlyElementsOf(issues);
+
+    when(resolvedServerIssue.resolution()).thenReturn("CLOSED");
+    Collection<Trackable> trackables2 = sonarLint.matchAndTrack(moduleRoot, issues);
+    assertThat(trackables2).extracting("issue").isEqualTo(Collections.singletonList(unresolved));
+  }
+
+  @Test
+  public void should_get_creation_date_from_matched_server_issue() {
+    Path moduleRoot = Paths.get("").toAbsolutePath();
+    String dummyFilePath = moduleRoot.resolve("dummy").toString();
+
+    Issue unmatched = mockIssue();
+    when(unmatched.getInputFile().getPath()).thenReturn(dummyFilePath);
+    Issue matched = mockIssue();
+    when(matched.getInputFile().getPath()).thenReturn(dummyFilePath);
+
+    Collection<Issue> issues = Arrays.asList(unmatched, matched);
+    ServerIssue matchedServerIssue = mockServerIssue(matched);
+    List<ServerIssue> serverIssues = Arrays.asList(mockServerIssue(mockIssue()), matchedServerIssue);
+    when(engine.getServerIssues(any(), any())).thenReturn(serverIssues);
+
+    Collection<Trackable> trackables = sonarLint.matchAndTrack(moduleRoot, issues);
+    assertThat(trackables).extracting("ruleKey").containsOnly(unmatched.getRuleKey(), matched.getRuleKey());
+    assertThat(trackables.stream().filter(t -> t.getRuleKey().equals(matched.getRuleKey())).collect(Collectors.toList()))
+      .extracting("ruleKey", "creationDate").containsOnly(
+      Tuple.tuple(matched.getRuleKey(), matchedServerIssue.creationDate().toEpochMilli())
+    );
+  }
+
+  // create uniquely identifiable issue
+  private Issue mockIssue() {
+    Issue issue = mock(Issue.class);
+
+    // basic setup to prevent NPEs
+    when(issue.getInputFile()).thenReturn(mock(ClientInputFile.class));
+    when(issue.getMessage()).thenReturn("dummy message " + counter.incrementAndGet());
+
+    // make issue match by rule key + line + text range hash
+    when(issue.getRuleKey()).thenReturn("dummy ruleKey" + counter.incrementAndGet());
+    when(issue.getStartLine()).thenReturn(counter.incrementAndGet());
+    return issue;
+  }
+
+  // copy enough fields so that tracker finds a match
+  private ServerIssue mockServerIssue(Issue issue) {
+    ServerIssue serverIssue = mock(ServerIssue.class);
+
+    // basic setup to prevent NPEs
+    when(serverIssue.creationDate()).thenReturn(Instant.ofEpochMilli(counter.incrementAndGet()));
+    when(serverIssue.resolution()).thenReturn("");
+    when(serverIssue.checksum()).thenReturn("dummy checksum " + counter.incrementAndGet());
+
+    // if issue itself is a mock, need to extract value to variable first
+    // as Mockito doesn't handle nested mocking inside mocking
+
+    String message = issue.getMessage();
+    when(serverIssue.message()).thenReturn(message);
+
+    // copy fields to match during tracking
+
+    String ruleKey = issue.getRuleKey();
+    when(serverIssue.ruleKey()).thenReturn(ruleKey);
+
+    Integer startLine = issue.getStartLine();
+    when(serverIssue.line()).thenReturn(startLine);
+
+    return serverIssue;
   }
 }

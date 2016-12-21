@@ -19,8 +19,8 @@
  */
 package org.sonarlint.cli.report;
 
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.function.Function;
 import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
@@ -28,5 +28,5 @@ import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 
 @FunctionalInterface
 public interface Reporter {
-  void execute(String projectName, Date date, List<Issue> issues, AnalysisResults result, Function<String, RuleDetails> ruleDescriptionProducer);
+  void execute(String projectName, Date date, Collection<Issue> issues, AnalysisResults result, Function<String, RuleDetails> ruleDescriptionProducer);
 }

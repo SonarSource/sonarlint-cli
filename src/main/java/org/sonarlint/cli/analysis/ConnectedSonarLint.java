@@ -158,7 +158,7 @@ public class ConnectedSonarLint extends SonarLint {
     return cache;
   }
 
-  private List<Trackable> getCurrentTrackables(Collection<String> relativePaths, IssueTrackerCache cache) {
+  private static List<Trackable> getCurrentTrackables(Collection<String> relativePaths, IssueTrackerCache cache) {
     return relativePaths.stream().flatMap(f -> cache.getCurrentTrackables(f).stream())
       .filter(trackable -> !trackable.isResolved())
       .collect(Collectors.toList());

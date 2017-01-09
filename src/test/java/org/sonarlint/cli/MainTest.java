@@ -75,7 +75,7 @@ public class MainTest {
     setUpLogger();
     sonarLint = mock(SonarLint.class);
     sonarLintFactory = mock(SonarLintFactory.class);
-    when(sonarLintFactory.createSonarLint(anyBoolean(), anyBoolean(), any(Path.class))).thenReturn(sonarLint);
+    when(sonarLintFactory.createSonarLint(any(Path.class), anyBoolean(), anyBoolean())).thenReturn(sonarLint);
     fileFinder = new InputFileFinder(null, null, null, Charset.defaultCharset());
     Path projectHome = temp.newFolder().toPath();
     main = new Main(opts, sonarLintFactory, reportFactory, fileFinder, projectHome);

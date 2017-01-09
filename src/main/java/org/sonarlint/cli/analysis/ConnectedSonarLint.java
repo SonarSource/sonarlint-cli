@@ -19,7 +19,6 @@
  */
 package org.sonarlint.cli.analysis;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import org.sonarlint.cli.config.SonarQubeServer;
@@ -52,10 +50,11 @@ import org.sonarsource.sonarlint.core.tracking.IssueTrackerCache;
 import org.sonarsource.sonarlint.core.tracking.ServerIssueTracker;
 import org.sonarsource.sonarlint.core.tracking.Trackable;
 
-public class ConnectedSonarLint extends SonarLint {
-  private static final String PATH_SEPARATOR_PATTERN = Pattern.quote(File.separator);
+import static org.sonarsource.sonarlint.core.client.api.util.FileUtils.toSonarQubePath;
 
+public class ConnectedSonarLint extends SonarLint {
   private static final Logger LOGGER = Logger.get();
+
   private final ConnectedSonarLintEngine engine;
   private final String moduleKey;
   private final SonarQubeServer server;
@@ -190,19 +189,6 @@ public class ConnectedSonarLint extends SonarLint {
     }
 
     return toSonarQubePath(baseDirPath.relativize(Paths.get(inputFile.getPath())).toString());
-  }
-
-  /**
-   * Convert relative path to SonarQube path format
-   *
-   * @param relativePath relative path string in the local OS
-   * @return SonarQube path format
-   */
-  private static String toSonarQubePath(String relativePath) {
-    if (File.separatorChar != '/') {
-      return relativePath.replaceAll(PATH_SEPARATOR_PATTERN, "/");
-    }
-    return relativePath;
   }
 
   @Override

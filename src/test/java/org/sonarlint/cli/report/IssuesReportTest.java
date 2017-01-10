@@ -51,7 +51,7 @@ public class IssuesReportTest {
   }
 
   @Test
-  public void testRoundTrip() {
+  public void test_round_trip() {
     Date d = new Date();
     String title = "title";
 
@@ -68,18 +68,20 @@ public class IssuesReportTest {
   }
 
   @Test
-  public void testAdd() {
-    report.addIssue(createTestIssue("comp", "rule1", "name1", "MAJOR", 10));
-    report.addIssue(createTestIssue("comp", "rule2", "name2", "MAJOR", 11));
+  public void should_find_added_issue() {
+    String filePath = "comp";
+    String ruleKey = "rule1";
+    report.addIssue(createTestIssue(filePath, ruleKey, "name1", "MAJOR", 10));
+    report.addIssue(createTestIssue(filePath, "rule2", "name2", "MAJOR", 11));
     assertThat(report.getSummary()).isNotNull();
     assertThat(report.getSummary().getTotal()).isEqualTo(new IssueVariation(2, 0, 0));
 
-    assertThat(report.getResourceReportsByResource()).containsOnlyKeys(Paths.get("comp"));
-    assertThat(report.getRuleName("rule1")).isEqualTo("name1");
+    assertThat(report.getResourceReportsByResource()).containsOnlyKeys(Paths.get(filePath));
+    assertThat(report.getRuleName(ruleKey)).isEqualTo("name1");
   }
 
   @Test
-  public void testHtmlDecoratorFullLine() throws Exception {
+  public void should_decorate_full_line_when_no_precise_location() throws Exception {
     Path file = temp.newFile().toPath();
     FileUtils.write(file.toFile(), "if (a && b)\nif (a < b)\nif (a > b)", StandardCharsets.UTF_8);
     report.addIssue(createTestIssue(file.toString(), "rule1", "name1", "MAJOR", 1));
@@ -89,7 +91,7 @@ public class IssuesReportTest {
   }
 
   @Test
-  public void testHtmlDecoratorPreciseLocation() throws Exception {
+  public void should_decorate_precise_location() throws Exception {
     Path file = temp.newFile().toPath();
     FileUtils.write(file.toFile(), " foo bar ", StandardCharsets.UTF_8);
     Trackable issue1 = createTestIssue(file.toString(), "rule1", "name1", "MAJOR", 1);
@@ -104,7 +106,7 @@ public class IssuesReportTest {
   }
 
   @Test
-  public void testHtmlDecorator_project_issue_without_file() {
+  public void should_be_able_to_create_issue_without_file() {
     Trackable issueWithoutFile = createTestIssue(null, "rule1", "name1", "MAJOR", 1);
     report.addIssue(issueWithoutFile);
     assertThat(report.getSummary().getTotal().getCountInCurrentAnalysis()).isEqualTo(1);

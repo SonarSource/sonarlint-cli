@@ -64,7 +64,7 @@ public class SonarLintFactory {
     this.configurationReader = configurationReader;
   }
 
-  public SonarLint createSonarLint(boolean mustBeConnected, boolean verbose, Path projectHome) {
+  public SonarLint createSonarLint(Path projectHome, boolean mustBeConnected, boolean verbose) {
     return createSonarLint(GLOBAL_CONFIGURATION_FILEPATH, projectHome.resolve(PROJECT_CONFIGURATION_FILENAME), mustBeConnected, verbose);
   }
 

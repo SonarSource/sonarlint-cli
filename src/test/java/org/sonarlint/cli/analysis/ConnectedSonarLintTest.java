@@ -185,6 +185,11 @@ public class ConnectedSonarLintTest {
   }
 
   @Test
+  public void getRelativePath_should_return_null_when_clientInputFile_is_null() {
+    assertThat(sonarLint.getRelativePath(Paths.get("dummy"), mock(Issue.class))).isNull();
+  }
+
+  @Test
   public void should_not_match_server_issues_when_there_are_none() {
     Path moduleRoot = Paths.get("").toAbsolutePath();
 

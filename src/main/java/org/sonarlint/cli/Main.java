@@ -86,7 +86,7 @@ public class Main {
 
     Stats stats = new Stats();
     try {
-      SonarLint sonarLint = sonarLintFactory.createSonarLint(opts.isUpdate(), opts.isVerbose(), projectHome);
+      SonarLint sonarLint = sonarLintFactory.createSonarLint(projectHome, opts.isUpdate(), opts.isVerbose());
       sonarLint.start(opts.isUpdate());
 
       Map<String, String> props = Util.toMap(opts.properties());

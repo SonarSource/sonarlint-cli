@@ -86,9 +86,17 @@ public class SonarLintFactoryTest {
   }
 
   @Test
-  public void testCreateStandalone() {
+  public void test_createSonarLint_with_custom_global_config() {
     mockConfigs(null, null);
     SonarLint sonarLint = sonarLintFactory.createSonarLint(globalConfigPath, projectConfigPath, false, true);
+
+    assertThat(sonarLint).isNotNull();
+    assertThat(sonarLint).isInstanceOf(StandaloneSonarLint.class);
+  }
+
+  @Test
+  public void test_createSonarLint_with_default_global_config() {
+    SonarLint sonarLint = sonarLintFactory.createSonarLint(Paths.get("dummy"), false, true);
 
     assertThat(sonarLint).isNotNull();
     assertThat(sonarLint).isInstanceOf(StandaloneSonarLint.class);

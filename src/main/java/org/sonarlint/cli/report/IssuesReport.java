@@ -128,7 +128,7 @@ public class IssuesReport {
       filePath = Paths.get(inputFile.getPath());
     }
     ResourceReport report = getOrCreate(filePath);
-    getSummary().addIssue(richIssue);
+    summary.addIssue(richIssue);
     report.addIssue(richIssue);
   }
 

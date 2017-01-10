@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -102,17 +103,27 @@ public class IssuesReportTest {
     assertThat(report.getEscapedSource(file)).containsExactly(" <span class=\"issue-0\">foo <span class=\"issue-1\">bar</span></span> ");
   }
 
-  private static Trackable createTestIssue(String filePath, String ruleKey, String name, String severity, int line) {
-    ClientInputFile inputFile = mock(ClientInputFile.class);
-    when(inputFile.getPath()).thenReturn(filePath);
+  @Test
+  public void testHtmlDecorator_project_issue_without_file() {
+    Trackable issueWithoutFile = createTestIssue(null, "rule1", "name1", "MAJOR", 1);
+    report.addIssue(issueWithoutFile);
+    assertThat(report.getSummary().getTotal().getCountInCurrentAnalysis()).isEqualTo(1);
+  }
 
+  private static Trackable createTestIssue(@Nullable String filePath, String ruleKey, String name, String severity, int line) {
     Issue issue = mock(Issue.class);
+
+    if (filePath != null) {
+      ClientInputFile inputFile = mock(ClientInputFile.class);
+      when(inputFile.getPath()).thenReturn(filePath);
+      when(issue.getInputFile()).thenReturn(inputFile);
+    }
+
     when(issue.getStartLine()).thenReturn(line);
     when(issue.getStartLineOffset()).thenReturn(null);
     when(issue.getEndLine()).thenReturn(line);
     when(issue.getEndLineOffset()).thenReturn(null);
     when(issue.getRuleName()).thenReturn(name);
-    when(issue.getInputFile()).thenReturn(inputFile);
     when(issue.getRuleKey()).thenReturn(ruleKey);
     when(issue.getSeverity()).thenReturn(severity);
     return new IssueTrackable(issue);

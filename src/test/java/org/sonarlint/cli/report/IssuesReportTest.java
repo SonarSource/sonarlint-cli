@@ -133,6 +133,13 @@ public class IssuesReportTest {
     report.getEscapedSource(temp.newFolder().toPath());
   }
 
+  @Test(expected = IllegalStateException.class)
+  public void getEscapedSource_should_throw_if_file_has_no_associated_report() throws IOException {
+    Path file = temp.newFile().toPath();
+    FileUtils.write(file.toFile(), "blah\nblah\n", StandardCharsets.UTF_8);
+    report.getEscapedSource(file);
+  }
+
   private static Trackable createTestIssue(@Nullable String filePath, String ruleKey, String name, String severity, int line) {
     Issue issue = mock(Issue.class);
 

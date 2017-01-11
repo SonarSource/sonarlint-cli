@@ -230,18 +230,19 @@ public class IssuesReport {
 
       lines = Files.readAllLines(filePath, charset);
     } catch (IOException e) {
-      throw new IllegalStateException("Unable to read source code of file: " + filePath, e);
+      throw new IllegalStateException("unable to read source code of file: " + filePath, e);
     }
     ResourceReport resourceReport = resourceReportsByFilePath.get(filePath);
+    if (resourceReport == null) {
+      throw new IllegalStateException("file has no associated report: " + filePath);
+    }
     List<String> escapedLines = new ArrayList<>(lines.size());
     int lineIdx = 1;
     for (String line : lines) {
       final int currentLineIdx = lineIdx;
-      List<RichIssue> issuesAtLine = resourceReport != null
-        ? resourceReport.getIssues().stream()
+      List<RichIssue> issuesAtLine = resourceReport.getIssues().stream()
           .filter(i -> i.getStartLine() <= currentLineIdx && i.getEndLine() >= currentLineIdx)
-          .collect(Collectors.toList())
-        : Collections.emptyList();
+          .collect(Collectors.toList());
 
       escapedLines.add(HtmlSourceDecorator.getDecoratedSourceAsHtml(line, currentLineIdx, issuesAtLine));
       lineIdx++;

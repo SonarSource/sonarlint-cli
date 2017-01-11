@@ -152,16 +152,39 @@ public class ConnectedSonarLintTest {
   @Test
   public void testUpdateNotNeeded() {
     GlobalStorageStatus status = mock(GlobalStorageStatus.class);
-    ModuleStorageStatus moduleStatus = mock(ModuleStorageStatus.class);
     when(status.isStale()).thenReturn(false);
-    when(engine.getModuleStorageStatus("project1")).thenReturn(moduleStatus);
-    when(engine.allModulesByKey()).thenReturn(getModulesByKey("project1"));
     when(engine.getGlobalStorageStatus()).thenReturn(status);
+
+    ModuleStorageStatus moduleStatus = mock(ModuleStorageStatus.class);
+    when(engine.getModuleStorageStatus("project1")).thenReturn(moduleStatus);
+
+    when(engine.allModulesByKey()).thenReturn(getModulesByKey("project1"));
     sonarLint.start(false);
 
     verify(engine).allModulesByKey();
     verify(engine).getGlobalStorageStatus();
     verify(engine).getModuleStorageStatus("project1");
+    verifyNoMoreInteractions(engine);
+  }
+
+  @Test
+  public void testModuleStorageUpdateNeeded() {
+    GlobalStorageStatus status = mock(GlobalStorageStatus.class);
+    when(status.isStale()).thenReturn(false);
+    when(engine.getGlobalStorageStatus()).thenReturn(status);
+
+    ModuleStorageStatus moduleStatus = mock(ModuleStorageStatus.class);
+    when(moduleStatus.isStale()).thenReturn(true);
+    String moduleKey = "project1";
+    when(engine.getModuleStorageStatus(moduleKey)).thenReturn(moduleStatus);
+
+    when(engine.allModulesByKey()).thenReturn(getModulesByKey(moduleKey));
+    sonarLint.start(false);
+
+    verify(engine).allModulesByKey();
+    verify(engine).getGlobalStorageStatus();
+    verify(engine).getModuleStorageStatus(moduleKey);
+    verify(engine).updateModule(any(), eq(moduleKey));
     verifyNoMoreInteractions(engine);
   }
 

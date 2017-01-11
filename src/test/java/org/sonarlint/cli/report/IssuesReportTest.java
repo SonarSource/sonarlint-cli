@@ -60,6 +60,7 @@ public class IssuesReportTest {
 
     assertThat(report.getDate()).isEqualTo(d);
     assertThat(report.getTitle()).isEqualTo(title);
+    assertThat(report.noIssues()).isTrue();
     assertThat(report.noFiles()).isTrue();
 
     report.setFilesAnalyzed(1);
@@ -78,6 +79,10 @@ public class IssuesReportTest {
 
     assertThat(report.getResourceReportsByResource()).containsOnlyKeys(Paths.get(filePath));
     assertThat(report.getRuleName(ruleKey)).isEqualTo("name1");
+
+    assertThat(report.noIssues()).isFalse();
+    assertThat(report.getResourceReports()).isNotEmpty();
+    assertThat(report.getResourcesWithReport()).isNotEmpty();
   }
 
   @Test

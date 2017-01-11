@@ -232,22 +232,22 @@ public class IssuesReport {
     } catch (IOException e) {
       throw new IllegalStateException("unable to read source code of file: " + filePath, e);
     }
+
     ResourceReport resourceReport = resourceReportsByFilePath.get(filePath);
     if (resourceReport == null) {
       throw new IllegalStateException("file has no associated report: " + filePath);
     }
+
     List<String> escapedLines = new ArrayList<>(lines.size());
-    int lineIdx = 1;
-    for (String line : lines) {
-      final int currentLineIdx = lineIdx;
+    for (int i = 0; i < lines.size(); i++) {
+      String line = lines.get(i);
+      final int currentLineIdx = i + 1;
       List<RichIssue> issuesAtLine = resourceReport.getIssues().stream()
-          .filter(i -> i.getStartLine() <= currentLineIdx && i.getEndLine() >= currentLineIdx)
-          .collect(Collectors.toList());
+        .filter(issue -> issue.getStartLine() <= currentLineIdx && currentLineIdx <= issue.getEndLine())
+        .collect(Collectors.toList());
 
       escapedLines.add(HtmlSourceDecorator.getDecoratedSourceAsHtml(line, currentLineIdx, issuesAtLine));
-      lineIdx++;
     }
     return escapedLines;
-
   }
 }

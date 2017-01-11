@@ -19,6 +19,7 @@
  */
 package org.sonarlint.cli.report;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -125,6 +126,11 @@ public class IssuesReportTest {
   @Test
   public void should_return_empty_escaped_source_for_nonexistent_file() {
     assertThat(report.getEscapedSource(Paths.get("nonexistent"))).isEmpty();
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void getEscapedSource_should_throw_on_unreadable_file() throws IOException {
+    report.getEscapedSource(temp.newFolder().toPath());
   }
 
   private static Trackable createTestIssue(@Nullable String filePath, String ruleKey, String name, String severity, int line) {

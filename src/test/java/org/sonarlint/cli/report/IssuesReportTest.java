@@ -19,10 +19,12 @@
  */
 package org.sonarlint.cli.report;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -50,7 +52,7 @@ public class IssuesReportTest {
   }
 
   @Test
-  public void testRoundTrip() {
+  public void test_round_trip() {
     Date d = new Date();
     String title = "title";
 
@@ -59,6 +61,7 @@ public class IssuesReportTest {
 
     assertThat(report.getDate()).isEqualTo(d);
     assertThat(report.getTitle()).isEqualTo(title);
+    assertThat(report.noIssues()).isTrue();
     assertThat(report.noFiles()).isTrue();
 
     report.setFilesAnalyzed(1);
@@ -67,18 +70,24 @@ public class IssuesReportTest {
   }
 
   @Test
-  public void testAdd() {
-    report.addIssue(createTestIssue("comp", "rule1", "name1", "MAJOR", 10));
-    report.addIssue(createTestIssue("comp", "rule2", "name2", "MAJOR", 11));
+  public void should_find_added_issue() {
+    String filePath = "comp";
+    String ruleKey = "rule1";
+    report.addIssue(createTestIssue(filePath, ruleKey, "name1", "MAJOR", 10));
+    report.addIssue(createTestIssue(filePath, "rule2", "name2", "MAJOR", 11));
     assertThat(report.getSummary()).isNotNull();
     assertThat(report.getSummary().getTotal()).isEqualTo(new IssueVariation(2, 0, 0));
 
-    assertThat(report.getResourceReportsByResource()).containsOnlyKeys(Paths.get("comp"));
-    assertThat(report.getRuleName("rule1")).isEqualTo("name1");
+    assertThat(report.getResourceReportsByResource()).containsOnlyKeys(Paths.get(filePath));
+    assertThat(report.getRuleName(ruleKey)).isEqualTo("name1");
+
+    assertThat(report.noIssues()).isFalse();
+    assertThat(report.getResourceReports()).isNotEmpty();
+    assertThat(report.getResourcesWithReport()).isNotEmpty();
   }
 
   @Test
-  public void testHtmlDecoratorFullLine() throws Exception {
+  public void should_decorate_full_line_when_no_precise_location() throws Exception {
     Path file = temp.newFile().toPath();
     FileUtils.write(file.toFile(), "if (a && b)\nif (a < b)\nif (a > b)", StandardCharsets.UTF_8);
     report.addIssue(createTestIssue(file.toString(), "rule1", "name1", "MAJOR", 1));
@@ -88,7 +97,7 @@ public class IssuesReportTest {
   }
 
   @Test
-  public void testHtmlDecoratorPreciseLocation() throws Exception {
+  public void should_decorate_precise_location() throws Exception {
     Path file = temp.newFile().toPath();
     FileUtils.write(file.toFile(), " foo bar ", StandardCharsets.UTF_8);
     Trackable issue1 = createTestIssue(file.toString(), "rule1", "name1", "MAJOR", 1);
@@ -102,17 +111,49 @@ public class IssuesReportTest {
     assertThat(report.getEscapedSource(file)).containsExactly(" <span class=\"issue-0\">foo <span class=\"issue-1\">bar</span></span> ");
   }
 
-  private static Trackable createTestIssue(String filePath, String ruleKey, String name, String severity, int line) {
-    ClientInputFile inputFile = mock(ClientInputFile.class);
-    when(inputFile.getPath()).thenReturn(filePath);
+  @Test
+  public void should_be_able_to_create_issue_without_file() {
+    Trackable issueWithoutFile = createTestIssue(null, "rule1", "name1", "MAJOR", 1);
+    report.addIssue(issueWithoutFile);
+    assertThat(report.getSummary().getTotal().getCountInCurrentAnalysis()).isEqualTo(1);
+  }
 
+  @Test
+  public void should_return_empty_escaped_source_for_null_path() {
+    assertThat(report.getEscapedSource(null)).isEmpty();
+  }
+
+  @Test
+  public void should_return_empty_escaped_source_for_nonexistent_file() {
+    assertThat(report.getEscapedSource(Paths.get("nonexistent"))).isEmpty();
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void getEscapedSource_should_throw_on_unreadable_file() throws IOException {
+    report.getEscapedSource(temp.newFolder().toPath());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void getEscapedSource_should_throw_if_file_has_no_associated_report() throws IOException {
+    Path file = temp.newFile().toPath();
+    FileUtils.write(file.toFile(), "blah\nblah\n", StandardCharsets.UTF_8);
+    report.getEscapedSource(file);
+  }
+
+  private static Trackable createTestIssue(@Nullable String filePath, String ruleKey, String name, String severity, int line) {
     Issue issue = mock(Issue.class);
+
+    if (filePath != null) {
+      ClientInputFile inputFile = mock(ClientInputFile.class);
+      when(inputFile.getPath()).thenReturn(filePath);
+      when(issue.getInputFile()).thenReturn(inputFile);
+    }
+
     when(issue.getStartLine()).thenReturn(line);
     when(issue.getStartLineOffset()).thenReturn(null);
     when(issue.getEndLine()).thenReturn(line);
     when(issue.getEndLineOffset()).thenReturn(null);
     when(issue.getRuleName()).thenReturn(name);
-    when(issue.getInputFile()).thenReturn(inputFile);
     when(issue.getRuleKey()).thenReturn(ruleKey);
     when(issue.getSeverity()).thenReturn(severity);
     return new IssueTrackable(issue);

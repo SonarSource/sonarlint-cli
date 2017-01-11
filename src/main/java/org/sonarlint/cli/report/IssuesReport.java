@@ -44,7 +44,6 @@ import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 public class IssuesReport {
 
-  public static final int TOO_MANY_ISSUES_THRESHOLD = 1000;
   private String title;
   private Date date;
   private int filesAnalyzed;
@@ -128,7 +127,7 @@ public class IssuesReport {
       filePath = Paths.get(inputFile.getPath());
     }
     ResourceReport report = getOrCreate(filePath);
-    getSummary().addIssue(richIssue);
+    summary.addIssue(richIssue);
     report.addIssue(richIssue);
   }
 
@@ -164,7 +163,6 @@ public class IssuesReport {
     @Override
     public Integer getEndLine() {
       return wrapped.getEndLine() != null ? wrapped.getEndLine() : getStartLine();
-
     }
 
     @Override
@@ -176,25 +174,21 @@ public class IssuesReport {
     @Override
     public String getMessage() {
       return wrapped.getMessage();
-
     }
 
     @Override
     public String getRuleKey() {
       return wrapped.getRuleKey();
-
     }
 
     @Override
     public String getRuleName() {
       return wrapped.getRuleName();
-
     }
 
     @Override
     public ClientInputFile getInputFile() {
       return wrapped.getInputFile();
-
     }
 
     @Override
@@ -236,24 +230,24 @@ public class IssuesReport {
 
       lines = Files.readAllLines(filePath, charset);
     } catch (IOException e) {
-      throw new IllegalStateException("Unable to read source code of file: " + filePath, e);
+      throw new IllegalStateException("unable to read source code of file: " + filePath, e);
     }
+
     ResourceReport resourceReport = resourceReportsByFilePath.get(filePath);
+    if (resourceReport == null) {
+      throw new IllegalStateException("file has no associated report: " + filePath);
+    }
+
     List<String> escapedLines = new ArrayList<>(lines.size());
-    int lineIdx = 1;
-    for (String line : lines) {
-      final int currentLineIdx = lineIdx;
-      List<RichIssue> issuesAtLine = resourceReport != null
-        ? resourceReport.getIssues().stream()
-          .filter(i -> i.getStartLine() <= currentLineIdx && i.getEndLine() >= currentLineIdx)
-          .collect(Collectors.toList())
-        : Collections.emptyList();
+    for (int i = 0; i < lines.size(); i++) {
+      String line = lines.get(i);
+      final int currentLineIdx = i + 1;
+      List<RichIssue> issuesAtLine = resourceReport.getIssues().stream()
+        .filter(issue -> issue.getStartLine() <= currentLineIdx && currentLineIdx <= issue.getEndLine())
+        .collect(Collectors.toList());
 
       escapedLines.add(HtmlSourceDecorator.getDecoratedSourceAsHtml(line, currentLineIdx, issuesAtLine));
-      lineIdx++;
     }
     return escapedLines;
-
   }
-
 }

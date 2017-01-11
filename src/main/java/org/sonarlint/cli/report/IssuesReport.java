@@ -44,7 +44,6 @@ import org.sonarsource.sonarlint.core.tracking.Trackable;
 
 public class IssuesReport {
 
-  public static final int TOO_MANY_ISSUES_THRESHOLD = 1000;
   private String title;
   private Date date;
   private int filesAnalyzed;
@@ -164,7 +163,6 @@ public class IssuesReport {
     @Override
     public Integer getEndLine() {
       return wrapped.getEndLine() != null ? wrapped.getEndLine() : getStartLine();
-
     }
 
     @Override
@@ -176,25 +174,21 @@ public class IssuesReport {
     @Override
     public String getMessage() {
       return wrapped.getMessage();
-
     }
 
     @Override
     public String getRuleKey() {
       return wrapped.getRuleKey();
-
     }
 
     @Override
     public String getRuleName() {
       return wrapped.getRuleName();
-
     }
 
     @Override
     public ClientInputFile getInputFile() {
       return wrapped.getInputFile();
-
     }
 
     @Override
@@ -255,5 +249,4 @@ public class IssuesReport {
     return escapedLines;
 
   }
-
 }

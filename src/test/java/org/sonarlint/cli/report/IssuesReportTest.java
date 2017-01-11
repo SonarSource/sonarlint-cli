@@ -117,6 +117,16 @@ public class IssuesReportTest {
     assertThat(report.getSummary().getTotal().getCountInCurrentAnalysis()).isEqualTo(1);
   }
 
+  @Test
+  public void should_return_empty_escaped_source_for_null_path() {
+    assertThat(report.getEscapedSource(null)).isEmpty();
+  }
+
+  @Test
+  public void should_return_empty_escaped_source_for_nonexistent_file() {
+    assertThat(report.getEscapedSource(Paths.get("nonexistent"))).isEmpty();
+  }
+
   private static Trackable createTestIssue(@Nullable String filePath, String ruleKey, String name, String severity, int line) {
     Issue issue = mock(Issue.class);
 

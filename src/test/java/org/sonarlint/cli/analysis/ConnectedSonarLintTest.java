@@ -47,6 +47,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.sonarlint.cli.config.SonarQubeServer;
 import org.sonarlint.cli.report.ReportFactory;
+import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 import org.sonarsource.sonarlint.core.client.api.connected.ConnectedSonarLintEngine;
@@ -278,6 +279,14 @@ public class ConnectedSonarLintTest {
     Path baseDirPath = Paths.get("nonexistent");
     sonarLint.doAnalysis(Collections.emptyMap(), reportFactory, Collections.emptyList(), baseDirPath);
     verify(reportFactory).createReporters(baseDirPath);
+  }
+
+  @Test
+  public void test_getRuleDetails() {
+    String ruleKey = "dummy key";
+    RuleDetails ruleDetails = mock(RuleDetails.class);
+    when(engine.getRuleDetails(ruleKey)).thenReturn(ruleDetails);
+    assertThat(sonarLint.getRuleDetails(ruleKey)).isEqualTo(ruleDetails);
   }
 
   // create uniquely identifiable issue

@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -45,6 +46,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.sonarlint.cli.config.SonarQubeServer;
+import org.sonarlint.cli.report.ReportFactory;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 import org.sonarsource.sonarlint.core.client.api.connected.ConnectedSonarLintEngine;
@@ -268,6 +270,14 @@ public class ConnectedSonarLintTest {
       .extracting("ruleKey", "creationDate").containsOnly(
       Tuple.tuple(matched.getRuleKey(), matchedServerIssue.creationDate().toEpochMilli())
     );
+  }
+
+  @Test
+  public void should_create_reports_for_empty_analysis() throws IOException {
+    ReportFactory reportFactory = mock(ReportFactory.class);
+    Path baseDirPath = Paths.get("nonexistent");
+    sonarLint.doAnalysis(Collections.emptyMap(), reportFactory, Collections.emptyList(), baseDirPath);
+    verify(reportFactory).createReporters(baseDirPath);
   }
 
   // create uniquely identifiable issue

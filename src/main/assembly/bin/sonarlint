@@ -58,9 +58,9 @@ project_home=$PWD
 exec "$java_cmd" \
   -Djava.awt.headless=true \
   $SONARLINT_OPTS \
-  -classpath  $jar_file \
-  -Dsonarlint.home=\$sonarlint_home \
-  -Dproject.home=\$project_home \
+  -classpath "$jar_file" \
+  -Dsonarlint.home="$sonarlint_home" \
+  -Dproject.home="$project_home" \
   -Dorg.freemarker.loggerLibrary=none \
   org.sonarlint.cli.Main "$@"
 

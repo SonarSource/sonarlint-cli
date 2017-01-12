@@ -22,19 +22,17 @@ real_path() {
   )
 }
 
-if [ -z "$SONARLINT_HOME" ] ; then
-  PRG="$0"
+PRG="$0"
 
-  if [ -h "$PRG" ] ; then
-    # resolve symlinks
-    PRG=$(real_path "$PRG")
-  fi
-
-  SONARLINT_HOME=$(dirname "$PRG")/..
-
-  # make it fully qualified
-  SONARLINT_HOME=$(cd "$SONARLINT_HOME" && pwd)
+if [ -h "$PRG" ]; then
+  # resolve symlinks
+  PRG=$(real_path "$PRG")
 fi
+
+SONARLINT_HOME=$(dirname "$PRG")/..
+
+# make it fully qualified
+SONARLINT_HOME=$(cd "$SONARLINT_HOME" && pwd)
 
 # check that the SONARLINT_HOME has been correctly set
 if [ ! -f "$SONARLINT_HOME/lib/sonarlint-cli-${project.version}.jar" ] ; then

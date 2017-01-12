@@ -172,6 +172,11 @@ public class IssuesReport {
     }
 
     @Override
+    public List<Flow> flows() {
+      return wrapped.flows();
+    }
+
+    @Override
     public String getMessage() {
       return wrapped.getMessage();
     }

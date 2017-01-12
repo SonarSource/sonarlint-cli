@@ -35,7 +35,8 @@ sonarlint_home=$(cd "$sonarlint_home" && pwd)
 
 # check that the sonarlint_home has been correctly set
 if [ ! -f "$sonarlint_home/lib/sonarlint-cli-${project.version}.jar" ] ; then
-  echo '$sonarlint_home' does not point to a valid installation directory: $sonarlint_home
+  echo "fatal: detected installation directory is invalid: $sonarlint_home"
+  echo 'fatal: lib/sonarlint-cli-${project.version}.jar should exist relative from the installation directory'
   exit 1
 fi
 

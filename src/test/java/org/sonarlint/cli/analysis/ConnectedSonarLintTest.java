@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -189,6 +190,41 @@ public class ConnectedSonarLintTest {
     verify(engine).getModuleStorageStatus(moduleKey);
     verify(engine).updateModule(any(), eq(moduleKey));
     verifyNoMoreInteractions(engine);
+  }
+
+  @Test
+  public void should_use_token_authentication_when_available() {
+    SonarQubeServer server = mock(SonarQubeServer.class);
+    when(server.url()).thenReturn("http://localhost:9000");
+    when(server.token()).thenReturn("dummy token");
+    engine = mock(ConnectedSonarLintEngine.class);
+    sonarLint = new ConnectedSonarLint(engine, server, "project1");
+
+    when(engine.allModulesByKey()).thenReturn(getModulesByKey("project1"));
+    sonarLint.start(false);
+
+    // 2 calls: 1 to update global data and 1 to update module data
+    verify(server, times(2)).url();
+    verify(server, times(2)).token();
+    verifyNoMoreInteractions(server);
+  }
+
+  @Test
+  public void should_use_login_and_password_when_token_null() {
+    SonarQubeServer server = mock(SonarQubeServer.class);
+    when(server.url()).thenReturn("http://localhost:9000");
+    engine = mock(ConnectedSonarLintEngine.class);
+    sonarLint = new ConnectedSonarLint(engine, server, "project1");
+
+    when(engine.allModulesByKey()).thenReturn(getModulesByKey("project1"));
+    sonarLint.start(false);
+
+    // 2 calls: 1 to update global data and 1 to update module data
+    verify(server, times(2)).url();
+    verify(server, times(2)).token();
+    verify(server, times(2)).login();
+    verify(server, times(2)).password();
+    verifyNoMoreInteractions(server);
   }
 
   private Map<String, RemoteModule> getModulesByKey(String... keys) {

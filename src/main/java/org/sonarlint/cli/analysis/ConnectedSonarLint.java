@@ -120,8 +120,9 @@ public class ConnectedSonarLint extends SonarLint {
       .url(server.url())
       .userAgent("SonarLint CLI " + SystemInfo.getVersion());
 
-    if (server.token() != null) {
-      serverConfigBuilder.token(server.token());
+    String token = server.token();
+    if (token != null) {
+      serverConfigBuilder.token(token);
     } else {
       serverConfigBuilder.credentials(server.login(), server.password());
     }

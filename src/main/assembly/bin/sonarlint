@@ -46,7 +46,7 @@ else
   java_cmd="$(which java)"
 fi
 
-jar_file="${sonarlint_home}"/lib/sonarlint-cli-${project.version}.jar
+jar_file="$sonarlint_home"/lib/sonarlint-cli-${project.version}.jar
 project_home=$PWD
 
 #echo "Info: Using sonarlint-cli in $sonarlint_home"
@@ -58,8 +58,8 @@ exec "$java_cmd" \
   -Djava.awt.headless=true \
   $SONARLINT_OPTS \
   -classpath  $jar_file \
-  "-Dsonarlint.home=\${sonarlint_home}" \
-  "-Dproject.home=\${project_home}" \
+  -Dsonarlint.home=\$sonarlint_home \
+  -Dproject.home=\$project_home \
   -Dorg.freemarker.loggerLibrary=none \
   org.sonarlint.cli.Main "$@"
 

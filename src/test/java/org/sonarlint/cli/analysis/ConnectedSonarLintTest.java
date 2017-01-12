@@ -23,10 +23,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -45,6 +47,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.sonarlint.cli.config.SonarQubeServer;
+import org.sonarlint.cli.report.ReportFactory;
+import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.ClientInputFile;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.Issue;
 import org.sonarsource.sonarlint.core.client.api.connected.ConnectedSonarLintEngine;
@@ -152,17 +156,75 @@ public class ConnectedSonarLintTest {
   @Test
   public void testUpdateNotNeeded() {
     GlobalStorageStatus status = mock(GlobalStorageStatus.class);
-    ModuleStorageStatus moduleStatus = mock(ModuleStorageStatus.class);
     when(status.isStale()).thenReturn(false);
-    when(engine.getModuleStorageStatus("project1")).thenReturn(moduleStatus);
-    when(engine.allModulesByKey()).thenReturn(getModulesByKey("project1"));
     when(engine.getGlobalStorageStatus()).thenReturn(status);
+
+    ModuleStorageStatus moduleStatus = mock(ModuleStorageStatus.class);
+    when(engine.getModuleStorageStatus("project1")).thenReturn(moduleStatus);
+
+    when(engine.allModulesByKey()).thenReturn(getModulesByKey("project1"));
     sonarLint.start(false);
 
     verify(engine).allModulesByKey();
     verify(engine).getGlobalStorageStatus();
     verify(engine).getModuleStorageStatus("project1");
     verifyNoMoreInteractions(engine);
+  }
+
+  @Test
+  public void testModuleStorageUpdateNeeded() {
+    GlobalStorageStatus status = mock(GlobalStorageStatus.class);
+    when(status.isStale()).thenReturn(false);
+    when(engine.getGlobalStorageStatus()).thenReturn(status);
+
+    ModuleStorageStatus moduleStatus = mock(ModuleStorageStatus.class);
+    when(moduleStatus.isStale()).thenReturn(true);
+    String moduleKey = "project1";
+    when(engine.getModuleStorageStatus(moduleKey)).thenReturn(moduleStatus);
+
+    when(engine.allModulesByKey()).thenReturn(getModulesByKey(moduleKey));
+    sonarLint.start(false);
+
+    verify(engine).allModulesByKey();
+    verify(engine).getGlobalStorageStatus();
+    verify(engine).getModuleStorageStatus(moduleKey);
+    verify(engine).updateModule(any(), eq(moduleKey));
+    verifyNoMoreInteractions(engine);
+  }
+
+  @Test
+  public void should_use_token_authentication_when_available() {
+    SonarQubeServer server = mock(SonarQubeServer.class);
+    when(server.url()).thenReturn("http://localhost:9000");
+    when(server.token()).thenReturn("dummy token");
+    engine = mock(ConnectedSonarLintEngine.class);
+    sonarLint = new ConnectedSonarLint(engine, server, "project1");
+
+    when(engine.allModulesByKey()).thenReturn(getModulesByKey("project1"));
+    sonarLint.start(false);
+
+    // 2 calls: 1 to update global data and 1 to update module data
+    verify(server, times(2)).url();
+    verify(server, times(2)).token();
+    verifyNoMoreInteractions(server);
+  }
+
+  @Test
+  public void should_use_login_and_password_when_token_null() {
+    SonarQubeServer server = mock(SonarQubeServer.class);
+    when(server.url()).thenReturn("http://localhost:9000");
+    engine = mock(ConnectedSonarLintEngine.class);
+    sonarLint = new ConnectedSonarLint(engine, server, "project1");
+
+    when(engine.allModulesByKey()).thenReturn(getModulesByKey("project1"));
+    sonarLint.start(false);
+
+    // 2 calls: 1 to update global data and 1 to update module data
+    verify(server, times(2)).url();
+    verify(server, times(2)).token();
+    verify(server, times(2)).login();
+    verify(server, times(2)).password();
+    verifyNoMoreInteractions(server);
   }
 
   private Map<String, RemoteModule> getModulesByKey(String... keys) {
@@ -245,6 +307,22 @@ public class ConnectedSonarLintTest {
       .extracting("ruleKey", "creationDate").containsOnly(
       Tuple.tuple(matched.getRuleKey(), matchedServerIssue.creationDate().toEpochMilli())
     );
+  }
+
+  @Test
+  public void should_create_reports_for_empty_analysis() throws IOException {
+    ReportFactory reportFactory = mock(ReportFactory.class);
+    Path baseDirPath = Paths.get("nonexistent");
+    sonarLint.doAnalysis(Collections.emptyMap(), reportFactory, Collections.emptyList(), baseDirPath);
+    verify(reportFactory).createReporters(baseDirPath);
+  }
+
+  @Test
+  public void test_getRuleDetails() {
+    String ruleKey = "dummy key";
+    RuleDetails ruleDetails = mock(RuleDetails.class);
+    when(engine.getRuleDetails(ruleKey)).thenReturn(ruleDetails);
+    assertThat(sonarLint.getRuleDetails(ruleKey)).isEqualTo(ruleDetails);
   }
 
   // create uniquely identifiable issue

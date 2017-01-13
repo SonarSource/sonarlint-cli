@@ -31,7 +31,7 @@ fi
 sonarlint_home=$(dirname "$script_path")/..
 
 # make it fully qualified
-sonarlint_home=$(cd "$sonarlint_home" && pwd)
+sonarlint_home=$(cd "$sonarlint_home" && pwd -P)
 
 # check that the sonarlint_home has been correctly set
 if [ ! -f "$sonarlint_home/lib/sonarlint-cli-${project.version}.jar" ] ; then

@@ -48,6 +48,8 @@
     <sonar.javascript.version>2.18.0.3454</sonar.javascript.version>
     <sonar.php.version>2.9.1.1705</sonar.php.version>
     <sonar.python.version>1.6</sonar.python.version>
+    <!-- Release: enable publication to Bintray -->
+    <artifactsToPublish>${project.groupId}:${project.artifactId}:zip</artifactsToPublish>
   </properties>
 
   <dependencies>

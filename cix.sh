@@ -10,9 +10,9 @@ else
   #deploy the version built by travis
   mkdir -p target
   cd target
-  curl --user $ARTIFACTORY_QA_READER_USERNAME:$ARTIFACTORY_QA_READER_PASSWORD -sSLO https://repox.sonarsource.com/sonarsource-public-qa/org/sonarsource/sonarlint/sonarlint-cli/$CURRENT_VERSION/sonarlint-cli-$CURRENT_VERSION.zip
+  curl --user $ARTIFACTORY_QA_READER_USERNAME:$ARTIFACTORY_QA_READER_PASSWORD -sSLO https://repox.sonarsource.com/sonarsource-public-qa/org/sonarsource/sonarlint/cli/sonarlint-cli/$CURRENT_VERSION/sonarlint-cli-$CURRENT_VERSION.zip
   cd ..
-  mvn install:install-file -Dfile=target/sonarlint-cli-$CURRENT_VERSION.zip -DgroupId=org.sonarsource.sonarlint \
+  mvn install:install-file -Dfile=target/sonarlint-cli-$CURRENT_VERSION.zip -DgroupId=org.sonarsource.sonarlint.cli \
     -DartifactId=sonarlint-cli -Dversion=$CURRENT_VERSION -Dpackaging=zip
 fi
 

@@ -33,7 +33,7 @@ import java.nio.file.Paths;
  * The location of the local maven repository can be passed with the environmental variable 'MAVEN_LOCAL_REPOSITORY'.
  */
 public class SonarlintInstaller {
-  private static final String GROUP_ID = "org.sonarsource.sonarlint";
+  private static final String GROUP_ID = "org.sonarsource.sonarlint.cli";
   private static final String ARTIFACT_ID = "sonarlint-cli";
   private static final Logger LOG = LoggerFactory.getLogger(SonarlintInstaller.class);
 

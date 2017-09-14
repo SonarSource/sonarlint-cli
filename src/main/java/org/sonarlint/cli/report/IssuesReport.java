@@ -133,7 +133,7 @@ public class IssuesReport {
 
   private static class RichIssueImpl implements RichIssue {
 
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MMMMM d, Y K:m a");
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MMMMM d, y K:m a");
 
     private final Issue wrapped;
     private final int id;

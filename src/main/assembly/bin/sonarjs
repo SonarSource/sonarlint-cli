@@ -1,0 +1,33 @@
+#!/usr/bin/env node
+const path = require("path");
+const { spawn } = require('child_process');
+
+const home = path.join(__dirname, "..");
+const projectVersion = "2.2-SNAPSHOT";
+const jarFile = path.join(home, "lib", `sonarlint-cli-${projectVersion}.jar`);
+const projectHome = process.cwd();
+
+const analyzer = spawn('java', [
+  '-Djava.awt.headless=true',
+  '-classpath',
+  jarFile,
+  `-Dsonarlint.home=${home}`,
+  `-Dproject.home=${projectHome}`,
+  "-Dorg.freemarker.loggerLibrary=none",
+  "org.sonarlint.cli.Main",
+  process.argv
+]);
+
+console.log(jarFile);
+
+analyzer.stdout.on('data', (data) => {
+  console.log(`stdout: ${data}`);
+});
+
+analyzer.stderr.on('data', (data) => {
+  console.log(`stderr: ${data}`);
+});
+
+analyzer.on('close', (code) => {
+  console.log(`child process exited with code ${code}`);
+});

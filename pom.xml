@@ -44,10 +44,7 @@
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
     <gitRepositoryName>sonarlint-cli</gitRepositoryName>
     <sonarlint.version>2.9.0.276</sonarlint.version>
-    <sonar.java.version>4.3.0.7717</sonar.java.version>
-    <sonar.javascript.version>2.18.0.3454</sonar.javascript.version>
-    <sonar.php.version>2.9.1.1705</sonar.php.version>
-    <sonar.python.version>1.6</sonar.python.version>
+    <sonar.javascript.version>3.3.0.5702</sonar.javascript.version>
     <!-- Release: enable publication to Bintray -->
     <artifactsToPublish>${project.groupId}:${project.artifactId}:zip</artifactsToPublish>
   </properties>
@@ -154,33 +151,9 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>org.sonarsource.java</groupId>
-                  <artifactId>sonar-java-plugin</artifactId>
-                  <version>${sonar.java.version}</version>
-                  <type>jar</type>
-                  <overWrite>false</overWrite>
-                  <outputDirectory>${project.build.directory}/plugins</outputDirectory>
-                </artifactItem>
-                <artifactItem>
                   <groupId>org.sonarsource.javascript</groupId>
                   <artifactId>sonar-javascript-plugin</artifactId>
                   <version>${sonar.javascript.version}</version>
-                  <type>jar</type>
-                  <overWrite>false</overWrite>
-                  <outputDirectory>${project.build.directory}/plugins</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.sonarsource.php</groupId>
-                  <artifactId>sonar-php-plugin</artifactId>
-                  <version>${sonar.php.version}</version>
-                  <type>jar</type>
-                  <overWrite>false</overWrite>
-                  <outputDirectory>${project.build.directory}/plugins</outputDirectory>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.sonarsource.python</groupId>
-                  <artifactId>sonar-python-plugin</artifactId>
-                  <version>${sonar.python.version}</version>
                   <type>jar</type>
                   <overWrite>false</overWrite>
                   <outputDirectory>${project.build.directory}/plugins</outputDirectory>
@@ -225,8 +198,8 @@
             <configuration>
               <rules>
                 <requireFilesSize>
-                  <minsize>30000000</minsize>
-                  <maxsize>35600000</maxsize>
+                  <minsize>24000000</minsize>
+                  <maxsize>35800000</maxsize>
                   <files>
                     <file>${project.build.directory}/sonarlint-cli-${project.version}.zip</file>
                   </files>

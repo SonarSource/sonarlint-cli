@@ -39,6 +39,16 @@
       <filtered>true</filtered>
     </fileSet>
     <fileSet>
+      <directory>src/main/assembly/bin</directory>
+      <outputDirectory>bin</outputDirectory>
+      <includes>
+        <include>sonarjs</include>
+      </includes>
+      <lineEnding>unix</lineEnding>
+      <fileMode>0755</fileMode>
+      <filtered>true</filtered>
+    </fileSet>
+    <fileSet>
       <directory>${project.build.directory}/plugins</directory>
       <outputDirectory>plugins</outputDirectory>
     </fileSet>
